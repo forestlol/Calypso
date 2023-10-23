@@ -10,8 +10,12 @@
           <li class="nav-item">
             <router-link to="/" class="nav-link">Home</router-link>
           </li>
+          <li class="nav-item">
+            <router-link to="/sensors" class="nav-link">Sensors</router-link>
+          </li>
           <!-- You can add more navigation links as required -->
         </ul>
+        <button v-if="isLoggedIn" @click="logout" class="btn btn-outline-danger ml-auto">Logout</button>
       </div>
     </div>
   </nav>
@@ -21,9 +25,24 @@
 </template>
 
 <script>
+import auth from '@/auth.js';
+
 export default {
-  name: 'App'
+  name: 'App',
+  computed: {
+    isLoggedIn() {
+      return auth.isLoggedIn();
+    }
+  },
+  methods: {
+    logout() {
+      auth.logout();
+      this.$router.push('/');
+    }
+  }
 };
+
+
 </script>
 
 
