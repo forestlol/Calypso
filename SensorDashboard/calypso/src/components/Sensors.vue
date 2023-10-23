@@ -3,7 +3,7 @@
     <h1 class="text-center mb-5 display-4">Sensor Devices</h1>
 
     <div class="mb-4">
-      <label for="typeFilter" class="mr-2">Filter by Type:</label>
+      <label for="typeFilter" class="mr-2">Filter by Type: &nbsp;</label>
       <select id="typeFilter" v-model="selectedType" class="form-control w-auto d-inline-block">
         <option value="all">All</option>
         <option value="0">Panic</option>
@@ -150,32 +150,71 @@
 </script>
   
 <style scoped>
-  /* Remove link underline */
-  a {
-      text-decoration: none;
+  /* Base styles */
+  .container {
+      font-family: 'Arial', sans-serif;
+      color: #333;
   }
 
-  /* Enhance cards */
+  h1, h3 {
+      color: #444;
+  }
+
+  /* Link styles */
+  a {
+      text-decoration: none;
+      color: #007BFF;
+  }
+
+  a:hover {
+      color: #0056b3;
+  }
+
+  /* Card styles */
   .card {
+      border: none;
+      background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
       transition: transform 0.3s, box-shadow 0.3s;
+      border-radius: 10px;
   }
 
   .card:hover {
       transform: translateY(-5px);
-      box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.12);
+      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
   }
 
-  /* Enhance dropdown filter */
-  form-control {
-      border-radius: 5px;
+  .card-header {
+      border-radius: 10px 10px 0 0;
+      font-weight: 600;
+  }
+
+  .card-body {
+      padding: 1.25rem;
+  }
+
+  /* Dropdown and Search styles */
+  .form-control {
+      border-radius: 20px;
       border: 1px solid #ced4da;
-      padding: 0.375rem 0.75rem;
-      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      transition: border-color 0.3s, box-shadow 0.3s;
   }
 
-  form-control:focus {
-      border-color: #80bdff;
+  .form-control:focus {
+      border-color: #007BFF;
       outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+  }
+
+  /* Mobile Responsive - adjust as per your requirements */
+  @media (max-width: 768px) {
+      .container {
+          padding-left: 10px;
+          padding-right: 10px;
+      }
+
+      .form-control.w-50 {
+          width: 100%!important;
+          margin-bottom: 1rem;
+      }
   }
 </style>
