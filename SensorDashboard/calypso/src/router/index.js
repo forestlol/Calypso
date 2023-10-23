@@ -4,6 +4,7 @@ import FloorPage from '../views/FloorDetail.vue';
 import RoomPage from '../views/RoomDetail.vue';
 import Login from '../views/Login.vue';
 import Sensors from '../components/Sensors.vue';
+import SensorDetails from '../components/SensorDetails.vue';
 import auth from '../auth';
 
 const routes = [
@@ -37,6 +38,11 @@ const routes = [
     path: '/sensors',
     name: 'Sensors',
     component: Sensors
+  },
+  {
+    path: '/sensor/:id',
+    component: SensorDetails,
+    name: 'sensor-details'
   }
 ];
 

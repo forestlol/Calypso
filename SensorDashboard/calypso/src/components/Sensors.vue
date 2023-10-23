@@ -14,26 +14,28 @@
 
     <div class="row">
       <div class="col-md-4" v-for="deviceName in filteredDeviceNames" :key="deviceName">
-        <div class="card mb-4 shadow">
-          <div class="card-header bg-primary text-white">
-            {{ deviceName }}
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">{{ sensorType(sensors[deviceName][0].type) }}</h5>
-            <!-- Check if type is Temperature -->
-            <div v-if="sensors[deviceName][0].type == 1">
-              <p class="card-text">Temperature: {{ getLastReading(deviceName).split(',')[0] }}°C</p>
-              <p class="card-text">Humidity: {{ getLastReading(deviceName).split(',')[1] }}%</p>
+        <router-link :to="{ name: 'sensor-details', params: { id: deviceName }}">
+          <div class="card mb-4 shadow">
+              <div class="card-header bg-primary text-white">
+                {{ deviceName }}
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">{{ sensorType(sensors[deviceName][0].type) }}</h5>
+                <!-- Check if type is Temperature -->
+                <div v-if="sensors[deviceName][0].type == 1">
+                  <p class="card-text">Temperature: {{ getLastReading(deviceName).split(',')[0] }}°C</p>
+                  <p class="card-text">Humidity: {{ getLastReading(deviceName).split(',')[1] }}%</p>
+                </div>
+                <!-- Otherwise, display data as it is -->
+                <div v-else>
+                  <p class="card-text">{{ getLastReading(deviceName) }}</p>
+                </div>
+                <p class="card-text">
+                  <small>Last updated: <span class="text-muted">{{ formatDate(sensors[deviceName][sensors[deviceName].length - 1].time) }}</span></small>
+                </p>
+              </div>
             </div>
-            <!-- Otherwise, display data as it is -->
-            <div v-else>
-              <p class="card-text">{{ getLastReading(deviceName) }}</p>
-            </div>
-            <p class="card-text">
-              <small>Last updated: <span class="text-muted">{{ formatDate(sensors[deviceName][0].time) }}</span></small>
-            </p>
-          </div>
-        </div>
+        </router-link>
       </div>
     </div>
   </div>
@@ -80,8 +82,8 @@
         return types[type] || 'Unknown';
       },
       getLastReading(deviceName) {
-      // Assuming the last reading is at index 0 (latest timestamp)
-        return this.sensors[deviceName][0].data;
+      // Assuming the last reading is at the last index (latest timestamp)
+        return this.sensors[deviceName][this.sensors[deviceName].length - 1].data;
       },
       sensorType(type) {
         switch(type) {
