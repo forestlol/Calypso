@@ -15,7 +15,7 @@
 
     <!-- Navigation to go back to the buildings page -->
     <div class="mt-5 text-center">
-      <router-link to="/" class="btn btn-outline-primary">Back to Buildings</router-link>
+      <router-link to="/building" class="btn btn-outline-primary">Back to Buildings</router-link>
     </div>
   </div>
 </template>
