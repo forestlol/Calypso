@@ -10,17 +10,25 @@
         <option value="1">Temperature</option>
         <option value="2">People Counter</option>
       </select>
+      <p></p>
+      <input v-model="searchTerm" type="text" placeholder="Search for a device..." class="form-control w-50">
     </div>
-
-    <div class="row">
-      <div class="col-md-4" v-for="deviceName in filteredDeviceNames" :key="deviceName">
+    <p class="mb-4">{{ filteredDeviceNames.length }} device(s) found.</p>
+    <div class="row mb-3" v-for="(deviceGroup, sensorType) in groupedAndOrderedDeviceNames" :key="sensorType">
+      <!-- Divider and Group Header -->
+      <div class="col-12">
+        <h3 class="mt-4 mb-2">{{ getTypeName(sensorType) }}</h3>
+        <hr />
+      </div>
+      <!-- Devices in the Group -->
+      <div class="col-md-4" v-for="deviceName in deviceGroup" :key="deviceName">
         <router-link :to="{ name: 'sensor-details', params: { id: deviceName }}">
           <div class="card mb-4 shadow">
               <div class="card-header bg-primary text-white">
                 {{ deviceName }}
               </div>
               <div class="card-body">
-                <h5 class="card-title">{{ sensorType(sensors[deviceName][0].type) }}</h5>
+                <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>
                 <!-- Check if type is Temperature -->
                 <div v-if="sensors[deviceName][0].type == 1">
                   <p class="card-text">Temperature: {{ getLastReading(deviceName).split(',')[0] }}°C</p>
@@ -42,13 +50,14 @@
 </template>
   
   
-  <script>
+<script>
   export default {
     data() {
       return {
         selectedType: 'all',
         sensors: {},
-        uniqueDeviceNames: []
+        uniqueDeviceNames: [],
+        searchTerm: '',
       };
     },
     async created() {
@@ -72,6 +81,7 @@
             console.error("Error fetching sensors:", error);
         }
     },
+
     methods: {
       getTypeName(type) {
         const types = {
@@ -84,14 +94,6 @@
       getLastReading(deviceName) {
       // Assuming the last reading is at the last index (latest timestamp)
         return this.sensors[deviceName][this.sensors[deviceName].length - 1].data;
-      },
-      sensorType(type) {
-        switch(type) {
-          case 0: return "Panic";
-          case 1: return "Temperature";
-          case 2: return "People Counter";
-          default: return "Unknown";
-        }
       },
       formatDate(dateTime) {
         const date = new Date(dateTime);
@@ -106,27 +108,74 @@
     },
     computed: {
       filteredDeviceNames() {
-        if (this.selectedType === 'all') {
-          return this.uniqueDeviceNames;
+        let filteredNames = this.uniqueDeviceNames;
+
+        if (this.selectedType !== 'all') {
+          filteredNames = filteredNames.filter(deviceName => {
+            return this.sensors[deviceName][0].type == this.selectedType;
+          });
         }
 
-        return this.uniqueDeviceNames.filter(deviceName => {
-          return this.sensors[deviceName][0].type == this.selectedType;
+        if (this.searchTerm) {
+          const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+          filteredNames = filteredNames.filter(deviceName => {
+            return deviceName.toLowerCase().includes(lowerCaseSearchTerm);
+          });
+        }
+
+        // Sort devices based on their type
+        filteredNames.sort((a, b) => {
+          const typeA = this.sensors[a][0].type;
+          const typeB = this.sensors[b][0].type;
+          return typeA - typeB;
         });
-      }
+
+        return filteredNames;
+      },
+      groupedAndOrderedDeviceNames() {
+            const grouped = {};
+
+            this.filteredDeviceNames.forEach(deviceName => {
+                const type = this.sensors[deviceName][0].type;
+                if (!grouped[type]) {
+                    grouped[type] = [];
+                } 
+                grouped[type].push(deviceName);
+            });
+
+            return grouped;
+        }
     },
   };
-  </script>
+</script>
   
-  <style scoped>
-  .card-header {
-    font-size: 1.25rem;
-    font-weight: 500;
+<style scoped>
+  /* Remove link underline */
+  a {
+      text-decoration: none;
   }
-  .card-title {
-    margin-bottom: 0.5rem;
+
+  /* Enhance cards */
+  .card {
+      transition: transform 0.3s, box-shadow 0.3s;
   }
-  .stretched-link::after {
-    background-color: rgba(0, 119, 204, 0.1);  /* Slight overlay to indicate clickable */
+
+  .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.12);
   }
-  </style>
+
+  /* Enhance dropdown filter */
+  form-control {
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+      padding: 0.375rem 0.75rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  form-control:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+</style>
