@@ -31,7 +31,7 @@
                 <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>
                 <!-- Check if type is Temperature -->
                 <div v-if="sensors[deviceName][0].type == 1">
-                  <p class="card-text">Temperature: {{ getLastReading(deviceName).split(',')[0] }}°C</p>
+                  <p class="card-text">Temperature: {{ parseFloat(getLastReading(deviceName).split(',')[0]).toFixed(2) }}°C</p>
                   <p class="card-text">Humidity: {{ getLastReading(deviceName).split(',')[1] }}%</p>
                 </div>
                 <!-- Otherwise, display data as it is -->
@@ -39,7 +39,7 @@
                   <p class="card-text">{{ getLastReading(deviceName) }}</p>
                 </div>
                 <p class="card-text">
-                  <small>Last updated: <span class="text-muted">{{ formatDate(sensors[deviceName][sensors[deviceName].length - 1].time) }}</span></small>
+                  <small>Last updated: <span class="text-muted">{{  formatDate(sensors[deviceName][sensors[deviceName].length - 1].time) }}</span></small>
                 </p>
               </div>
             </div>

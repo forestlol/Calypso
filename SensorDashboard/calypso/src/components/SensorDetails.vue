@@ -42,15 +42,15 @@
         <!-- Chart Display -->
         <div class="sensor-card" v-if="sensorType === 1">
             <h4>Temperature (°C)</h4>
-            <line-chart :data="temperatureData" :xtitle="'Hours'" :ytitle="'Temperature (°C)'" :library="chartOptions"></line-chart>
+            <area-chart :data="temperatureData" :xtitle="'Hours'" :ytitle="'Temperature (°C)'" :library="chartOptions"></area-chart>
 
             <h4 class="mt-4">Humidity (%)</h4>
-            <line-chart :data="humidityData" :xtitle="'Hours'" :ytitle="'Humidity (%)'" :library="chartOptions"></line-chart>
+            <area-chart :data="humidityData" :xtitle="'Hours'" :ytitle="'Humidity (%)'" :library="chartOptions"></area-chart>
         </div>
 
         <div v-else class="sensor-card">
             <h4>Sensor Data</h4>
-            <line-chart :data="sensorData" :xtitle="'Hours'" :ytitle="'Value'" :library="chartOptions"></line-chart>
+            <area-chart :data="sensorData" :xtitle="'Hours'" :ytitle="'Value'" :library="chartOptions"></area-chart>
         </div>
     </div>
 </template>
