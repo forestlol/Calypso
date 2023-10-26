@@ -45,23 +45,19 @@
             </div>
           </router-link>
           <!-- Panic card here-->
-          <div v-else class="card mb-4 shadow panic-card">
-              <div class="card-header bg-danger text-white">
-                <span style="font-weight: bold; font-size: 1.5rem;">⚠️&nbsp;</span>
-                {{ deviceName }}
-              </div>
-              <div class="card-body">
+          <div v-else class="card mb-4 shadow" :class="isAcknowledged(deviceName) ? 'panic-card-acknowledged' : 'panic-card'">
+            <div class="card-header text-white" :class="isAcknowledged(deviceName) ? 'bg-success' : 'bg-danger'">
+              <span style="font-weight: bold; font-size: 1.5rem;">⚠️&nbsp;</span>
+              {{ deviceName }}
+            </div>
+            <div class="card-body">
+                <p v-if="isAcknowledged(deviceName)" class="text-success">Alert acknowledged!</p>
                 <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>
-                <!-- Check if type is Temperature -->
-                <div v-if="sensors[deviceName][0].type == 1">
-                  <p class="card-text">Temperature: {{ parseFloat(getLastReading(deviceName).split(',')[0]).toFixed(2) }}°C</p>
-                  <p class="card-text">Humidity: {{ getLastReading(deviceName).split(',')[1] }}%</p>
-                </div>
                 <!-- Otherwise, display data as it is -->
-                <div v-else>
-                  <div v-if="sensors[deviceName][0].type == 0">
-                    <p class="card-text">Status: {{ getLastReading(deviceName) == '1' ? 'Alert' : 'Normal' }}</p>
-                    <button v-if="getLastReading(deviceName) == '1'" @click="acknowledgePanic(deviceName)" class="btn btn-danger">Acknowledge</button>
+                <div>
+                  <div v-if="sensors[deviceName][0].type == 0" class="card-text">
+                    <p>Status: <span v-if="getLastReading(deviceName) == '1'">Alert</span><span v-else>Acknowledged</span></p>
+                    <button v-if="getLastReading(deviceName) == '1'" @click="acknowledgePanic(deviceName)" class="btn btn-danger" :disabled="isAcknowledged(deviceName)">Acknowledge</button>
                   </div>
                 </div>
                 <p class="card-text">
@@ -136,8 +132,10 @@
         // Assuming the data is a string and you want to set it to '0'
         const device = this.sensors[deviceName];
         device[device.length - 1].data = '0';
-        this.$set(this.sensors, deviceName, device);
-      }
+      },
+      isAcknowledged(deviceName) {
+        return this.getLastReading(deviceName) !== '1';
+      },
     },
     computed: {
       filteredDeviceNames() {
@@ -239,18 +237,18 @@
   }
 
   .panic-card {
-  background-color: #FFEBEB; /* Light red background */
-  border: 1px solid #FF6666; /* Darker red border */
-  box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2); /* Soft red shadow */
-  animation: pulse 2s infinite; /* Pulsating effect */
-}
+    background-color: #FFEBEB; /* Light red background */
+    border: 1px solid #FF6666; /* Darker red border */
+    box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2); /* Soft red shadow */
+    animation: pulse 2s infinite; /* Pulsating effect */
+  }
 
 .panic-card .card-header {
-  background-color: #FF6666; /* Darker red background for header */
-  color: #ffffff; /* White text */
-  font-weight: bold; /* Bold text */
-  font-size: 1.25rem; /* Larger font size */
-}
+    background-color: #FF6666; /* Darker red background for header */
+    color: #ffffff; /* White text */
+    font-weight: bold; /* Bold text */
+    font-size: 1.25rem; /* Larger font size */
+  }
 
 .panic-card .card-body {
   color: #333333; /* Dark text for better contrast and readability */
@@ -259,6 +257,18 @@
 .panic-card .card-body h5,
 .panic-card .card-body p {
   font-weight: bold; /* Bold text for better visibility */
+}
+
+.panic-card-acknowledged {
+  background-color: #e6ffcc; /* Light green background */
+  border: 1px solid #b3ff66; /* Darker green border */
+  box-shadow: 0 4px 8px rgba(179, 255, 102, 0.2); /* Soft green shadow */
+}
+
+.panic-card-acknowledged .card-header {
+  background-color: #b3ff66; /* Darker green background for header */
+  color: #ffffff; /* White text */
+  font-weight: bold; /* Bold text */
 }
 
 @keyframes pulse {
