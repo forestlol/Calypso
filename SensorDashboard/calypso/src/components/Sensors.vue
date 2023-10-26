@@ -21,9 +21,9 @@
         <hr />
       </div>
       <!-- Devices in the Group -->
-      <div class="col-md-4" v-for="deviceName in deviceGroup" :key="deviceName">
-        <router-link :to="{ name: 'sensor-details', params: { id: deviceName }}">
-          <div class="card mb-4 shadow">
+      <div class="col-md-4" v-for="deviceName in deviceGroup" :key="deviceName" >
+        <router-link v-if="sensors[deviceName][0].type !== 0" :to="{ name: 'sensor-details', params: { id: deviceName }}" custom v-slot="{ href, navigate }">
+          <div class="card mb-4 shadow" @click="navigate">
               <div class="card-header bg-primary text-white">
                 {{ deviceName }}
               </div>
@@ -43,7 +43,32 @@
                 </p>
               </div>
             </div>
-        </router-link>
+          </router-link>
+          <!-- Panic card here-->
+          <div v-else class="card mb-4 shadow panic-card">
+              <div class="card-header bg-danger text-white">
+                <span style="font-weight: bold; font-size: 1.5rem;">⚠️&nbsp;</span>
+                {{ deviceName }}
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>
+                <!-- Check if type is Temperature -->
+                <div v-if="sensors[deviceName][0].type == 1">
+                  <p class="card-text">Temperature: {{ parseFloat(getLastReading(deviceName).split(',')[0]).toFixed(2) }}°C</p>
+                  <p class="card-text">Humidity: {{ getLastReading(deviceName).split(',')[1] }}%</p>
+                </div>
+                <!-- Otherwise, display data as it is -->
+                <div v-else>
+                  <div v-if="sensors[deviceName][0].type == 0">
+                    <p class="card-text">Status: {{ getLastReading(deviceName) == '1' ? 'Alert' : 'Normal' }}</p>
+                    <button v-if="getLastReading(deviceName) == '1'" @click="acknowledgePanic(deviceName)" class="btn btn-danger">Acknowledge</button>
+                  </div>
+                </div>
+                <p class="card-text">
+                  <small>Last updated: <span class="text-muted">{{  formatDate(sensors[deviceName][sensors[deviceName].length - 1].time) }}</span></small>
+                </p>
+              </div>
+          </div>
       </div>
     </div>
   </div>
@@ -104,6 +129,14 @@
         const minutes = date.getUTCMinutes().toString().padStart(2, '0');
 
         return `${day}/${month}/${year} ${hours}:${minutes}`;
+      },
+      acknowledgePanic(deviceName) {
+        window.alert(`Panic alert for ${deviceName} has been acknowledged.`);
+        // Update local state to reflect that the panic has been acknowledged
+        // Assuming the data is a string and you want to set it to '0'
+        const device = this.sensors[deviceName];
+        device[device.length - 1].data = '0';
+        this.$set(this.sensors, deviceName, device);
       }
     },
     computed: {
@@ -204,6 +237,45 @@
       outline: 0;
       box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
   }
+
+  .panic-card {
+  background-color: #FFEBEB; /* Light red background */
+  border: 1px solid #FF6666; /* Darker red border */
+  box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2); /* Soft red shadow */
+  animation: pulse 2s infinite; /* Pulsating effect */
+}
+
+.panic-card .card-header {
+  background-color: #FF6666; /* Darker red background for header */
+  color: #ffffff; /* White text */
+  font-weight: bold; /* Bold text */
+  font-size: 1.25rem; /* Larger font size */
+}
+
+.panic-card .card-body {
+  color: #333333; /* Dark text for better contrast and readability */
+}
+
+.panic-card .card-body h5,
+.panic-card .card-body p {
+  font-weight: bold; /* Bold text for better visibility */
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 51, 51, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2);
+  }
+}
+
 
   /* Mobile Responsive - adjust as per your requirements */
   @media (max-width: 768px) {
