@@ -23,7 +23,7 @@
       <!-- Devices in the Group -->
       <div class="col-md-4" v-for="deviceName in deviceGroup" :key="deviceName" >
         <router-link v-if="sensors[deviceName][0].type !== 0" :to="{ name: 'sensor-details', params: { id: deviceName }}" custom v-slot="{ href, navigate }">
-          <div class="card mb-4 shadow" @click="navigate">
+          <div class="card mb-4 shadow" @click="navigate" style="cursor: pointer;">
               <div class="card-header bg-primary text-white">
                 {{ deviceName }}
               </div>
@@ -243,48 +243,48 @@
     animation: pulse 2s infinite; /* Pulsating effect */
   }
 
-.panic-card .card-header {
-    background-color: #FF6666; /* Darker red background for header */
+  .panic-card .card-header {
+      background-color: #FF6666; /* Darker red background for header */
+      color: #ffffff; /* White text */
+      font-weight: bold; /* Bold text */
+      font-size: 1.25rem; /* Larger font size */
+    }
+
+  .panic-card .card-body {
+    color: #333333; /* Dark text for better contrast and readability */
+  }
+
+  .panic-card .card-body h5,
+  .panic-card .card-body p {
+    font-weight: bold; /* Bold text for better visibility */
+  }
+
+  .panic-card-acknowledged {
+    background-color: #e6ffcc; /* Light green background */
+    border: 1px solid #b3ff66; /* Darker green border */
+    box-shadow: 0 4px 8px rgba(179, 255, 102, 0.2); /* Soft green shadow */
+  }
+
+  .panic-card-acknowledged .card-header {
+    background-color: #b3ff66; /* Darker green background for header */
     color: #ffffff; /* White text */
     font-weight: bold; /* Bold text */
-    font-size: 1.25rem; /* Larger font size */
   }
 
-.panic-card .card-body {
-  color: #333333; /* Dark text for better contrast and readability */
-}
-
-.panic-card .card-body h5,
-.panic-card .card-body p {
-  font-weight: bold; /* Bold text for better visibility */
-}
-
-.panic-card-acknowledged {
-  background-color: #e6ffcc; /* Light green background */
-  border: 1px solid #b3ff66; /* Darker green border */
-  box-shadow: 0 4px 8px rgba(179, 255, 102, 0.2); /* Soft green shadow */
-}
-
-.panic-card-acknowledged .card-header {
-  background-color: #b3ff66; /* Darker green background for header */
-  color: #ffffff; /* White text */
-  font-weight: bold; /* Bold text */
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2);
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(255, 51, 51, 0.3);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2);
+    }
   }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255, 51, 51, 0.3);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2);
-  }
-}
 
 
   /* Mobile Responsive - adjust as per your requirements */

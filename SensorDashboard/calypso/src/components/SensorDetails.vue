@@ -113,29 +113,30 @@
         const count = Object.values(data).filter(value => value !== null).length;
         return sum / count;
     },
-        extractHourlyData(data, index = null) {
-            let hourlyData = {};
-            for (let hour = 0; hour < 24; hour++) {
-            const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
-            let hour12Format = (hour % 12) || 12; // Convert 24-hour format to 12-hour format
-            hour12Format += hour < 12 ? ' AM' : ' PM';
-
+    extractHourlyData(data, index = null) {
+        let hourlyData = {};
+        for (let hour = 0; hour < 24; hour++) {
+        const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
+        let hour12Format = (hour % 12) || 12; // Convert 24-hour format to 12-hour format
+        hour12Format += hour < 12 ? ' AM' : ' PM';
             if (hourData.length > 0) {
                 let value = index !== null ? hourData[0].data.split(',')[index] : hourData[0].data;
                 
                 // Check if this is temperature data and then round off to 2 decimal places
                 if (this.sensorType === 1 && index === 0) {
-                value = parseFloat(value).toFixed(2);
+                    value = parseFloat(value).toFixed(2);
                 }
-
+                if(this.sensorType === 2){
+                    value += value;
+                }
                 hourlyData[hour12Format] = parseFloat(value);
             } else {
                 hourlyData[hour12Format] = null;
-            }
+                }
             }
             return hourlyData;
-            }
         }
+    }
   };
 </script>
   

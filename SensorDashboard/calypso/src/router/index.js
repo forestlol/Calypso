@@ -5,13 +5,14 @@ import RoomPage from '../views/RoomDetail.vue';
 import Login from '../views/Login.vue';
 import Sensors from '../components/Sensors.vue';
 import SensorDetails from '../components/SensorDetails.vue';
+import SensorOverview from '../components/SensorOverview.vue';
 import auth from '../auth';
 
 const routes = [
   {
     path: '/',
-    name: 'Login',
-    component: Login,
+    name: 'SensorOverview',
+    component: SensorOverview,
     meta: { guestOnly: true}
   },
   {
@@ -43,7 +44,7 @@ const routes = [
     path: '/sensor/:id',
     component: SensorDetails,
     name: 'sensor-details'
-  }
+  },
 ];
 
 const router = createRouter({
