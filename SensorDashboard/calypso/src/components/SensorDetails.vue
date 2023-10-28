@@ -115,7 +115,7 @@
     },
     extractHourlyData(data, index = null) {
         let hourlyData = {};
-        for (let hour = 0; hour < 24; hour++) {
+        for (let hour = 0; hour < 18; hour++) {
         const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
         let hour12Format = (hour % 12) || 12; // Convert 24-hour format to 12-hour format
         hour12Format += hour < 12 ? ' AM' : ' PM';

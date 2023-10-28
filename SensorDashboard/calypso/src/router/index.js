@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import MainPage from '../views/Home.vue';
+import Building from '../views/Home.vue';
 import FloorPage from '../views/FloorDetail.vue';
 import RoomPage from '../views/RoomDetail.vue';
 import Login from '../views/Login.vue';
@@ -11,14 +11,20 @@ import auth from '../auth';
 const routes = [
   {
     path: '/',
-    name: 'SensorOverview',
-    component: SensorOverview,
+    name: 'Login',
+    component: Login,
     meta: { guestOnly: true}
   },
   {
+    path: '/overview',
+    name: 'SensorOverview',
+    component: SensorOverview,
+    meta: { requiresAuth: true}
+  },
+  {
     path: '/building',
-    name: 'MainPage',
-    component: MainPage,
+    name: 'Building',
+    component: Building,
     meta: { requiresAuth: true}
   },
   {
@@ -38,12 +44,14 @@ const routes = [
   {
     path: '/sensors',
     name: 'Sensors',
-    component: Sensors
+    component: Sensors,
+    meta: { requiresAuth: true}
   },
   {
     path: '/sensor/:id',
     component: SensorDetails,
-    name: 'sensor-details'
+    name: 'sensor-details',
+    meta: { requiresAuth: true}
   },
 ];
 
@@ -56,7 +64,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !auth.isLoggedIn()) {
     next('/');
   } else if (to.meta.guestOnly && auth.isLoggedIn()) {
-    next(`/building/${auth.user.buildingId}`);
+    next(`/overview`);
   } else {
     next();
   }

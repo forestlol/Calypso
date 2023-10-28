@@ -1,6 +1,6 @@
 <template>
 <div class="container mt-5">
-    <h1 class="text-center mb-5 display-4">Sensor Overview</h1>
+    <h1 class="text-center mb-5 display-4">Sensors Overview</h1>
 
     <!-- Cards for Average Temperature, Humidity and Total People -->
     <div class="row">
@@ -33,14 +33,14 @@
     <!-- Bar Chart for Total Amount of Sensors -->
         <div class="row mb-4">
         <div class="col-lg-6">
-            <h3 class="text-center mb-3">Sensor Distribution</h3>
+            <h3 class="text-center mb-3">Recent Active Sensor Distribution</h3>
             <!-- Bar Chart for Total Amount of Sensors -->
             <div>
             <column-chart :data="sensorBarChartData" download="true"></column-chart>
             </div>
         </div>
         <div class="col-lg-6">
-            <h3 class="text-center mb-3">Sensor Types</h3>
+            <h3 class="text-center mb-3">Recent Active Sensor Types</h3>
             <!-- Pie Chart for Total Amount of Sensors -->
             <div>
             <pie-chart :data="sensorPieChartData" download="true" donut="true"></pie-chart>
