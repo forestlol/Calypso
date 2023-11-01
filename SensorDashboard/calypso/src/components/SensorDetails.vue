@@ -115,10 +115,11 @@
     },
     extractHourlyData(data, index = null) {
         let hourlyData = {};
-        for (let hour = 0; hour < 18; hour++) {
-        const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
-        let hour12Format = (hour % 12) || 12; // Convert 24-hour format to 12-hour format
-        hour12Format += hour < 12 ? ' AM' : ' PM';
+        for (let hour = 0; hour <= 8; hour++) {
+            const adjustedHour = (hour + 8) % 24;
+            const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
+            let hour12Format = (adjustedHour % 12) || 12; // Convert 24-hour format to 12-hour format
+            hour12Format += adjustedHour < 12 ? ' AM' : ' PM';
             if (hourData.length > 0) {
                 let value = index !== null ? hourData[0].data.split(',')[index] : hourData[0].data;
                 
