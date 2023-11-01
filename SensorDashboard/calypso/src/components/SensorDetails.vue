@@ -1,7 +1,9 @@
 <template>
     <div class="container mt-5">
-        <h2 class="mb-4">{{ sensorName }}</h2>
-        
+        <div class="header-row">
+            <h2 class="mb-4">{{ sensorName }}</h2>
+            <button @click="downloadSensorData" class="btn btn-primary">Download Sensor Data</button>
+        </div>
         <!-- Loading State -->
         <div v-if="isLoading">
             <p>Loading data...</p>
@@ -115,7 +117,7 @@
     },
     extractHourlyData(data, index = null) {
         let hourlyData = {};
-        for (let hour = 0; hour <= 8; hour++) {
+        for (let hour = 0; hour <= 24; hour++) {
             const adjustedHour = (hour + 8) % 24;
             const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
             let hour12Format = (adjustedHour % 12) || 12; // Convert 24-hour format to 12-hour format
@@ -127,8 +129,10 @@
                 if (this.sensorType === 1 && index === 0) {
                     value = parseFloat(value).toFixed(2);
                 }
-                if(this.sensorType === 2){
-                    value += value;
+                if (this.sensorType === 2) { // People Counter
+                    value = Math.max(...hourData.map(d => parseInt(d.data, 10)));
+                } else {
+                    value = index !== null ? hourData[0].data.split(',')[index] : hourData[0].data;
                 }
                 hourlyData[hour12Format] = parseFloat(value);
             } else {
@@ -136,6 +140,71 @@
                 }
             }
             return hourlyData;
+        },
+        async downloadSensorData() 
+        {
+            try {
+                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
+                const rawData = await response.json();
+                const todaysData = rawData.filter(data => {
+                    const date = new Date(data.time);
+                    return date.toDateString() === new Date().toDateString() && data.deviceName === this.sensorName;
+                });
+
+                if (todaysData.length === 0) {
+                    alert('No data available for today');
+                    return;
+                }
+
+                let csvContent = "data:text/csv;charset=utf-8,";
+
+                // Determine the sensor type and format CSV content accordingly
+                switch(this.sensorType) {
+                    case 1: // Temperature and Humidity Sensor
+                        csvContent += "Time,Temperature,Humidity\n";
+                        todaysData.forEach(row => {
+                            const date = new Date(row.time);
+                            const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+                            const [temperature, humidity] = row.data.split(',');
+                            csvContent += `${time},${temperature},${humidity}\n`;
+                        });
+                        break;
+                    case 2: // People Counter
+                        csvContent += "Time,People Count\n";
+                        todaysData.forEach(row => {
+                            const date = new Date(row.time);
+                            const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+                            const peopleCount = row.data;
+                            csvContent += `${time},${peopleCount}\n`;
+                        });
+                        break;
+                    case 3: // Panic Button
+                        csvContent += "Time\n";
+                        todaysData.forEach(row => {
+                            if(row.data === "1") {
+                                const date = new Date(row.time);
+                                const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+                                csvContent += `${time}\n`;
+                            }
+                        });
+                        break;
+                    default:
+                        alert('Sensor type not recognized');
+                        return;
+                }
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "sensor_data.csv");
+                document.body.appendChild(link);
+
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (error) {
+                console.error("Error downloading sensor data:", error);
+            }
         }
     }
   };
@@ -157,6 +226,16 @@
 
     h5 {
         font-size: 1.1rem;
+    }
+
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    h2.mb-4 {
+        margin-bottom: 0;
     }
 
     /* Containers and Spacing */
@@ -201,6 +280,24 @@
         background-color: #fee;
         padding: 15px;
         border-radius: 5px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
     }
 
     /* Additional Color Scheme */
