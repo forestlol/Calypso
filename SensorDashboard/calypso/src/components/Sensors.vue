@@ -12,6 +12,8 @@
       </select>
       <p></p>
       <input v-model="searchTerm" type="text" placeholder="Search for a device..." class="form-control w-50">
+      <p></p>
+      <button @click="downloadReport" class="btn btn-primary">Download Today's Report</button>
     </div>
     <p class="mb-4">{{ filteredDeviceNames.length }} device(s) found.</p>
     <div class="row mb-3" v-for="(deviceGroup, sensorType) in groupedAndOrderedDeviceNames" :key="sensorType">
@@ -136,6 +138,49 @@
       isAcknowledged(deviceName) {
         return this.getLastReading(deviceName) !== '1';
       },
+      async downloadReport() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const todaysData = Object.entries(this.sensors).reduce((acc, [deviceName, readings]) => {
+          const todaysReadings = readings.filter(reading => {
+            const readingDate = new Date(reading.time);
+            readingDate.setHours(0, 0, 0, 0);
+            return readingDate.getTime() === today.getTime();
+          });
+
+          if (todaysReadings.length > 0) {
+            acc[deviceName] = todaysReadings;
+          }
+
+          return acc;
+        }, {});
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Device Name,Type,Data,Time\n";
+
+        Object.entries(todaysData).forEach(([deviceName, readings]) => {
+          readings.forEach(reading => {
+            const time = new Date(reading.time);
+            let hours = time.getUTCHours();
+            const minutes = time.getUTCMinutes().toString().padStart(2, '0');
+
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+            csvContent += `${deviceName},${this.getTypeName(reading.type)},${reading.data},${formattedTime}\n`;
+          });
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "sensors_report_today.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     },
     computed: {
       filteredDeviceNames() {
@@ -175,7 +220,8 @@
             });
 
             return grouped;
-        }
+        },
+        
     },
   };
 </script>
