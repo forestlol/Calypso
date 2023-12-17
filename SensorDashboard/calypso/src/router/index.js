@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Building from '../views/Home.vue';
-import FloorPage from '../views/FloorDetail.vue';
+import FloorDetails from '../views/FloorDetail.vue';
 import RoomPage from '../views/RoomDetail.vue';
 import Login from '../views/Login.vue';
 import Sensors from '../components/Sensors.vue';
@@ -28,14 +28,14 @@ const routes = [
     meta: { requiresAuth: true}
   },
   {
-    path: '/building/:buildingId',
-    name: 'FloorPage',
-    component: FloorPage,
+    path: '/building/:buildingId/:floorName',
+    name: 'FloorDetails',
+    component: FloorDetails, // Make sure to import the FloorDetails component at the top
     props: true,
-    meta: { requiresAuth: true}
+    meta: { requiresAuth: true }
   },
   {
-    path: '/building/:buildingId/floor/:floorId',
+    path: '/building/:buildingName/:floorName/:roomName',
     name: 'RoomPage',
     component: RoomPage,
     props: true,

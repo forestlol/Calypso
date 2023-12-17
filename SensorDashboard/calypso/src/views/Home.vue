@@ -1,13 +1,19 @@
 <template>
   <div class="container mt-5">
-    <h1 class="text-center mb-5">User's Buildings</h1>
+    <h1 class="text-center mb-5">Buildings</h1>
     <div class="row gy-4">
-      <div class="col-lg-4 col-md-6" v-for="building in userBuildings" :key="building.id">
+      <div class="col-lg-4 col-md-6" v-for="building in buildings" :key="building.building_name">
         <div class="card shadow">
           <div class="card-body">
-            <h5 class="card-title">{{ building.name }}</h5>
-            <p class="card-text">Description: {{ building.description }}</p>
-            <router-link :to="`/building/${building.id}`" class="btn btn-primary">View Floors</router-link>
+            <h5 class="card-title">{{ building.building_name }}</h5>
+            <div v-if="building.floors && building.floors.length" v-for="floor in building.floors" :key="floor.floor_name">
+              <p class="card-text">{{ floor.floor_name }} - Level: {{ floor.floor_level }}</p>
+              <p class="card-text">Rooms: {{ floor.rooms.length }}</p>
+              <!-- Link to view rooms for the floor -->
+              <router-link :to="`/building/${building.building_name}/${floor.floor_name}`" class="btn btn-primary">View Rooms</router-link>
+            </div>
+            <!-- You could add an else case if there are no floors -->
+            <div v-else>No floors available</div>
           </div>
         </div>
       </div>
@@ -15,46 +21,49 @@
   </div>
 </template>
 
-
-  
 <script>
-import auth from '@/auth.js';
-
 export default {
   data() {
-  return {
-    buildings: [
-      { id: 'A', name: 'Building A', description: 'North Wing' },
-      { id: 'B', name: 'Building B', description: 'South Wing' },
-      { id: 'C', name: 'Building C', description: 'East Wing' },
-      { id: 'D', name: 'Building D', description: 'West Wing' },
-      { id: 'E', name: 'Building E', description: 'Central Hub' },
-      { id: 'F', name: 'Building F', description: 'Research and Development' },
-      { id: 'G', name: 'Building G', description: 'Human Resources' },
-      { id: 'H', name: 'Building H', description: 'Engineering' },
-      { id: 'I', name: 'Building I', description: 'Customer Support' },
-      { id: 'J', name: 'Building J', description: 'Product Management' },
-      { id: 'K', name: 'Building K', description: 'Finance and Administration' },
-      { id: 'L', name: 'Building L', description: 'Sales and Marketing' },
-      { id: 'M', name: 'Building M', description: 'Training Center' },
-      { id: 'N', name: 'Building N', description: 'Cafeteria' },
-      { id: 'O', name: 'Building O', description: 'Gymnasium' },
-      { id: 'P', name: 'Building P', description: 'Auditorium' },
-      { id: 'Q', name: 'Building Q', description: 'Library' },
-      { id: 'R', name: 'Building R', description: 'Outdoor Recreation' },
-      { id: 'S', name: 'Building S', description: 'Conference Rooms' },
-      { id: 'T', name: 'Building T', description: 'Executive Suites' }
-      ]
+    return {
+      buildings: [],
+      loading: false,
+      error: null
     };
   },
-  computed: {
-    userBuildings() {
-      const buildingsForUser = this.buildings.filter(b => auth.getBuildingIds().includes(b.id));
-      return buildingsForUser;
+  async mounted() {
+    await this.fetchBuildings();
+  },
+  methods: {
+    async fetchBuildings() {
+      this.loading = true;
+      try {
+        const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/building');
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
+        }
+        const text = await response.text();
+        // Sanitize the response text to remove ObjectId references
+        const sanitizedText = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+        const data = JSON.parse(sanitizedText);
+        this.buildings = data.map(item => ({
+          building_name: item.building.building_name,
+          floors: item.building.floors.map(floor => ({
+            floor_name: floor.floor_name,
+            floor_level: floor.floor_level,
+            rooms: floor.rooms
+          }))
+        }));
+      } catch (err) {
+        console.error(err);
+        this.error = 'Failed to load buildings data: ' + err.message;
+      } finally {
+        this.loading = false;
+      }
     }
   }
 };
 </script>
 
-
-  
+<style>
+/* Your existing styles */
+</style>
