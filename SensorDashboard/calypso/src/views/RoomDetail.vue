@@ -17,8 +17,16 @@
               Sensor ID: {{ sensor.id }}
             </div>
             <div class="card-body">
-              <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
-              <p class="card-text">Humidity: {{ sensor.humidity }}%</p>
+              <p v-if="sensor.type == 0" class="card-text">
+                Activated: {{ sensor.activated ? 'Yes' : 'No' }}
+              </p>
+              <template v-if="sensor.type == 1">
+                <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
+                <p class="card-text">Humidity: {{ sensor.humidity }}%</p>
+              </template>
+              <p v-if="sensor.type == 2" class="card-text">
+                People Count: {{ sensor.peopleCount }}
+              </p>
             </div>
             <router-link :to="`/sensor/${sensor.id}`" class="btn btn-primary">View Sensor Detail</router-link>
           </div>
@@ -92,8 +100,12 @@ export default {
         // Initialize all sensors with "N/A" data
         this.sensors = room.sensors.map(id => ({
           id: id,
+          type: -1, // Default type
           temp: 'N/A',
-          humidity: 'N/A'
+          humidity: 'N/A',
+          activated: 'No',
+          peopleCount: 'N/A',
+          lastReadingDate: null,
         }));
 
         // Fetch sensor data
@@ -103,12 +115,24 @@ export default {
 
         // Map the latest sensor data to the initialized sensors
         allSensorData.forEach(sensor => {
-          if (sensor.type === 1 && room.sensors.includes(sensor.deviceName)) {
-            const sensorIndex = this.sensors.findIndex(s => s.id === sensor.deviceName);
-            if (sensorIndex !== -1) {
-              const [temperature, humidity] = sensor.data.split(',').map(Number);
-              this.sensors[sensorIndex].temp = temperature.toFixed(2);
-              this.sensors[sensorIndex].humidity = humidity.toFixed(2);
+          const sensorIndex = this.sensors.findIndex(s => s.id === sensor.deviceName);
+          
+          if (sensorIndex !== -1) {
+            this.sensors[sensorIndex].type = sensor.type;
+            switch (sensor.type) {
+              case 0: // Sensor type for activation
+                this.sensors[sensorIndex].activated = sensor.data == '0' ? 'Yes' : 'No';
+                break;
+              case 1: // Sensor type for temperature and humidity
+              {
+                const [temperature, humidity] = sensor.data.split(',').map(Number);
+                this.sensors[sensorIndex].temp = temperature.toFixed(2);
+                this.sensors[sensorIndex].humidity = humidity.toFixed(2);
+                break;
+              }
+              case 2: // Sensor type for people count
+                this.sensors[sensorIndex].peopleCount = Number(sensor.data);
+                break;
             }
           }
         });
