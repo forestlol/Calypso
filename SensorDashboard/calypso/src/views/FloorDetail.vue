@@ -3,24 +3,42 @@
     <div v-if="loading">Loading...</div>
     <div v-if="error">Error: {{ error }}</div>
     <div v-if="floorData" class="floor">
-      <h1>{{ floorData.buildingName }}</h1>
-      <h2>{{ floorData.floorName }} - Level: {{ floorData.floorLevel }}</h2>
+      <div class="floor-header">
+        <h1>{{ floorData.buildingName }}</h1>
+        <h2>{{ floorData.floorName }} - Level: {{ floorData.floorLevel }}</h2>
+      </div>
       <div class="rooms-grid">
         <div v-for="room in floorData.rooms" :key="room._id" class="card">
-          <h3>{{ room.room_name }}</h3>
-          <p>Average Temperature: {{ getAverage(room.avgTemperature) }}°C</p>
-          <p>Average Humidity: {{ getAverage(room.avgHumidity) }}%</p>
-          <router-link
-            :to="`/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`"
-            class="btn btn-primary">
-            View Room Detail
-          </router-link>
-
+          <div class="card-header">
+            <h3>{{ room.room_name }}</h3>
+          </div>
+          <div class="card-body">
+            <div class="sensor-info">
+              <i class="fas fa-thermometer-half"></i>
+              <p>Average Temperature: {{ getAverage(room.avgTemperature) }}°C</p>
+            </div>
+            <div class="sensor-info">
+              <i class="fas fa-tint"></i>
+              <p>Average Humidity: {{ getAverage(room.avgHumidity) }}%</p>
+            </div>
+            <div class="sensor-info">
+              <i class="fas fa-users"></i>
+              <p>Last People Count: {{ room.peopleCount }}</p>
+            </div>
+          </div>
+          <div class="card-footer">
+            <router-link
+              :to="`/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`"
+              class="btn btn-primary">
+              View Room Detail
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -100,6 +118,19 @@ export default {
             };
           }
         }
+        else if (item.type === 2) {
+          // People count sensor data handling
+          const sensorId = item.deviceName;
+          const peopleCount = Number(item.data);
+          const time = new Date(item.time);
+          if (!this.sensorData[sensorId] || new Date(this.sensorData[sensorId].time) < time) {
+            this.sensorData[sensorId] = {
+              ...this.sensorData[sensorId], // Keep existing sensor data
+              peopleCount: peopleCount,
+              time: time.toISOString()
+            };
+          }
+        }
       });
     },
     integrateSensorData() {
@@ -129,6 +160,15 @@ export default {
         // If there were no sensors with data, set average to 'N/A'
         room.avgTemperature = sensorCount > 0 ? room.avgTemperature : 'N/A';
         room.avgHumidity = sensorCount > 0 ? room.avgHumidity : 'N/A';
+
+        // People count integration
+        room.peopleCount = '0'; // Default if no sensor data
+        room.sensors.forEach(sensorId => {
+          const sensorData = this.sensorData[sensorId];
+          if (sensorData && sensorData.peopleCount !== undefined) {
+            room.peopleCount = sensorData.peopleCount;
+          }
+        });
       });
     }
   }
@@ -137,33 +177,98 @@ export default {
 
 <style>
 .container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
+  color: #333;
+  font-family: 'Open Sans', sans-serif;
 }
 
-.buildings {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.floor-header {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-.floor {
-  background-color: #f8f8f8;
-  padding: 16px;
-  border-radius: 8px;
+.floor-header h1 {
+  color: #0056b3; /* Primary color */
+  margin-bottom: 0.5em;
+}
+
+.floor-header h2 {
+  color: #666;
+  font-weight: normal;
 }
 
 .rooms-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
 }
 
 .card {
   border: 1px solid #ddd;
   border-radius: 4px;
+  overflow: hidden; /* Ensures the border-radius applies to children elements */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.card-header {
+  background-color: #0056b3;
+  color: white;
+  padding: 15px;
+  font-size: 1.2em;
+}
+
+.card-body {
   padding: 20px;
+  text-align: left;
+}
+
+.sensor-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sensor-info i {
+  margin-right: 10px;
+  color: #0056b3;
+}
+
+.card-footer {
+  background-color: #f8f8f8;
+  padding: 10px;
   text-align: center;
 }
+
+.btn-primary {
+  background-color: #0056b3;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #004494;
+}
+
+@media (max-width: 768px) {
+  .rooms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 0; /* Removes padding for the card on smaller screens */
+  }
+
+  .card-header, .card-body, .card-footer {
+    padding: 10px;
+  }
+}
 </style>
+
+
+
