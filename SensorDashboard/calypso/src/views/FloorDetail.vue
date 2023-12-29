@@ -15,15 +15,15 @@
           <div class="card-body">
             <div class="sensor-info">
               <i class="fas fa-thermometer-half"></i>
-              <p>Average Temperature: {{ getAverage(room.avgTemperature) }}°C</p>
+              <p>Temperature: {{ getAverage(room.latestTemperature) }}°C</p>
             </div>
             <div class="sensor-info">
               <i class="fas fa-tint"></i>
-              <p>Average Humidity: {{ getAverage(room.avgHumidity) }}%</p>
+              <p>Humidity: {{ getAverage(room.latestHumidity) }}%</p>
             </div>
             <div class="sensor-info">
               <i class="fas fa-users"></i>
-              <p>Last People Count: {{ room.peopleCount }}</p>
+              <p>Last People Count: {{ room.latestPeopleCount}}</p>
             </div>
           </div>
           <div class="card-footer">
@@ -114,7 +114,8 @@ export default {
             this.sensorData[sensorId] = {
               temperature: temperature,
               humidity: humidity,
-              time: time.toISOString()
+              time: time.toISOString(),
+              type: item.type
             };
           }
         }
@@ -127,7 +128,8 @@ export default {
             this.sensorData[sensorId] = {
               ...this.sensorData[sensorId], // Keep existing sensor data
               peopleCount: peopleCount,
-              time: time.toISOString()
+              time: time.toISOString(),
+              type: item.type
             };
           }
         }
@@ -138,37 +140,41 @@ export default {
         console.error('No floor data to integrate sensor data with.');
         return;
       }
-
-      // Integrate sensor data with floor data
       this.floorData.rooms.forEach(room => {
-        let totalTemperature = 0;
-        let totalHumidity = 0;
-        let sensorCount = room.sensors.length;  // Total number of sensors including those without data
+        // Initialize variables to track the most recent readings
+        let latestTemperatureReading = null;
+        let latestHumidityReading = null;
+        let latestPeopleCount = null;
 
         room.sensors.forEach(sensorId => {
           const sensorData = this.sensorData[sensorId];
           if (sensorData) {
-            totalTemperature += sensorData.temperature ?? 0;  // Use 0 if temperature is not available
-            totalHumidity += sensorData.humidity ?? 0;  // Use 0 if humidity is not available
+            // Update the latest temperature reading if this one is more recent
+            switch(sensorData.type){
+              case 1:
+                if (!latestTemperatureReading || new Date(latestTemperatureReading.time) < new Date(sensorData.time)) {
+                  latestTemperatureReading = sensorData;
+                }
+    
+                // Update the latest humidity reading if this one is more recent
+                if (!latestHumidityReading || new Date(latestHumidityReading.time) < new Date(sensorData.time)) {
+                  latestHumidityReading = sensorData;
+                }
+                break;
+              case 2:
+                // Update the latest people count if this one is more recent
+                if (!latestPeopleCount || new Date(latestPeopleCount.time) < new Date(sensorData.time)) {
+                  latestPeopleCount = sensorData;
+                }
+                break;
+            }
           }
         });
 
-        // Calculate average; divide by the total number of sensors to account for those without readings
-        room.avgTemperature = (totalTemperature / sensorCount).toFixed(2);
-        room.avgHumidity = (totalHumidity / sensorCount).toFixed(2);
-
-        // If there were no sensors with data, set average to 'N/A'
-        room.avgTemperature = sensorCount > 0 ? room.avgTemperature : 'N/A';
-        room.avgHumidity = sensorCount > 0 ? room.avgHumidity : 'N/A';
-
-        // People count integration
-        room.peopleCount = '0'; // Default if no sensor data
-        room.sensors.forEach(sensorId => {
-          const sensorData = this.sensorData[sensorId];
-          if (sensorData && sensorData.peopleCount !== undefined) {
-            room.peopleCount = sensorData.peopleCount;
-          }
-        });
+      // Set the room's sensor data to the latest readings or a default value
+      room.latestTemperature = latestTemperatureReading ? latestTemperatureReading.temperature.toFixed(2) : 'N/A';
+      room.latestHumidity = latestHumidityReading ? latestHumidityReading.humidity.toFixed(2) : 'N/A';
+      room.latestPeopleCount = latestPeopleCount ? latestPeopleCount.peopleCount.toString() : 'N/A';
       });
     }
   }
