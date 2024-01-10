@@ -1,62 +1,78 @@
 <template>
 <div class="container mt-5">
-    <h1 class="text-center mb-5 display-4">Sensors Overview</h1>
 
+    <div class="row">
+      <div class="col-lg-6 mb-5">
+          <select class="form-select" v-model="selectedBuilding" aria-label="Default select example">
+            <option disabled value="">Select your building</option>
+            <option v-for="building in buildings" :key="building.building_name" :value="building.building_name">
+              {{ building.building_name }}
+            </option>
+        </select>
+      </div>
+      <div class="text-center col-lg-6 mb-5">
+        <h3 v-if="selectedBuilding" class="display-4">{{selectedBuilding}} <br> Sensors Overview</h3>
+        <h3 v-else class="display-4">Sensors Overview</h3>
+      </div>
+    </div>
+    
     <!-- Cards for Average Temperature, Humidity and Total People -->
     <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="card mb-4">
                 <h5 class="card-header bg-primary">Average Temperature</h5>
-            <div class="card-body">
-                <p class="card-text">{{ averageTemperature }}°C</p>
+                <div class="card-body">
+                  <p class="card-text">{{ averageTemperature }}°C</p>
+                </div>
             </div>
-            </div>
-        </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card">
+            <div class="card mb-4">
                 <h5 class="card-header  bg-primary">Average Humidity</h5>
-            <div class="card-body">
-                <p class="card-text">{{ averageHumidity }}%</p>
+                <div class="card-body">
+                    <p class="card-text">{{ averageHumidity }}%</p>
+                </div>
             </div>
+
+            <div class="card mb-4">
+                <h5 class="card-header  bg-primary">Total People</h5>
+                <div class="card-body">
+                    <p class="card-text">{{ totalPeople }}</p>
+                </div>
             </div>
+        </div>
+        <div class="col-md-2 d-flex" style="height: auto;">
+          <div class="vr"></div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <h5 class="card-header  bg-primary">Total People</h5>
-            <div class="card-body">
-                <p class="card-text">{{ totalPeople }}</p>
-            </div>
-            </div>
-        </div>
     <!-- Bar Chart for Total Amount of Sensors -->
-        <div class="row mb-4">
-        <div class="col-lg-6">
+        <!-- <div class="row mb-4"> -->
+        <!-- <div class="col-lg-6">
             <h3 class="text-center mb-3">Recent Active Sensor Distribution</h3>
-            <!-- Bar Chart for Total Amount of Sensors -->
             <div>
             <column-chart :data="sensorBarChartData" download="true"></column-chart>
             </div>
-        </div>
-        <div class="col-lg-6">
+        </div> -->
+        <div class="col-md-6">
             <h3 class="text-center mb-3">Recent Active Sensor Types</h3>
             <!-- Pie Chart for Total Amount of Sensors -->
             <div>
-            <pie-chart :data="sensorPieChartData" download="true" donut="true"></pie-chart>
+              <pie-chart :data="sensorPieChartData" download="true" donut="true"></pie-chart>
             </div>
         </div>
-        </div>
+      </div>
 
-    </div>
 </div>
 </template>
   
-  <script>
+<script>
   
   export default {
     data() {
       return {
+        buildings: [],
+        selectedBuilding: '',
+        loading: false,
+        error: null,
         sensors: {},
         sensorTypes: {
           0: 'Panic',
@@ -66,6 +82,7 @@
       }
     },
     async created() {
+      await this.fetchBuildings();
       try {
         const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
         const rawData = await response.json();
@@ -81,6 +98,32 @@
       }
     },
     methods: {
+      async fetchBuildings() {
+        this.loading = true;
+        try {
+          const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/building');
+          if (!response.ok) {
+            throw new Error('Network response was not ok.');
+          }
+          const text = await response.text();
+          // Sanitize the response text to remove ObjectId references
+          const sanitizedText = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+          const data = JSON.parse(sanitizedText);
+          this.buildings = data.map(item => ({
+            building_name: item.building.building_name,
+            floors: item.building.floors.map(floor => ({
+              floor_name: floor.floor_name,
+              floor_level: floor.floor_level,
+              rooms: floor.rooms
+            }))
+          }));
+        } catch (err) {
+          console.error(err);
+          this.error = 'Failed to load buildings data: ' + err.message;
+        } finally {
+          this.loading = false;
+        }
+      },
         formatDate(date) {
             const year = date.getUTCFullYear();
             const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based in JavaScript
