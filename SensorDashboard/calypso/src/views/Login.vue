@@ -55,7 +55,7 @@ export default {
       isLoggingIn: false,
       loginError: false,
       backgroundImageStyle: {
-        backgroundImage: `url(${new URL('../assets/loginPage.png', import.meta.url)})`
+        backgroundImage: `url(${new URL('../assets/login.png', import.meta.url)})`
       }
     };
   },
