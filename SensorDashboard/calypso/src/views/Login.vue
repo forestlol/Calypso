@@ -13,7 +13,7 @@
         <div class="col col-sm-6 col-lg-7 col-xl-6">
           <!-- Logo -->
           <a href="#" class="d-flex justify-content-center mb-4">
-            <img src="src/assets/calypso.png" alt="" width="60">
+            <img src="@/assets/calypso.png" alt="" width="60">
           </a>
 
           <div class="text-center mb-5">
