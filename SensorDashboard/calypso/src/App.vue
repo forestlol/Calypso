@@ -1,5 +1,6 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+  <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
       <router-link to="/overview" class="navbar-brand">Calypso</router-link>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +50,7 @@
 </script>
 
 <style>
+
   body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
