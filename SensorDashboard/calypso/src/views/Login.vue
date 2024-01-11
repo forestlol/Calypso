@@ -3,7 +3,7 @@
   <div class="row vh-100 g-0">
     <!-- Left Side -->
     <div class="col-lg-6 position-relative d-none d-lg-block">
-      <div class="bg-holder" :style="{ backgroundImage: 'url(src/assets/loginPage.PNG)' }">
+      <div class="bg-holder" :style="backgroundImageStyle">
       </div>
     </div>
 
@@ -21,21 +21,6 @@
             <p class="text-secondary"> Get access to your account</p>
           </div>
 
-          <!-- Social Login -->
-          <button class="btn btn-lg btn-outline-secondary btn-outline-custom w-100 mb-3">
-            <i class='bx bxl-google text-danger me-1 fs-6'></i> Login with Google
-          </button>
-
-          <button class="btn btn-lg btn-outline-secondary btn-outline-custom  w-100 mb-3">
-            <i class='bx bxl-facebook text-primary me-1 fs-6'></i>Login with Facebook
-          </button>
-
-          <!-- Divider -->
-          <div class="position-relative">
-            <hr class="text-secondary divider">
-            <div class="divider-content-center">Or</div>
-          </div>
-
           <!-- Form -->
           <form @submit.prevent="handleLogin">
           <div class="mb-3">
@@ -46,25 +31,13 @@
             <label for="password" class="form-label">Password</label>
             <input id="password" type="password" class="form-control" v-model.trim="password" required />
           </div>
-          <div class="input-group mb-3 d-flex justify-content-between">
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="formCheck">
-              <label for="formCheck" class="form-check-label text-secondary"><small>Remember Me</small></label>
-            </div>
-            <div>
-              <small><a href="#">Forget Password?</a></small>
-            </div>
-          </div>
           <button type="submit" class="btn btn-primary btn-block mb-3" :disabled="isLoggingIn" @click="handleLogin">
             <span v-if="isLoggingIn" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             {{ isLoggingIn ? 'Logging in...' : 'Login' }}
           </button>
           <div v-if="loginError" class="alert alert-danger mt-3">Invalid login credentials</div>
         </form>
-
-        <div class="text-center">
-          <small>Don't have an account?</small> <a href="#" class="fw-bold">Sign Up</a>
-        </div>
+        
         </div>
       </div>
     </div>
@@ -80,7 +53,10 @@ export default {
       username: '',
       password: '',
       isLoggingIn: false,
-      loginError: false
+      loginError: false,
+      backgroundImageStyle: {
+        backgroundImage: `url(${new URL('../assets/loginPage.png', import.meta.url)})`
+      }
     };
   },
   methods: {
@@ -108,7 +84,6 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
-@import 'https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css';
 * {
   font-family: 'Nunito Sans', sans-serif;
 }
@@ -130,43 +105,6 @@ a:hover {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-}
-
-.btn {
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.btn i {
-  vertical-align: text-top;
-}
-
-.btn-outline-custom {
-  color: #31374a;
-  border-color: #ddd;
-}
-
-.btn-outline-custom:hover {
-  color: #31374a;
-  border-color: #eee;
-  background-color: #eee;
-}
-
-.divider-content-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  background-color: #fff;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #999;
-}
-
-.divider {
-  margin: 2rem 0;
 }
 
 .btn-block {
