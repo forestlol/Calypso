@@ -3,7 +3,7 @@
   <div class="row vh-100 g-0">
     <!-- Left Side -->
     <div class="col-lg-6 position-relative d-none d-lg-block">
-      <div class="bg-holder" :style="{ backgroundImage: 'url(src/assets/loginPage.PNG)' }">
+      <div class="bg-holder" :style="{ backgroundImage: url('src/assets/loginPage.PNG') }">
       </div>
     </div>
 
