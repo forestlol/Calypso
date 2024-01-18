@@ -7,34 +7,57 @@
         <h1>{{ floorData.buildingName }}</h1>
         <h2>{{ floorData.floorName }} - Level: {{ floorData.floorLevel }}</h2>
       </div>
-      <div class="rooms-grid">
-        <div v-for="room in floorData.rooms" :key="room._id" class="card">
-          <div class="card-header">
-            <h3>{{ room.room_name }}</h3>
-          </div>
-          <div class="card-body">
-            <div class="sensor-info">
-              <i class="fas fa-thermometer-half"></i>
-              <p>Temperature: {{ getAverage(room.latestTemperature) }}°C</p>
+       <!-- Tabs --> <!--Delete if unneeded later-->
+       <div class="tabs">
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <button class="nav-link active" id="all-sensors-tab" data-bs-toggle="tab" data-bs-target="#all-sensors-tab-pane" type="button" role="tab" aria-controls="all-sensors-tab-pane" aria-selected="true">Sensors</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="all-cctv-tab" data-bs-toggle="tab" data-bs-target="#all-cctv-tab-pane" type="button" role="tab" aria-controls="all-cctv-tab-pane" aria-selected="false">CCTV</button>
+          </li>
+        </ul>
+      </div>
+      <!-- Tab content --><!--Delete if unneeded later-->
+      <div class="tab-content" id="floor-tab-content">
+        <div class="tab-pane show active" id="all-sensors-tab-pane" role="tabpanel" aria-labelledby="all-sensors-tab" tabindex="0">
+          <br>
+          <!--Sensors for All Rooms-->
+          <div class="rooms-grid">
+            <div v-for="room in floorData.rooms" :key="room._id" class="card">
+              <div class="card-header">
+                <h3>{{ room.room_name }}</h3>
+              </div>
+              <div class="card-body">
+                <div class="sensor-info">
+                  <i class="fas fa-thermometer-half"></i>
+                  <p>Temperature: {{ getAverage(room.latestTemperature) }}°C</p>
+                </div>
+                <div class="sensor-info">
+                  <i class="fas fa-tint"></i>
+                  <p>Humidity: {{ getAverage(room.latestHumidity) }}%</p>
+                </div>
+                <div class="sensor-info">
+                  <i class="fas fa-users"></i>
+                  <p>Last People Count: {{ room.latestPeopleCount}}</p>
+                </div>
+              </div>
+              <div class="card-footer">
+                <router-link
+                  :to="`/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`"
+                  class="btn btn-primary">
+                  View Room Detail
+                </router-link>
+              </div>
             </div>
-            <div class="sensor-info">
-              <i class="fas fa-tint"></i>
-              <p>Humidity: {{ getAverage(room.latestHumidity) }}%</p>
-            </div>
-            <div class="sensor-info">
-              <i class="fas fa-users"></i>
-              <p>Last People Count: {{ room.latestPeopleCount}}</p>
-            </div>
-          </div>
-          <div class="card-footer">
-            <router-link
-              :to="`/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`"
-              class="btn btn-primary">
-              View Room Detail
-            </router-link>
           </div>
         </div>
+        <div class="tab-pane" id="all-cctv-tab-pane" role="tabpanel" aria-labelledby="all-cctv-tab" tabindex="0">
+            all cctv
+            <!-- Display all CCTV -->
+        </div>
       </div>
+
     </div>
   </div>
 </template>

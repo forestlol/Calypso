@@ -9,7 +9,7 @@
         <button @click="goToRoomDetail(room.id)" class="btn btn-primary mt-2">View Details</button>
       </div>
     </div>
-  </template>
+  </template> 
   
   <script>
   export default {

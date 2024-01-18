@@ -8,28 +8,72 @@
     <!-- Check if sensor data is available -->
     <div v-if="sensors.length > 0" class="room-sensors">
       <h1 class="text-center mb-4">{{ roomName }}</h1>
-
-      <!-- Display temperature and humidity sensors -->
-      <div class="row">
-        <div class="col-md-6 mb-3" v-for="sensor in sensors" :key="sensor.id">
-          <div class="card h-100">
-            <div class="card-header">
-              Sensor ID: {{ sensor.id }}
+      <!-- Tabs -->
+      <div class="tabs">
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <button class="nav-link active" id="sensors-tab" data-bs-toggle="tab" data-bs-target="#sensors-tab-pane" type="button" role="tab" aria-controls="sensors-tab-pane" aria-selected="true">Sensors</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="cctv-tab" data-bs-toggle="tab" data-bs-target="#cctv-tab-pane" type="button" role="tab" aria-controls="cctv-tab-pane" aria-selected="false">CCTV</button>
+          </li>
+        </ul>
+      </div>
+      <!-- Tab content -->
+      <div class="tab-content" id="room-tab-content">
+        <div class="tab-pane show active" id="sensors-tab-pane" role="tabpanel" aria-labelledby="sensors-tab" tabindex="0">
+          <br>  
+          <!-- Display temperature and humidity sensors -->
+            <div class="row">
+              <div class="col-md-6 mb-3" v-for="sensor in sensors" :key="sensor.id">
+                <div class="card h-100">
+                  <div class="card-header">
+                    Sensor ID: {{ sensor.id }}
+                  </div>
+                  <div class="card-body">
+                    <p v-if="sensor.type == 0" class="card-text">
+                      Activated: {{ sensor.activated ? 'Yes' : 'No' }}
+                    </p>
+                    <template v-if="sensor.type == 1">
+                      <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
+                      <p class="card-text">Humidity: {{ sensor.humidity }}%</p>
+                    </template>
+                    <p v-if="sensor.type == 2" class="card-text">
+                      People Count: {{ sensor.peopleCount }}
+                    </p>
+                  </div>
+                  <router-link :to="`/sensor/${sensor.id}`" class="btn btn-primary">View Sensor Detail</router-link>
+                </div>
+              </div>
             </div>
-            <div class="card-body">
-              <p v-if="sensor.type == 0" class="card-text">
-                Activated: {{ sensor.activated ? 'Yes' : 'No' }}
-              </p>
-              <template v-if="sensor.type == 1">
-                <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
-                <p class="card-text">Humidity: {{ sensor.humidity }}%</p>
-              </template>
-              <p v-if="sensor.type == 2" class="card-text">
-                People Count: {{ sensor.peopleCount }}
-              </p>
+        </div>
+        <!-- Display CCTV -->
+        <div class="tab-pane" id="cctv-tab-pane" role="tabpanel" aria-labelledby="cctv-tab" tabindex="0">
+          <br>
+            <!--http://(IP address):(Camera port number)-->
+            <!--Sample Video-->
+            <div class="row gx-5">
+              <div class="col-12">
+                <div>
+                  <iframe width="100%" height="370" src="https://www.youtube.com/embed/K4TOrB7at0Y?si=dp1Ha6nVGWtAhnMz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+              </div>
             </div>
-            <router-link :to="`/sensor/${sensor.id}`" class="btn btn-primary">View Sensor Detail</router-link>
-          </div>
+            <!--CCTV Controls-->
+            Camera Controls
+            <div class="row text-center">
+              <div class="col">
+                <button id="volume-button" type="button" class="btn " @click="volumeToggle"><img id="volume-button-image" class="button-image" src="../assets/volumeon.png"><br>Sound</button>
+              </div>
+              <div class="col">
+                <button id="mic-button" type="button" class="btn" @click="micToggle"><img id="mic-button-image" class="button-image" src="../assets/micon.png"><br>Mic</button>
+              </div>
+              <div class="col">
+                <button id="screenshot-button" type="button" class="btn" @click="screenshot"><img id="screenshot-button-image" class="button-image" src="../assets/capture.png"><br>Screenshot</button>
+              </div>
+            </div>
+            
+            
         </div>
       </div>
 
@@ -141,6 +185,30 @@ export default {
         this.error = err.message;
       }
     },
+    // click button to change image
+    volumeToggle() {
+      var image = document.getElementById('volume-button-image');
+      if (image.src.includes("/volumeon.png")) {
+        
+        image.src = "/src/assets/volumeoff.png";
+      } else {
+        image.src = "/src/assets/volumeon.png";
+      }
+      //add function to connect to cctv
+    },
+    micToggle() {
+      var image = document.getElementById('mic-button-image');
+      if (image.src.includes("/micon.png")) {
+        
+        image.src = "/src/assets/micoff.png";
+      } else {
+        image.src = "/src/assets/micon.png";
+      }
+      //add function to connect to cctv
+    },
+    screenshot() {
+      //add function to connect to cctv
+    },
   },
 };
 </script>
@@ -177,5 +245,9 @@ export default {
 
 .btn-secondary {
   margin-left: 10px;
+}
+.button-image {
+  width: 20px;
+  height: 20px;
 }
 </style>
