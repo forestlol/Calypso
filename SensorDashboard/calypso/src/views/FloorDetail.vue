@@ -53,7 +53,7 @@
           </div>
         </div>
         <div class="tab-pane" id="all-cctv-tab-pane" role="tabpanel" aria-labelledby="all-cctv-tab" tabindex="0">
-            cctv
+            all cctv
             <!-- Display all CCTV -->
         </div>
       </div>

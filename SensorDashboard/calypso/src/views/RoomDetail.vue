@@ -47,37 +47,33 @@
               </div>
             </div>
         </div>
+        <!-- Display CCTV -->
         <div class="tab-pane" id="cctv-tab-pane" role="tabpanel" aria-labelledby="cctv-tab" tabindex="0">
           <br>
-            <!-- Display CCTV -->
             <!--http://(IP address):(Camera port number)-->
             <!--Sample Video-->
             <div class="row gx-5">
-              <div class="col-12 col-md-6">
+              <div class="col-12">
                 <div>
-                  <iframe width="100%" height="100%" src="https://www.youtube.com/embed/K4TOrB7at0Y?si=dp1Ha6nVGWtAhnMz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                </div>
-              </div>
-              
-              <!--CCTV Controls-->
-              <div class="col-12 col-md-6">
-                Camera Controls
-                <div class="row">
-                  <div class="col-3 col-md-6">
-                    <button type="button" class="btn btn-primary"><img src="https://www.flaticon.com/free-icons/speaker">Sound</button>
-                  </div>
-                  <div class="col-3 col-md-6">
-                    <button type="button" class="btn btn-primary"><img src="">Mic</button>
-                  </div>
-                  <div class="col-3 col-md-6">
-                    <button type="button" class="btn btn-primary"><img src="">Screenshot</button>
-                  </div>
-                  <div class="col-3 col-md-6">
-                    <button type="button" class="btn btn-primary"><img src=""></button>
-                  </div>
+                  <iframe width="100%" height="370" src="https://www.youtube.com/embed/K4TOrB7at0Y?si=dp1Ha6nVGWtAhnMz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                 </div>
               </div>
             </div>
+            <!--CCTV Controls-->
+            Camera Controls
+            <div class="row text-center">
+              <div class="col">
+                <button id="volume-button" type="button" class="btn " @click="volumeToggle"><img id="volume-button-image" class="button-image" src="../assets/volumeon.png"><br>Sound</button>
+              </div>
+              <div class="col">
+                <button id="mic-button" type="button" class="btn" @click="micToggle"><img id="mic-button-image" class="button-image" src="../assets/micon.png"><br>Mic</button>
+              </div>
+              <div class="col">
+                <button id="screenshot-button" type="button" class="btn" @click="screenshot"><img id="screenshot-button-image" class="button-image" src="../assets/capture.png"><br>Screenshot</button>
+              </div>
+            </div>
+            
+            
         </div>
       </div>
 
@@ -189,6 +185,30 @@ export default {
         this.error = err.message;
       }
     },
+    // click button to change image
+    volumeToggle() {
+      var image = document.getElementById('volume-button-image');
+      if (image.src.includes("/volumeon.png")) {
+        
+        image.src = "/src/assets/volumeoff.png";
+      } else {
+        image.src = "/src/assets/volumeon.png";
+      }
+      //add function to connect to cctv
+    },
+    micToggle() {
+      var image = document.getElementById('mic-button-image');
+      if (image.src.includes("/micon.png")) {
+        
+        image.src = "/src/assets/micoff.png";
+      } else {
+        image.src = "/src/assets/micon.png";
+      }
+      //add function to connect to cctv
+    },
+    screenshot() {
+      //add function to connect to cctv
+    },
   },
 };
 </script>
@@ -225,5 +245,9 @@ export default {
 
 .btn-secondary {
   margin-left: 10px;
+}
+.button-image {
+  width: 20px;
+  height: 20px;
 }
 </style>
