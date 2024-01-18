@@ -54,11 +54,12 @@
   body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
-    background-color: #fafafa;
+    background-color: #2c323c !important;;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 300;
+    color: #3590f3;
   }
 
   h1 {
