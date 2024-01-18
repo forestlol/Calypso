@@ -158,7 +158,7 @@
             }
           });
         }
-      });
+      }); 
 
       return temperatures.length > 0
         ? (temperatures.reduce((a, b) => a + b, 0) / temperatures.length).toFixed(2)

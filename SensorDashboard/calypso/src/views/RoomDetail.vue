@@ -8,28 +8,76 @@
     <!-- Check if sensor data is available -->
     <div v-if="sensors.length > 0" class="room-sensors">
       <h1 class="text-center mb-4">{{ roomName }}</h1>
-
-      <!-- Display temperature and humidity sensors -->
-      <div class="row">
-        <div class="col-md-6 mb-3" v-for="sensor in sensors" :key="sensor.id">
-          <div class="card h-100">
-            <div class="card-header">
-              Sensor ID: {{ sensor.id }}
+      <!-- Tabs -->
+      <div class="tabs">
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <button class="nav-link active" id="sensors-tab" data-bs-toggle="tab" data-bs-target="#sensors-tab-pane" type="button" role="tab" aria-controls="sensors-tab-pane" aria-selected="true">Sensors</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="cctv-tab" data-bs-toggle="tab" data-bs-target="#cctv-tab-pane" type="button" role="tab" aria-controls="cctv-tab-pane" aria-selected="false">CCTV</button>
+          </li>
+        </ul>
+      </div>
+      <!-- Tab content -->
+      <div class="tab-content" id="room-tab-content">
+        <div class="tab-pane show active" id="sensors-tab-pane" role="tabpanel" aria-labelledby="sensors-tab" tabindex="0">
+          <br>  
+          <!-- Display temperature and humidity sensors -->
+            <div class="row">
+              <div class="col-md-6 mb-3" v-for="sensor in sensors" :key="sensor.id">
+                <div class="card h-100">
+                  <div class="card-header">
+                    Sensor ID: {{ sensor.id }}
+                  </div>
+                  <div class="card-body">
+                    <p v-if="sensor.type == 0" class="card-text">
+                      Activated: {{ sensor.activated ? 'Yes' : 'No' }}
+                    </p>
+                    <template v-if="sensor.type == 1">
+                      <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
+                      <p class="card-text">Humidity: {{ sensor.humidity }}%</p>
+                    </template>
+                    <p v-if="sensor.type == 2" class="card-text">
+                      People Count: {{ sensor.peopleCount }}
+                    </p>
+                  </div>
+                  <router-link :to="`/sensor/${sensor.id}`" class="btn btn-primary">View Sensor Detail</router-link>
+                </div>
+              </div>
             </div>
-            <div class="card-body">
-              <p v-if="sensor.type == 0" class="card-text">
-                Activated: {{ sensor.activated ? 'Yes' : 'No' }}
-              </p>
-              <template v-if="sensor.type == 1">
-                <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
-                <p class="card-text">Humidity: {{ sensor.humidity }}%</p>
-              </template>
-              <p v-if="sensor.type == 2" class="card-text">
-                People Count: {{ sensor.peopleCount }}
-              </p>
+        </div>
+        <div class="tab-pane" id="cctv-tab-pane" role="tabpanel" aria-labelledby="cctv-tab" tabindex="0">
+          <br>
+            <!-- Display CCTV -->
+            <!--http://(IP address):(Camera port number)-->
+            <!--Sample Video-->
+            <div class="row gx-5">
+              <div class="col-12 col-md-6">
+                <div>
+                  <iframe width="100%" height="100%" src="https://www.youtube.com/embed/K4TOrB7at0Y?si=dp1Ha6nVGWtAhnMz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+              </div>
+              
+              <!--CCTV Controls-->
+              <div class="col-12 col-md-6">
+                Camera Controls
+                <div class="row">
+                  <div class="col-3 col-md-6">
+                    <button type="button" class="btn btn-primary"><img src="https://www.flaticon.com/free-icons/speaker">Sound</button>
+                  </div>
+                  <div class="col-3 col-md-6">
+                    <button type="button" class="btn btn-primary"><img src="">Mic</button>
+                  </div>
+                  <div class="col-3 col-md-6">
+                    <button type="button" class="btn btn-primary"><img src="">Screenshot</button>
+                  </div>
+                  <div class="col-3 col-md-6">
+                    <button type="button" class="btn btn-primary"><img src=""></button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <router-link :to="`/sensor/${sensor.id}`" class="btn btn-primary">View Sensor Detail</router-link>
-          </div>
         </div>
       </div>
 
