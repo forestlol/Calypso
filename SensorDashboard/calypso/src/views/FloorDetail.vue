@@ -286,6 +286,14 @@ export default {
   background-color: #004494;
 }
 
+.nav-link{
+  color: rgb(150, 150, 150) !important;
+}
+
+.nav-link:focus, .nav-link:hover {
+    color: #000000 !important; /*changes the color of the text when hovered */
+}
+
 @media (max-width: 768px) {
   .rooms-grid {
     grid-template-columns: 1fr;
