@@ -230,7 +230,7 @@ body {
 h1.display-4, h3.display-4 {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #3590f3;
+  color: #3590f3 !important;
 }
 
 .form-select.bg-secondary {

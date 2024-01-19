@@ -55,6 +55,7 @@
     font-family: 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
     background-color: #2c323c !important;;
+    color: rgb(216, 216, 216) !important;;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -65,6 +66,15 @@
   h1 {
     font-size: 2.5em;
     margin-bottom: 0.5em;
+    color: rgb(216, 216, 216) !important;;
+  }
+
+  h2{
+    color: rgb(150, 150, 150) !important;;
+  }
+
+  h3 {
+    color: rgb(216, 216, 216) !important;;
   }
 
   h5 {

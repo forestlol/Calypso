@@ -4,10 +4,10 @@
     <div v-if="error">
       <p>Error: {{ error }}</p>
     </div>
-
+    <h1 class="text-center mb-4">{{ roomName }}</h1>
     <!-- Check if sensor data is available -->
     <div v-if="sensors.length > 0" class="room-sensors">
-      <h1 class="text-center mb-4">{{ roomName }}</h1>
+      <!-- <h1 class="text-center mb-4">{{ roomName }}</h1> -->
       <!-- Tabs -->
       <div class="tabs">
         <ul class="nav nav-tabs">

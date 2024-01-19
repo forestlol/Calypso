@@ -7,7 +7,7 @@
         <h1>{{ floorData.buildingName }}</h1>
         <h2>{{ floorData.floorName }} - Level: {{ floorData.floorLevel }}</h2>
       </div>
-       <!-- Tabs --> <!--Delete if unneeded later-->
+       <!-- Tabs -->
        <div class="tabs">
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -18,7 +18,7 @@
           </li>
         </ul>
       </div>
-      <!-- Tab content --><!--Delete if unneeded later-->
+      <!-- Tab content -->
       <div class="tab-content" id="floor-tab-content">
         <div class="tab-pane show active" id="all-sensors-tab-pane" role="tabpanel" aria-labelledby="all-sensors-tab" tabindex="0">
           <br>
@@ -26,7 +26,7 @@
           <div class="rooms-grid">
             <div v-for="room in floorData.rooms" :key="room._id" class="card">
               <div class="card-header">
-                <h3>{{ room.room_name }}</h3>
+                <h3 class="room-card-header">{{ room.room_name }}</h3>
               </div>
               <div class="card-body">
                 <div class="sensor-info">
@@ -248,7 +248,9 @@ export default {
   padding: 15px;
   font-size: 1.2em;
 }
-
+.room-card-header{
+  color: #212529 !important;
+}
 .card-body {
   padding: 20px;
   text-align: left;
