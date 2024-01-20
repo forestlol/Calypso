@@ -7,9 +7,9 @@
         <h1>{{ floorData.buildingName }}</h1>
         <h2>{{ floorData.floorName }} - Level: {{ floorData.floorLevel }}</h2>
       </div>
-       <!-- Tabs --> <!--Delete if unneeded later-->
+       <!-- Tabs -->
        <div class="tabs">
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item">
             <button class="nav-link active" id="all-sensors-tab" data-bs-toggle="tab" data-bs-target="#all-sensors-tab-pane" type="button" role="tab" aria-controls="all-sensors-tab-pane" aria-selected="true">Sensors</button>
           </li>
@@ -18,7 +18,7 @@
           </li>
         </ul>
       </div>
-      <!-- Tab content --><!--Delete if unneeded later-->
+      <!-- Tab content -->
       <div class="tab-content" id="floor-tab-content">
         <div class="tab-pane show active" id="all-sensors-tab-pane" role="tabpanel" aria-labelledby="all-sensors-tab" tabindex="0">
           <br>
@@ -26,7 +26,7 @@
           <div class="rooms-grid">
             <div v-for="room in floorData.rooms" :key="room._id" class="card">
               <div class="card-header">
-                <h3>{{ room.room_name }}</h3>
+                <h3 class="room-card-header">{{ room.room_name }}</h3>
               </div>
               <div class="card-body">
                 <div class="sensor-info">
@@ -43,18 +43,37 @@
                 </div>
               </div>
               <div class="card-footer">
-                <router-link
-                  :to="`/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`"
-                  class="btn btn-primary">
-                  View Room Detail
-                </router-link>
-              </div>
+                  <router-link
+                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'sensors' } }"
+                    class="btn btn-primary">
+                    View Room Details
+                  </router-link>
+                </div>
             </div>
           </div>
         </div>
         <div class="tab-pane" id="all-cctv-tab-pane" role="tabpanel" aria-labelledby="all-cctv-tab" tabindex="0">
-            all cctv
             <!-- Display all CCTV -->
+            <div class="rooms-grid">
+              <div v-for="room in floorData.rooms" :key="room._id" class="card">
+                <div class="card-header">
+                  <h3 class="room-card-header">{{ room.room_name }}</h3>
+                </div>
+                <div class="card-body">
+                  CCTV 
+                  <!-- v-for="room in floorData.rooms" :key="room._cctv" -->
+                  <!--<iframe src="" ></iframe>-->
+                  <iframe></iframe>
+                </div>
+                <div class="card-footer">
+                  <router-link
+                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'cctv' } }"
+                    class="btn btn-primary">
+                    View Room CCTV
+                  </router-link>
+                </div>
+              </div>
+          </div>
         </div>
       </div>
 
@@ -69,6 +88,7 @@ export default {
     return {
       floorData: null,
       sensorData: {},
+      query: null,
       loading: false,
       error: null
     };
@@ -83,6 +103,9 @@ export default {
           this.integrateSensorData();
         }
       }
+      this.$nextTick(() => {
+        this.activateTabBasedOnQueryParam();
+      });
     } catch (err) {
       console.error(err);
       this.error = err.message;
@@ -94,6 +117,39 @@ export default {
     getAverage(value) {
       return typeof value === 'number' ? value.toFixed(2) : value;
     },
+    activateTabBasedOnQueryParam(){
+      this.query = this.$route.query.tab;
+      if (this.query != null) {
+          this.resetTabs();
+        if (this.query === 'allsensors') {
+          this.activateTab('all-sensors');
+        } else if (this.query === 'allcctv') {
+          this.activateTab('all-cctv');
+        }
+      }
+      
+    },
+    resetTabs() {
+      const sensorsTab = document.getElementById('all-sensors-tab');
+      const cctvTab = document.getElementById('all-cctv-tab');
+      const sensorsTabPane = document.getElementById('all-sensors-tab-pane');
+      const cctvTabPane = document.getElementById('all-cctv-tab-pane');
+
+      sensorsTab.classList.remove('active');
+      cctvTab.classList.remove('active');
+      sensorsTabPane.classList.remove('show', 'active');
+      cctvTabPane.classList.remove('show', 'active');
+    },
+    activateTab(tabName) {
+      const tab = document.getElementById(`${tabName}-tab`);
+      const tabPane = document.getElementById(`${tabName}-tab-pane`);
+
+      if (tab && tabPane) {
+        tab.classList.add('active');
+        tabPane.classList.add('show', 'active');
+      }
+    },
+    
     async fetchFloorData() {
       const buildingName = this.$route.params.buildingId;
       const floorName = decodeURIComponent(this.$route.params.floorName);
@@ -248,7 +304,9 @@ export default {
   padding: 15px;
   font-size: 1.2em;
 }
-
+.room-card-header{
+  color: #212529 !important;
+}
 .card-body {
   padding: 20px;
   text-align: left;
@@ -282,6 +340,14 @@ export default {
 
 .btn-primary:hover {
   background-color: #004494;
+}
+
+.nav-link{
+  color: rgb(150, 150, 150) !important;
+}
+
+.nav-link:focus, .nav-link:hover {
+    color: #000000 !important; /*changes the color of the text when hovered */
 }
 
 @media (max-width: 768px) {

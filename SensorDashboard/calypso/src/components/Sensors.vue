@@ -230,7 +230,7 @@
   /* Base styles */
   .container {
       font-family: 'Arial', sans-serif;
-      color: #333;
+      color: rgb(216, 216, 216);
   }
 
   h1, h3 {
