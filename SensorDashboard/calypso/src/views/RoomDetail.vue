@@ -15,7 +15,7 @@
             <button class="nav-link active" id="sensors-tab" data-bs-toggle="tab" data-bs-target="#sensors-tab-pane"
               type="button" role="tab" aria-controls="sensors-tab-pane" aria-selected="true">Sensors</button>
           </li>
-          <li class="nav-item" id="nav-tester1">
+          <li class="nav-item">
             <button class="nav-link" id="cctv-tab" data-bs-toggle="tab" data-bs-target="#cctv-tab-pane" type="button"
               role="tab" aria-controls="cctv-tab-pane" aria-selected="false">CCTV</button>
           </li>
