@@ -46,7 +46,7 @@
                   <router-link
                     :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'sensors' } }"
                     class="btn btn-primary">
-                    View Room CCTV
+                    View Room Details
                   </router-link>
                 </div>
             </div>
@@ -88,6 +88,7 @@ export default {
     return {
       floorData: null,
       sensorData: {},
+      query: null,
       loading: false,
       error: null
     };
@@ -102,6 +103,9 @@ export default {
           this.integrateSensorData();
         }
       }
+      this.$nextTick(() => {
+        this.activateTabBasedOnQueryParam();
+      });
     } catch (err) {
       console.error(err);
       this.error = err.message;
@@ -113,6 +117,39 @@ export default {
     getAverage(value) {
       return typeof value === 'number' ? value.toFixed(2) : value;
     },
+    activateTabBasedOnQueryParam(){
+      this.query = this.$route.query.tab;
+      if (this.query != null) {
+          this.resetTabs();
+        if (this.query === 'allsensors') {
+          this.activateTab('all-sensors');
+        } else if (this.query === 'allcctv') {
+          this.activateTab('all-cctv');
+        }
+      }
+      
+    },
+    resetTabs() {
+      const sensorsTab = document.getElementById('all-sensors-tab');
+      const cctvTab = document.getElementById('all-cctv-tab');
+      const sensorsTabPane = document.getElementById('all-sensors-tab-pane');
+      const cctvTabPane = document.getElementById('all-cctv-tab-pane');
+
+      sensorsTab.classList.remove('active');
+      cctvTab.classList.remove('active');
+      sensorsTabPane.classList.remove('show', 'active');
+      cctvTabPane.classList.remove('show', 'active');
+    },
+    activateTab(tabName) {
+      const tab = document.getElementById(`${tabName}-tab`);
+      const tabPane = document.getElementById(`${tabName}-tab-pane`);
+
+      if (tab && tabPane) {
+        tab.classList.add('active');
+        tabPane.classList.add('show', 'active');
+      }
+    },
+    
     async fetchFloorData() {
       const buildingName = this.$route.params.buildingId;
       const floorName = decodeURIComponent(this.$route.params.floorName);

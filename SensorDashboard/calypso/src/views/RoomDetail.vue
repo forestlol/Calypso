@@ -49,6 +49,11 @@
               </div>
             </div>
           </div>
+          <div class="text-center mt-4">
+            <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
+            
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allsensors' } }" class="btn btn-secondary">Back to Floor</router-link>
+          </div>
         </div>
         <!-- Display CCTV -->
         <div class="tab-pane" id="cctv-tab-pane" role="tabpanel" aria-labelledby="cctv-tab" tabindex="0">
@@ -81,14 +86,14 @@
                   id="screenshot-button-image" class="button-image" src="../assets/capture.png"><br>Screenshot</button>
             </div>
           </div>
+          <div class="text-center mt-4">
+            <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
+            
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allcctv' } }" class="btn btn-secondary">Back to All CCTV</router-link>
+          </div>
 
 
         </div>
-      </div>
-
-      <div class="text-center mt-4">
-        <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
-        <router-link :to="`/building/${buildingName}/${floorName}`" class="btn btn-secondary">Back to Floor</router-link>
       </div>
     </div>
 
@@ -137,12 +142,15 @@ export default {
       this.query = this.$route.query.tab;
     },
     activateTabBasedOnQueryParam() {
-      this.resetTabs();
-      if (this.query === 'sensors') {
-        this.activateTab('sensors');
-      } else if (this.query === 'cctv') {
-        this.activateTab('cctv');
+      if (!this.query != null){
+        this.resetTabs();
+        if (this.query === 'sensors') {
+          this.activateTab('sensors');
+        } else if (this.query === 'cctv') {
+          this.activateTab('cctv');
+        }
       }
+      
     },
     resetTabs() {
       const sensorsTab = document.getElementById('sensors-tab');
