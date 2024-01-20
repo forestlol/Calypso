@@ -43,12 +43,12 @@
                 </div>
               </div>
               <div class="card-footer">
-                <router-link
-                  :to="`/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`"
-                  class="btn btn-primary">
-                  View Room Detail
-                </router-link>
-              </div>
+                  <router-link
+                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'sensors' } }"
+                    class="btn btn-primary">
+                    View Room CCTV
+                  </router-link>
+                </div>
             </div>
           </div>
         </div>
@@ -67,7 +67,7 @@
                 </div>
                 <div class="card-footer">
                   <router-link
-                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { activeTab: 'cctv' } }"
+                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'cctv' } }"
                     class="btn btn-primary">
                     View Room CCTV
                   </router-link>
