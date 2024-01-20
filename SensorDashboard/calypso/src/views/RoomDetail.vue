@@ -14,7 +14,7 @@
           <li class="nav-item">
             <button class="nav-link active" id="sensors-tab" data-bs-toggle="tab" data-bs-target="#sensors-tab-pane" type="button" role="tab" aria-controls="sensors-tab-pane" aria-selected="true">Sensors</button>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" id="nav-tester1">
             <button class="nav-link" id="cctv-tab" data-bs-toggle="tab" data-bs-target="#cctv-tab-pane" type="button" role="tab" aria-controls="cctv-tab-pane" aria-selected="false">CCTV</button>
           </li>
         </ul>
@@ -133,11 +133,11 @@ export default {
         // Use Bootstrap's JavaScript API to activate the "cctv-tab"
         const cctvTab = document.getElementById('cctv-tab');
         if (cctvTab) {
-          cctvTab.setAttribute('data-bs-toggle', 'tab');
-          cctvTab.click();
+          new bootstrap.Tab(cctvTab).show();
         }
         else {
           console.error('Failed to find cctv-tab');
+          //its not working!!!!!
         }
       }
     },
