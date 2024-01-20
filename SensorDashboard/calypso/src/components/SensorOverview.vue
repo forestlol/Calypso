@@ -11,13 +11,13 @@
       </select>
     </div>
     <div class="col-lg-6">
-      <h3 v-if="selectedBuilding" class="display-4 text-center">{{selectedBuilding}} Sensors Overview</h3>
-      <h3 v-else class="display-4 text-center">Sensors Overview</h3>
+      <h3 v-if="selectedBuilding" class="display-4 text-center">{{selectedBuilding}} <br> Overview</h3>
+      <h3 v-else class="display-4 text-center">Overview</h3>
     </div>
   </div>
 
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-3">
       <div class="card-group">
         <div class="card mb-4 text-center bg-secondary">
           <h5 class="card-header">Average Temperature</h5>
@@ -42,25 +42,57 @@
       </div>
     </div>
 
-    <div class="col-md-6">
-      <div class="pie-chart-container">
-        <h3 class="chart-title text-center mb-3">Recent Active Sensor Types</h3>
-        <pie-chart :data="sensorPieChartData" :options="pieChartOptions"></pie-chart>
+      <div class="col-md-9">
+        <div class="row">
+          <div class="col-lg-6 col-md-12">
+            <div class="col-lg-12 col-md-12">
+              <div class="card text-center mb-4" :class="{'bg-danger': isPanicAlert, 'bg-secondary': !isPanicAlert}">
+                <div class="card-header">
+                  Panic Alert
+                </div>
+                <div class="card-body">
+                  <p class="card-text display-6">
+                    {{ panicMessage }}
+                  </p>
+                  <!-- Only show the button if there is a panic alert -->
+                  <router-link v-if="isPanicAlert" to="/sensors" class="btn btn-primary">
+                    Check Sensors
+                  </router-link>
+                </div>
+              </div>
+            </div>
+            <div class="pie-chart-container">
+              <h3 class="chart-title text-center mb-3">Recent Active Sensor Types</h3>
+              <pie-chart :data="sensorPieChartData" :options="pieChartOptions"></pie-chart>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6">
+            <div class="line-charts-column">
+              <h3 class="mb-3 text-center">Temperature Charts</h3>
+              <div v-for="hours in [1, 3, 8, 12, 24]" :key="`line-chart-container-${hours}h`">
+                <div class="line-chart-container">
+                  <canvas :id="`canvas${hours}h`"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
     </div>
+    
   </div>
 
-  </div>
 </template>
   
 <script>
-  import { Pie } from 'vue-chartjs';
+  import { Chart, registerables } from 'chart.js';
+  Chart.register(...registerables);
+
   export default {
-    extends: Pie,
     props: ['data', 'options'],
     data() {
       return {
-        chartData: null,
         pieChartOptions: {
           responsive: true,
           maintainAspectRatio: false, // Add this to maintain aspect ratio
@@ -73,7 +105,13 @@
           // Define color of the pie sections
           backgroundColor: ['#3590f3', '#5d91c9', '#004fa3'],
         },
+        lineChartOptions: {
+          responsive: true,
+          maintainAspectRatio: true,
+          aspectRatio: 3,
+        },
         buildings: [],
+        panicAlertMessage: '',
         selectedBuilding: '',
         loading: false,
         error: null,
@@ -101,8 +139,14 @@
         console.error("Error fetching sensors:", error);
       }
     },
+    mounted() {
+      this.$nextTick(() => {
+        [1, 3, 8, 12, 24].forEach(hours => {
+          this.createLineChart(hours);
+        });
+      });
+    },
     methods: {
-      
       async fetchBuildings() {
         this.loading = true;
         try {
@@ -129,14 +173,51 @@
           this.loading = false;
         }
       },
-        formatDate(date) {
-            const year = date.getUTCFullYear();
-            const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based in JavaScript
-            const day = String(date.getUTCDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
+      formatDate(date) {
+          const year = date.getUTCFullYear();
+          const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based in JavaScript
+          const day = String(date.getUTCDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+      },
+      createLineChart(hours) {
+        this.$nextTick(() => {
+          const canvasId = `canvas${hours}h`;
+          const canvasElement = document.getElementById(canvasId);
+
+          if (canvasElement && canvasElement.getContext) {
+            const ctx = canvasElement.getContext('2d');
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: [...Array(hours).keys()].map(num => `${num}h`),
+                datasets: [{
+                  label: `${hours} Hour Temperature`,
+                  data: [...Array(hours)].map(() => Math.random() * (30 - 20) + 20),
+                  fill: false,
+                  borderColor: 'rgb(75, 192, 192)',
+                  tension: 0.1
+                }]
+              },
+              options: this.lineChartOptions
+            });
+          }
+          else {
+            console.error(`Canvas or getContext not available for '${canvasId}'`);
+          }
+        });
+      }
     },
     computed: {
+      isPanicAlert() {
+        const sensors = {};
+        Object.keys(this.sensorTypes).forEach(type => {
+          sensors[this.sensorTypes[type]] = Object.values(this.sensors).filter(sensor => sensor[0].type == type).length;
+        });
+        return sensors['Panic'] > 0;
+      },
+      panicMessage() {
+        return this.isPanicAlert ? 'Panic detected!' : 'No emergency detected.';
+      },
       sensorBarChartData() {
         const data = {};
         Object.keys(this.sensorTypes).forEach(type => {
@@ -168,44 +249,44 @@
         return temperatures.length > 0
           ? (temperatures.reduce((a, b) => a + b, 0) / temperatures.length).toFixed(2)
           : "No data";
-    },
-    averageHumidity() {
-      const humidities = [];
-      const today = this.formatDate(new Date());
+      },
+      averageHumidity() {
+        const humidities = [];
+        const today = this.formatDate(new Date());
 
-      Object.values(this.sensors).forEach(sensor => {
-        if (sensor[0].type == 1) { // 1 is for Temperature
-          sensor.forEach(data => {
-            if (this.formatDate(new Date(data.time)) === today) {
-              humidities.push(parseFloat(data.data.split(',')[1]));
-            }
-          });
-        }
-      });
+        Object.values(this.sensors).forEach(sensor => {
+          if (sensor[0].type == 1) { // 1 is for Temperature
+            sensor.forEach(data => {
+              if (this.formatDate(new Date(data.time)) === today) {
+                humidities.push(parseFloat(data.data.split(',')[1]));
+              }
+            });
+          }
+        });
 
-      return humidities.length > 0
-        ? (humidities.reduce((a, b) => a + b, 0) / humidities.length).toFixed(2)
-        : "No data";
-    },
-    totalPeople() {
-      let total = 0;
-      const today = this.formatDate(new Date());
+        return humidities.length > 0
+          ? (humidities.reduce((a, b) => a + b, 0) / humidities.length).toFixed(2)
+          : "No data";
+      },
+      totalPeople() {
+        let total = 0;
+        const today = this.formatDate(new Date());
 
-      Object.values(this.sensors).forEach(sensor => {
-        if (sensor[0].type == 2) { // 2 is for People Counter
-          sensor.forEach(data => {
-            if (data.time.split("T")[0] === today) {
-              total += parseInt(data.data);
-            }
-          });
-        }
-      });
+        Object.values(this.sensors).forEach(sensor => {
+          if (sensor[0].type == 2) { // 2 is for People Counter
+            sensor.forEach(data => {
+              if (data.time.split("T")[0] === today) {
+                total += parseInt(data.data);
+              }
+            });
+          }
+        });
 
-      return total;
-     }
+        return total;
+      },
     }
   }
-  </script>
+</script>
 
 <style scoped>
 
@@ -221,7 +302,7 @@ body {
 
 /* Container */
 .container {
-  max-width: 1200px;
+  max-width: 1600px;
   padding: 20px 40px; /* top and bottom padding of 20px, left and right padding of 40px */
   margin: auto;
 }
@@ -245,7 +326,7 @@ h1.display-4, h3.display-4 {
 
 /* Cards */
 .card {
-  min-width: 80%;
+  min-width: 100%;
   display: flex; /* Make the card a flex container */
   flex-direction: column; /* Stack children vertically */
   margin-bottom: 20px;
@@ -290,12 +371,17 @@ h1.display-4, h3.display-4 {
   display: flex; /* Align the text in the center */
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
 
 .card-text {
   font-size: 1.25rem;
   /* margin: 0; */
   color: #fbffff;
+}
+
+.card-header, .card-text, h1.display-4, h3.display-4 {
+  font-family: 'Roboto', sans-serif; /* Apply the font only to these classes and elements */
 }
 
 /* Charts */
@@ -311,6 +397,16 @@ pie-chart {
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   padding: 2rem;
+}
+
+.line-chart-container {
+    width: 100%;
+    height: 200px; 
+  }
+
+.bg-danger {
+  background-color: #dc3545; /* Bootstrap's default danger color */
+  color: white; /* Text color for better contrast */
 }
 
 .chart-container h3 {
@@ -346,11 +442,19 @@ pie-chart {
     padding: 10px; /* Less padding on smaller screens */
   }
 
+  .card
+  {
+    max-width: 100%;
+  }
   .card-group .card {
     margin-bottom: 1rem;
   }
 
   .card-group {
+    flex-direction: column;
+  }
+
+  .line-chart-container {
     flex-direction: column;
   }
 }
