@@ -97,6 +97,7 @@ export default {
       roomName: null, // Extracted from URL
       buildingName: null, // Extracted from URL
       floorName: null, // Extracted from URL
+      query: null, // Extracted from URL
       sensors: [], // Sensors data for the room
       loading: false,
       error: null,
@@ -125,6 +126,20 @@ export default {
       this.buildingName = decodeURIComponent(segments[1]);
       this.floorName = decodeURIComponent(segments[2]);
       this.roomName = decodeURIComponent(segments[3]);
+      // set the active tab to cctv if redirected from a cctv
+      this.query = this.$route.query.activeTab;
+      // Check if the query parameter is set to 'cctv'
+      if (this.query == 'cctv') {
+        // Use Bootstrap's JavaScript API to activate the "cctv-tab"
+        const cctvTab = document.getElementById('cctv-tab');
+        if (cctvTab) {
+          cctvTab.setAttribute('data-bs-toggle', 'tab');
+          cctvTab.click();
+        }
+        else {
+          console.error('Failed to find cctv-tab');
+        }
+      }
     },
     async fetchRoomSensors() {
       try {

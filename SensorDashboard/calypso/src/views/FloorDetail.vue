@@ -9,7 +9,7 @@
       </div>
        <!-- Tabs -->
        <div class="tabs">
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item">
             <button class="nav-link active" id="all-sensors-tab" data-bs-toggle="tab" data-bs-target="#all-sensors-tab-pane" type="button" role="tab" aria-controls="all-sensors-tab-pane" aria-selected="true">Sensors</button>
           </li>
@@ -53,8 +53,27 @@
           </div>
         </div>
         <div class="tab-pane" id="all-cctv-tab-pane" role="tabpanel" aria-labelledby="all-cctv-tab" tabindex="0">
-            all cctv
             <!-- Display all CCTV -->
+            <div class="rooms-grid">
+              <div v-for="room in floorData.rooms" :key="room._id" class="card">
+                <div class="card-header">
+                  <h3 class="room-card-header">{{ room.room_name }}</h3>
+                </div>
+                <div class="card-body">
+                  CCTV 
+                  <!-- v-for="room in floorData.rooms" :key="room._cctv" -->
+                  <!--<iframe src="" ></iframe>-->
+                  <iframe></iframe>
+                </div>
+                <div class="card-footer">
+                  <router-link
+                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { activeTab: 'cctv' } }"
+                    class="btn btn-primary">
+                    View Room CCTV
+                  </router-link>
+                </div>
+              </div>
+          </div>
         </div>
       </div>
 
