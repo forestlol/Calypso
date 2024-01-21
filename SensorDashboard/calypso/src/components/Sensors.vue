@@ -26,11 +26,13 @@
       <div class="col-md-4" v-for="deviceName in deviceGroup" :key="deviceName" >
         <router-link v-if="sensors[deviceName][0].type !== 0" :to="{ name: 'sensor-details', params: { id: deviceName }}" custom v-slot="{ href, navigate }">
           <div class="card mb-4 shadow" @click="navigate" style="cursor: pointer;">
-              <div class="card-header bg-primary text-white">
+              <div class="card-header" :class="getCardHeaderClass(deviceName)">
+                <div class="status-indicator" :class="{ 'active': isActive(deviceName), 'inactive': !isActive(deviceName) }"></div>
                 {{ deviceName }}
               </div>
               <div class="card-body">
-                <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>
+                <!-- <span class="status-text">{{ isActive(deviceName) ? 'Active' : 'Inactive' }}</span> -->
+                <!-- <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>-->
                 <!-- Check if type is Temperature -->
                 <div v-if="sensors[deviceName][0].type == 1">
                   <p class="card-text">Temperature: {{ parseFloat(getLastReading(deviceName).split(',')[0]).toFixed(2) }}°C</p>
@@ -38,8 +40,9 @@
                 </div>
                 <!-- Otherwise, display data as it is -->
                 <div v-else>
-                  <p class="card-text">{{ getLastReading(deviceName) }}</p>
+                  <p class="card-text">Current people count: {{ getLastReading(deviceName) }}</p>
                 </div>
+                <p></p>
                 <p class="card-text">
                   <small>Last updated: <span class="text-muted">{{  formatDate(sensors[deviceName][sensors[deviceName].length - 1].time) }}</span></small>
                 </p>
@@ -54,11 +57,11 @@
             </div>
             <div class="card-body">
                 <p v-if="isAcknowledged(deviceName)" class="text-success">Alert acknowledged!</p>
-                <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>
+                <!--<h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5> -->
                 <!-- Otherwise, display data as it is -->
                 <div>
                   <div v-if="sensors[deviceName][0].type == 0" class="card-text">
-                    <p>Status: <span v-if="getLastReading(deviceName) == '1'">Alert</span><span v-else>Acknowledged</span></p>
+                    <p><span v-if="getLastReading(deviceName) == '1'">Incident Alert!</span><span v-else>Acknowledged</span></p>
                     <button v-if="getLastReading(deviceName) == '1'" @click="acknowledgePanic(deviceName)" class="btn btn-danger" :disabled="isAcknowledged(deviceName)">Acknowledge</button>
                   </div>
                 </div>
@@ -113,6 +116,15 @@
           2: 'People Counter'
         };
         return types[type] || 'Unknown';
+      },
+      getCardHeaderClass(deviceName) {
+        const sensorType = this.sensors[deviceName][0].type;
+        switch (sensorType) {
+          case 0: return 'card-header-panic';
+          case 1: return 'card-header-temperature';
+          case 2: return 'card-header-people-counter';
+          default: return '';
+        }
       },
       getLastReading(deviceName) {
       // Assuming the last reading is at the last index (latest timestamp)
@@ -180,7 +192,22 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      }
+      },
+      isActive(deviceName) {
+        if (!this.sensors[deviceName] || this.sensors[deviceName].length === 0) {
+          return false; 
+        }
+
+        const lastSensorData = this.sensors[deviceName][this.sensors[deviceName].length - 1];
+        if (!lastSensorData || !lastSensorData.time) {
+          return false; 
+        }
+
+        const lastUpdateTime = new Date(lastSensorData.time);
+        const currentTime = new Date();
+        const timeDifference = currentTime.getTime() - lastUpdateTime.getTime(); // time difference in milliseconds
+        return timeDifference < 15 * 60 * 1000; // 15 minutes in milliseconds
+      },
     },
     computed: {
       filteredDeviceNames() {
@@ -209,19 +236,17 @@
         return filteredNames;
       },
       groupedAndOrderedDeviceNames() {
-            const grouped = {};
+          const grouped = {};
 
-            this.filteredDeviceNames.forEach(deviceName => {
-                const type = this.sensors[deviceName][0].type;
-                if (!grouped[type]) {
-                    grouped[type] = [];
-                } 
-                grouped[type].push(deviceName);
-            });
-
-            return grouped;
-        },
-        
+          this.filteredDeviceNames.forEach(deviceName => {
+              const type = this.sensors[deviceName][0].type;
+              if (!grouped[type]) {
+                  grouped[type] = [];
+              } 
+              grouped[type].push(deviceName);
+        });
+          return grouped;
+      },
     },
   };
 </script>
@@ -249,37 +274,48 @@
 
   /* Card styles */
   .card {
-      border: none;
-      background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
-      transition: transform 0.3s, box-shadow 0.3s;
-      border-radius: 10px;
+    border: none;
+    background: #f8f9fa;
+    color: #333;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   }
 
   .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
   }
 
-  .card-header {
-      border-radius: 10px 10px 0 0;
-      font-weight: 600;
+  .card-header-temperature  {
+    background-color: #e67e22 !important; 
+    color: #fff;
+    border-radius: 10px 10px 0 0;
+    font-weight: bold;
   }
+
+  .card-header-people-counter {
+    background-color: #4682B4 !important;
+    color: #fff;
+    border-radius: 10px 10px 0 0;
+    font-weight: bold;
+}
 
   .card-body {
-      padding: 1.25rem;
+    padding: 1.25rem;
   }
 
   /* Dropdown and Search styles */
   .form-control {
-      border-radius: 20px;
-      border: 1px solid #ced4da;
-      transition: border-color 0.3s, box-shadow 0.3s;
+    border-radius: 20px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
 
   .form-control:focus {
-      border-color: #007BFF;
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+    border-color: #007BFF;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
   }
 
   .panic-card {
@@ -290,10 +326,10 @@
   }
 
   .panic-card .card-header {
-      background-color: #FF6666; /* Darker red background for header */
-      color: #ffffff; /* White text */
-      font-weight: bold; /* Bold text */
-      font-size: 1.25rem; /* Larger font size */
+    background-color: #FF6666 !important; /* Darker red background for header */
+    color: #ffffff; /* White text */
+    font-weight: bold; /* Bold text */
+    font-size: 1.25rem; /* Larger font size */
     }
 
   .panic-card .card-body {
@@ -330,6 +366,26 @@
       transform: scale(1);
       box-shadow: 0 4px 8px rgba(255, 51, 51, 0.2);
     }
+  }
+
+  .status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+
+  .status-indicator.active {
+    background-color: green;
+  }
+
+  .status-indicator.inactive {
+    background-color: red;
+  }
+
+  .status-text {
+    vertical-align: middle;
   }
 
 
