@@ -48,11 +48,28 @@
                 <router-link :to="`/sensor/${sensor.id}`" class="btn btn-primary">View Sensor Detail</router-link>
               </div>
             </div>
+
+            <!-- Consumption Charts Section -->
+            <div class="row mt-4">
+              <div class="col-12 col-md-6">
+                <h2 class="text-center">Water Consumption Data</h2>
+                <div class="chart-container">
+                  <canvas id="waterConsumptionChart"></canvas>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <h2 class="text-center">Electrical Consumption Data</h2>
+                <div class="chart-container">
+                  <canvas id="electricalConsumptionChart"></canvas>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="text-center mt-4">
             <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
-            
-            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allsensors' } }" class="btn btn-secondary">Back to Floor</router-link>
+
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allsensors' } }"
+              class="btn btn-secondary">Back to Floor</router-link>
           </div>
         </div>
         <!-- Display CCTV -->
@@ -88,8 +105,9 @@
           </div>
           <div class="text-center mt-4">
             <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
-            
-            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allcctv' } }" class="btn btn-secondary">Back to All CCTV</router-link>
+
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allcctv' } }"
+              class="btn btn-secondary">Back to All CCTV</router-link>
           </div>
 
 
@@ -105,6 +123,9 @@
 </template>
 
 <script>
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
+
 export default {
   data() {
     return {
@@ -115,22 +136,22 @@ export default {
       sensors: [], // Sensors data for the room
       loading: false,
       error: null,
+      waterConsumptionData: [], // Placeholder for water consumption data
+      electricalConsumptionData: [], // Placeholder for electrical consumption data
     };
   },
   async mounted() {
-    this.loading = true;
-    try {
-      this.parseUrlParams();
-      await this.fetchRoomSensors();
+    this.parseUrlParams();
+    this.fetchRoomSensors().then(() => {
       this.$nextTick(() => {
         this.activateTabBasedOnQueryParam();
+        this.initWaterConsumptionChart();
+        this.initElectricalConsumptionChart();
       });
-    } catch (err) {
+    }).catch((err) => {
       console.error(err);
       this.error = err.message;
-    } finally {
-      this.loading = false;
-    }
+    });
   },
   methods: {
     parseUrlParams() {
@@ -142,7 +163,7 @@ export default {
       this.query = this.$route.query.tab;
     },
     activateTabBasedOnQueryParam() {
-      if (!this.query != null){
+      if (!this.query != null) {
         this.resetTabs();
         if (this.query === 'sensors') {
           this.activateTab('sensors');
@@ -150,7 +171,7 @@ export default {
           this.activateTab('cctv');
         }
       }
-      
+
     },
     resetTabs() {
       const sensorsTab = document.getElementById('sensors-tab');
@@ -237,6 +258,76 @@ export default {
     screenshot() {
       // Functionality to be implemented
     },
+    generateLast24HoursLabels() {
+      const labels = [];
+      const currentHour = new Date().getHours(); // Get the current hour
+
+      for (let i = 0; i < 24; i++) {
+        labels.push(`${(currentHour - i + 24) % 24}:00`); // Format hours in 24-hour format
+      }
+
+      return labels.reverse(); // Reverse to get the labels in chronological order
+    },
+    WaterConsumptionData() {
+      // Static fake data for 24 hours
+      return [
+        20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35,
+        40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21
+      ];
+    },
+    ElectricalConsumptionData() {
+      // Static fake data for 24 hours
+      return [
+        40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21,
+        20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35
+      ];
+    },
+    initWaterConsumptionChart() {
+      const ctxWater = document.getElementById('waterConsumptionChart').getContext('2d');
+      new Chart(ctxWater, {
+        type: 'line',
+        data: {
+          labels: this.generateLast24HoursLabels(),
+          datasets: [{
+            label: 'Water Consumption (Liters)',
+            data: this.WaterConsumptionData(), // Use static fake data
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    },
+    initElectricalConsumptionChart() {
+      const ctxElectric = document.getElementById('electricalConsumptionChart').getContext('2d');
+      new Chart(ctxElectric, {
+        type: 'line',
+        data: {
+          labels: this.generateLast24HoursLabels(),
+          datasets: [{
+            label: 'Electrical Consumption (kWh)',
+            data: this.ElectricalConsumptionData(), // Use static fake data
+            backgroundColor: 'rgba(255, 206, 86, 0.5)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    },
   },
 };
 </script>
@@ -280,5 +371,13 @@ export default {
 .button-image {
   width: 20px;
   height: 20px;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  /* Adjust the height as necessary */
+  width: 100%;
+  /* Take the full width of the parent */
 }
 </style>
