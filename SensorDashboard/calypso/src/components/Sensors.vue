@@ -268,7 +268,7 @@
     },
     computed: {
       filteredDeviceNames() {
-        let filteredNames = this.uniqueDeviceNames; 
+        let filteredNames = Object.keys(this.roomData); 
 
         if (this.selectedType !== 'all') {
           filteredNames = filteredNames.filter(deviceName => {
@@ -280,7 +280,7 @@
           const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
 
           filteredNames = filteredNames.filter(deviceName => {
-            return deviceName.toLowerCase().includes(lowerCaseSearchTerm);
+            return deviceName.toLowerCase().includes(lowerCaseSearchTerm) || this.roomData[deviceName].toLowerCase().includes(lowerCaseSearchTerm);
           });
         }
         //console.log(filteredNames);
