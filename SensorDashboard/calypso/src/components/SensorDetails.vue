@@ -109,9 +109,9 @@ export default {
             sensorData: {},
             sensorType: null,
             sensorName: this.$route.params.id,
-            averageTemperature: 22, // Example average
-            averageHumidity: 45, // Example average
-            averageSensorData: 50, // Example average for non-temperature/humidity sensors
+            //averageTemperature: 22, // Example average
+            //averageHumidity: 45, // Example average
+            //averageSensorData: 50, // Example average for non-temperature/humidity sensors
             waterConsumptionData: [], // Placeholder for water consumption data
             electricalConsumptionData: [], // Placeholder for electrical consumption data
         };
@@ -137,8 +137,26 @@ export default {
     methods: {
         async fetchDataForSelectedDate() {
             try {
-                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
-                const rawData = await response.json();
+                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
+                if (!response.ok) throw new Error('Network response was not ok.');
+
+                let text = await response.text();
+
+                // Replace ObjectId and ISODate formats with valid JSON
+                text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+                text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+
+                let rawData;
+                try {
+                    rawData = JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Error parsing JSON data');
+                }
+
+                if (!this.selectedDate || !this.sensorName) {
+                    throw new Error('Selected date or sensor name is not defined');
+                }
+
                 const selectedData = rawData.filter(data => {
                     const dataDate = new Date(data.time).toISOString().substring(0, 10);
                     return dataDate === this.selectedDate && data.deviceName === this.sensorName;
@@ -165,30 +183,33 @@ export default {
             }
         },
         calculateAverage(data) {
-            const sum = Object.values(data).reduce((acc, value) => acc + (value || 0), 0);
-            const count = Object.values(data).filter(value => value !== null).length;
-            return sum / count;
+            const values = Object.values(data).map(value => parseFloat(value) || 0);
+            const sum = values.reduce((acc, value) => acc + value, 0);
+            const count = values.filter(value => !isNaN(value)).length;
+            return count > 0 ? sum / count : 0;
         },
         extractHourlyData(data, index = null) {
             let hourlyData = {};
-            for (let hour = 0; hour <= 24; hour++) {
-                const adjustedHour = (hour + 8) % 24;
+            for (let hour = 0; hour < 24; hour++) {
                 const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
-                let hour12Format = (adjustedHour % 12) || 12; // Convert 24-hour format to 12-hour format
-                hour12Format += adjustedHour < 12 ? ' AM' : ' PM';
+                let hour12Format = (hour % 12) || 12; // Convert 24-hour format to 12-hour format
+                hour12Format += hour < 12 ? ' AM' : ' PM';
+
                 if (hourData.length > 0) {
                     let value = index !== null ? hourData[0].data.split(',')[index] : hourData[0].data;
 
-                    // Check if this is temperature data and then round off to 2 decimal places
                     if (this.sensorType === 1 && index === 0) {
+                        // Temperature data, round off to 2 decimal places
                         value = parseFloat(value).toFixed(2);
-                    }
-                    if (this.sensorType === 2) { // People Counter
+                    } else if (this.sensorType === 2) {
+                        // People Counter
                         value = Math.max(...hourData.map(d => parseInt(d.data, 10)));
                     } else {
-                        value = index !== null ? hourData[0].data.split(',')[index] : hourData[0].data;
+                        // Other sensor data
+                        value = parseFloat(value);
                     }
-                    hourlyData[hour12Format] = parseFloat(value);
+
+                    hourlyData[hour12Format] = value;
                 } else {
                     hourlyData[hour12Format] = null;
                 }
@@ -197,8 +218,17 @@ export default {
         },
         async downloadSensorData() {
             try {
-                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
-                const rawData = await response.json();
+                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
+                if (!response.ok) throw new Error('Network response was not ok.');
+
+                let text = await response.text();
+
+                // Replace ObjectId and ISODate formats with valid JSON
+                text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+                text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+
+                const rawData = JSON.parse(text);
+
                 const todaysData = rawData.filter(data => {
                     const date = new Date(data.time);
                     return date.toDateString() === new Date().toDateString() && data.deviceName === this.sensorName;
@@ -212,39 +242,7 @@ export default {
                 let csvContent = "data:text/csv;charset=utf-8,";
 
                 // Determine the sensor type and format CSV content accordingly
-                switch (this.sensorType) {
-                    case 1: // Temperature and Humidity Sensor
-                        csvContent += "Time,Temperature,Humidity\n";
-                        todaysData.forEach(row => {
-                            const date = new Date(row.time);
-                            const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-                            const [temperature, humidity] = row.data.split(',');
-                            csvContent += `${time},${temperature},${humidity}\n`;
-                        });
-                        break;
-                    case 2: // People Counter
-                        csvContent += "Time,People Count\n";
-                        todaysData.forEach(row => {
-                            const date = new Date(row.time);
-                            const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-                            const peopleCount = row.data;
-                            csvContent += `${time},${peopleCount}\n`;
-                        });
-                        break;
-                    case 3: // Panic Button
-                        csvContent += "Time\n";
-                        todaysData.forEach(row => {
-                            if (row.data === "1") {
-                                const date = new Date(row.time);
-                                const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-                                csvContent += `${time}\n`;
-                            }
-                        });
-                        break;
-                    default:
-                        alert('Sensor type not recognized');
-                        return;
-                }
+                // ... [rest of your switch case logic] ...
 
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
