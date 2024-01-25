@@ -29,7 +29,7 @@
           <div class="card mb-4 shadow" @click="navigate" style="cursor: pointer;">
               <div class="card-header" :class="getCardHeaderClass(deviceName)">
                 <div class="status-indicator" :class="{ 'active': isActive(deviceName), 'inactive': !isActive(deviceName) }"></div>
-                {{ deviceName }}
+                {{ deviceName }} {{ roomData[deviceName] }}
               </div>
               <div class="card-body">
                 <!-- <span class="status-text">{{ isActive(deviceName) ? 'Active' : 'Inactive' }}</span> -->
@@ -54,7 +54,7 @@
           <div v-else class="card mb-4 shadow" :class="isAcknowledged(deviceName) ? 'panic-card-acknowledged' : 'panic-card'">
             <div class="card-header text-white" :class="isAcknowledged(deviceName) ? 'bg-success' : 'bg-danger'">
               <span style="font-weight: bold; font-size: 1.5rem;">⚠️&nbsp;</span>
-              {{ deviceName }}
+              {{ deviceName }} {{ roomData[deviceName] }}
             </div>
             <div class="card-body">
                 <p v-if="isAcknowledged(deviceName)" class="text-success">Alert acknowledged!</p>
@@ -85,6 +85,7 @@
         sensors: {},
         uniqueDeviceNames: [],
         searchTerm: '',
+        roomData: {}, // { devicename : {room_name:"", device_name : "" } }
       };
     },
     async created() {
@@ -120,12 +121,50 @@
 
           // If you want an array of unique device names
           this.uniqueDeviceNames = Object.keys(this.sensors);
+            console.log(this.uniqueDeviceNames);
+
+            // get room names
+            //roomData = this.fetchRoomData();
+            this.fetchRoomData();
+            console.log(this.roomData);
+
 
       } catch (error) {
           console.error("Error fetching sensors:", error);
       }
   },
     methods: {
+      async fetchRoomData() {
+        try {
+          const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/building');
+          if (!response.ok) {
+            throw new Error('Network response was not ok.');
+          }
+          
+          const text = await response.text();
+          const sanitizedText = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+          const buildings = JSON.parse(sanitizedText);
+          
+          // iterate through this.sensors and print all
+          const rooms = buildings[0].building.floors[0].rooms;
+          for (let i=0; i<rooms.length; i++){
+            //console.log(rooms[i].room_name);
+            for (let j=0; j<rooms[i].sensors.length; j++){
+              //console.log(rooms[i].sensors[j]);
+              if (rooms[i].sensors[j]) {
+                this.roomData[rooms[i].sensors[j]] = rooms[i].room_name;
+                //this.roomData[rooms[i].sensors[j]] = {'room_name':rooms[i].room_name, 'sensor_name':rooms[i].sensors[j]};
+              }
+              
+            }
+            
+          }
+
+        } catch (err) {
+          console.error(err);
+          this.error = 'Failed to load floor data: ' + err.message;
+        }
+      },
       getTypeName(type) {
         const types = {
           0: 'Panic',
@@ -245,7 +284,7 @@
 
         // Sort devices based on their type
         filteredNames.sort((a, b) => {
-          const typeA = this.sensors[a][0].type;
+          const typeA = this.sensors[a][0].type; 
           const typeB = this.sensors[b][0].type;
           return typeA - typeB;
         });
