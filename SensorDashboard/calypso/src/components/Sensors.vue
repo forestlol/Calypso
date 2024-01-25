@@ -85,7 +85,7 @@
         sensors: {},
         uniqueDeviceNames: [],
         searchTerm: '',
-        roomData: {}, // { devicename : {room_name:"", device_name : "" } }
+        roomData: {}, // { devicename : {room_name:"", device_name : "" } } 
       };
     },
     async created() {
@@ -121,12 +121,9 @@
 
           // If you want an array of unique device names
           this.uniqueDeviceNames = Object.keys(this.sensors);
-            console.log(this.uniqueDeviceNames);
 
-            // get room names
-            //roomData = this.fetchRoomData();
-            this.fetchRoomData();
-            console.log(this.roomData);
+          this.fetchRoomData();
+
 
 
       } catch (error) {
@@ -148,17 +145,21 @@
           // iterate through this.sensors and print all
           const rooms = buildings[0].building.floors[0].rooms;
           for (let i=0; i<rooms.length; i++){
-            //console.log(rooms[i].room_name);
             for (let j=0; j<rooms[i].sensors.length; j++){
-              //console.log(rooms[i].sensors[j]);
-              if (rooms[i].sensors[j]) {
-                this.roomData[rooms[i].sensors[j]] = rooms[i].room_name;
-                //this.roomData[rooms[i].sensors[j]] = {'room_name':rooms[i].room_name, 'sensor_name':rooms[i].sensors[j]};
+              if (this.uniqueDeviceNames.includes(rooms[i].sensors[j])){        
+                  this.roomData[rooms[i].sensors[j]] = rooms[i].room_name; // { 84AECD: Material Room }
               }
+              // if (rooms[i].sensors[j]) {
+              //   this.roomData[rooms[i].sensors[j]] = rooms[i].room_name;
+              //   //this.roomData[rooms[i].sensors[j]] = {'room_name':rooms[i].room_name, 'sensor_name':rooms[i].sensors[j]};
+              // }
               
             }
             
           }
+          // console.log(Object.keys(this.roomData));
+          // console.log(Object.values(this.uniqueDeviceNames));
+          
 
         } catch (err) {
           console.error(err);
@@ -267,7 +268,7 @@
     },
     computed: {
       filteredDeviceNames() {
-        let filteredNames = this.uniqueDeviceNames;
+        let filteredNames = this.uniqueDeviceNames; 
 
         if (this.selectedType !== 'all') {
           filteredNames = filteredNames.filter(deviceName => {
@@ -277,11 +278,12 @@
 
         if (this.searchTerm) {
           const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+
           filteredNames = filteredNames.filter(deviceName => {
             return deviceName.toLowerCase().includes(lowerCaseSearchTerm);
           });
         }
-
+        //console.log(filteredNames);
         // Sort devices based on their type
         filteredNames.sort((a, b) => {
           const typeA = this.sensors[a][0].type; 
