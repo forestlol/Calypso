@@ -174,10 +174,10 @@ export default {
     },
     async fetchRoomSensors() {
       try {
+        // Fetching building data
         let response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/building');
         if (!response.ok) throw new Error('Failed to fetch buildings');
-        let text = await response.text();
-        text = this.sanitizeResponse(text);
+        let text = this.sanitizeResponse(await response.text());
         let buildingsData = JSON.parse(text);
         let building = buildingsData.find(b => b.building.building_name === this.buildingName).building;
         let floor = building.floors.find(f => f.floor_name === this.floorName);
@@ -192,9 +192,11 @@ export default {
           lastReadingDate: null,
         }));
 
-        response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
+        // Fetching sensor data
+        response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/readings');
         if (!response.ok) throw new Error('Failed to fetch sensor data');
-        let allSensorData = await response.json();
+        text = this.sanitizeResponse(await response.text());
+        let allSensorData = JSON.parse(text);
 
         allSensorData.forEach(sensor => {
           const sensorIndex = this.sensors.findIndex(s => s.id === sensor.deviceName);
@@ -207,6 +209,12 @@ export default {
         console.error(err);
         this.error = err.message;
       }
+    },
+
+    sanitizeResponse(text) {
+      // Replace ObjectId and ISODate formats with valid JSON
+      return text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"')
+                .replace(/ISODate\("([^"]+)"\)/g, '"$1"');
     },
     processSensorData(sensor, sensorIndex) {
       switch (sensor.type) {
@@ -222,9 +230,6 @@ export default {
           this.sensors[sensorIndex].peopleCount = Number(sensor.data);
           break;
       }
-    },
-    sanitizeResponse(responseText) {
-      return responseText.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
     },
     volumeToggle() {
       var image = document.getElementById('volume-button-image');

@@ -70,32 +70,44 @@
       };
     },
     async created() {
-      try {
-        const today = new Date();
-        const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup'); 
-        const rawData = await response.json();
-        const todaysData = rawData.filter(data => {
-          const date = new Date(data.time);
-          return date.getUTCDate() === today.getUTCDate() &&
-                 date.getUTCMonth() === today.getUTCMonth() &&
-                 date.getUTCFullYear() === today.getUTCFullYear() &&
-                 data.deviceName === this.sensorName;
-        });
-  
-        if (todaysData.length > 0) {
-          this.sensorType = todaysData[0].type;
-  
-          // If Temperature Sensor, split the data for Temperature and Humidity
-          if (this.sensorType === 1) {
-            this.temperatureData = this.extractHourlyData(todaysData, 0);
-            this.humidityData = this.extractHourlyData(todaysData, 1);
-          } else {
-            this.sensorData = this.extractHourlyData(todaysData);
-          }
+        try {
+            const today = new Date();
+            const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/readings');
+            
+            if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            let text = await response.text();
+
+            // Replace ObjectId and ISODate formats with valid JSON
+            text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+            text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+
+            const rawData = JSON.parse(text);
+
+            const todaysData = rawData.filter(data => {
+            const date = new Date(data.time);
+            return date.getUTCDate() === today.getUTCDate() &&
+                    date.getUTCMonth() === today.getUTCMonth() &&
+                    date.getUTCFullYear() === today.getUTCFullYear() &&
+                    data.deviceName === this.sensorName;
+            });
+
+            if (todaysData.length > 0) {
+            this.sensorType = todaysData[0].type;
+
+            // If Temperature Sensor, split the data for Temperature and Humidity
+            if (this.sensorType === 1) {
+                this.temperatureData = this.extractHourlyData(todaysData, 0);
+                this.humidityData = this.extractHourlyData(todaysData, 1);
+            } else {
+                this.sensorData = this.extractHourlyData(todaysData);
+            }
+            }
+        } catch (error) {
+            console.error("Error fetching sensor data:", error);
         }
-      } catch (error) {
-        console.error("Error fetching sensor data:", error);
-      }
     },
     computed: {
         averageTemperature() 
@@ -118,7 +130,7 @@
     extractHourlyData(data, index = null) {
         let hourlyData = {};
         for (let hour = 0; hour <= 24; hour++) {
-            const adjustedHour = (hour + 8) % 24;
+            const adjustedHour = (hour) % 24;
             const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
             let hour12Format = (adjustedHour % 12) || 12; // Convert 24-hour format to 12-hour format
             hour12Format += adjustedHour < 12 ? ' AM' : ' PM';

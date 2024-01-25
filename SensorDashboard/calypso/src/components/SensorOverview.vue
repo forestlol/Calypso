@@ -151,9 +151,29 @@
     async created() {
       await this.fetchBuildings();
       try {
-        const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
-        const rawData = await response.json();
-        this.sensors = rawData.reduce((acc, curr) => {
+        const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/readings');
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        let text = await response.text();
+
+        // Replace ObjectId and ISODate formats with valid JSON
+        text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+        text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+
+        const rawData = JSON.parse(text);
+
+        const parsedData = rawData.map(item => {
+          // Convert time string to Date object
+          if (item.time && typeof item.time === 'string') {
+            item.time = new Date(item.time); 
+          }
+          return item;
+        });
+
+        this.sensors = parsedData.reduce((acc, curr) => {
           if (!acc[curr.deviceName]) {
             acc[curr.deviceName] = [];
           }
@@ -173,7 +193,7 @@
         this.createElectricalConsumptionChart();
       });
     },
-    beforeDestroy() {
+    beforeUnmount() {
       if (this.waterChart) {
         this.waterChart.destroy();
       }
@@ -383,11 +403,11 @@
       totalPeople() {
         let total = 0;
         const today = this.formatDate(new Date());
-
+        console.log(today);
         Object.values(this.sensors).forEach(sensor => {
           if (sensor[0].type == 2) { // 2 is for People Counter
             sensor.forEach(data => {
-              if (data.time.split("T")[0] === today) {
+              if (data.time === today) {
                 total += parseInt(data.data);
               }
             });

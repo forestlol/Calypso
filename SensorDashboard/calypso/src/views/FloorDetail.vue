@@ -181,38 +181,50 @@ export default {
       }
     },
     async fetchSensorData() {
-      const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
-      if (!response.ok) throw new Error('Network response was not ok.');
-      const rawData = await response.json();
-      rawData.forEach(item => {
-        if (item.type === 1) {
-          const sensorId = item.deviceName;
-          const [temperature, humidity] = item.data.split(',').map(Number);
-          const time = new Date(item.time);
-          if (!this.sensorData[sensorId] || new Date(this.sensorData[sensorId].time) < time) {
-            this.sensorData[sensorId] = {
-              temperature: temperature,
-              humidity: humidity,
-              time: time.toISOString(),
-              type: item.type
-            };
+      try {
+        const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/readings');
+        if (!response.ok) throw new Error('Network response was not ok.');
+
+        let text = await response.text();
+
+        // Replace ObjectId and ISODate formats with valid JSON
+        text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+        text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+
+        const readings = JSON.parse(text);
+
+        readings.forEach(item => {
+          if (item.type === 1) {
+            const sensorId = item.deviceName;
+            const [temperature, humidity] = item.data.split(',').map(Number);
+            const time = new Date(item.time);
+            if (!this.sensorData[sensorId] || new Date(this.sensorData[sensorId].time) < time) {
+              this.sensorData[sensorId] = {
+                temperature: temperature,
+                humidity: humidity,
+                time: time.toISOString(),
+                type: item.type
+              };
+            }
           }
-        }
-        else if (item.type === 2) {
-          // People count sensor data handling
-          const sensorId = item.deviceName;
-          const peopleCount = Number(item.data);
-          const time = new Date(item.time);
-          if (!this.sensorData[sensorId] || new Date(this.sensorData[sensorId].time) < time) {
-            this.sensorData[sensorId] = {
-              ...this.sensorData[sensorId], // Keep existing sensor data
-              peopleCount: peopleCount,
-              time: time.toISOString(),
-              type: item.type
-            };
+          else if (item.type === 2) {
+            // People count sensor data handling
+            const sensorId = item.deviceName;
+            const peopleCount = Number(item.data);
+            const time = new Date(item.time);
+            if (!this.sensorData[sensorId] || new Date(this.sensorData[sensorId].time) < time) {
+              this.sensorData[sensorId] = {
+                ...this.sensorData[sensorId], // Keep existing sensor data
+                peopleCount: peopleCount,
+                time: time.toISOString(),
+                type: item.type
+              };
+            }
           }
-        }
-      });
+        });
+      } catch (error) {
+        console.error("Error fetching sensor data:", error);
+      }
     },
     integrateSensorData() {
       if (!this.floorData) {

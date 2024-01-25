@@ -87,27 +87,43 @@
       };
     },
     async created() {
-        try {
-            const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
-            const rawData = await response.json();
-            
-            // Process rawData to get the desired dictionary
-            this.sensors = rawData.reduce((acc, curr) => {
-            if (!acc[curr.deviceName]) {
-                acc[curr.deviceName] = [];
-            }
-            acc[curr.deviceName].push(curr);
-            return acc;
-            }, {});
-            
-            // If you want an array of unique device names
-            this.uniqueDeviceNames = Object.keys(this.sensors);
+      try {
+          const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/readings');
+          
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-        } catch (error) {
-            console.error("Error fetching sensors:", error);
-        }
-    },
+          let text = await response.text();
 
+          // Replace ObjectId and ISODate formats with valid JSON
+          text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+          text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+
+          const rawData = JSON.parse(text);
+
+          // Process rawData to get the desired dictionary
+          this.sensors = rawData.reduce((acc, curr) => {
+              if (!acc[curr.deviceName]) {
+                  acc[curr.deviceName] = [];
+              }
+
+              // Convert time string to Date object, if needed
+              if (curr.time && typeof curr.time === 'string') {
+                  curr.time = new Date(curr.time);
+              }
+
+              acc[curr.deviceName].push(curr);
+              return acc;
+          }, {});
+
+          // If you want an array of unique device names
+          this.uniqueDeviceNames = Object.keys(this.sensors);
+
+      } catch (error) {
+          console.error("Error fetching sensors:", error);
+      }
+  },
     methods: {
       getTypeName(type) {
         const types = {
