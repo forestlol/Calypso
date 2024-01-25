@@ -4,6 +4,19 @@
             <h2 class="mb-4">{{ sensorName }}</h2>
             <button @click="downloadSensorData" class="btn btn-primary">Download Sensor Data</button>
         </div>
+
+        <div class="date-picker-container">
+            <label for="datePicker">Select Date: </label>
+            <input 
+            type="date" 
+            id="datePicker" 
+            v-model="selectedDate" 
+            @change="fetchDataForSelectedDate" 
+            :min="minDate"
+            :max="maxDate"
+            />
+        </div>
+
         <!-- Loading State -->
         <div v-if="isLoading">
             <p>Loading data...</p>
@@ -85,7 +98,12 @@ Chart.register(...registerables);
 
 export default {
     data() {
+        const today = new Date();
+        const apiStartDate = new Date("2023-12-11"); // Assuming API data starts from December 11, 2023
         return {
+            selectedDate: today.toISOString().substring(0, 10),
+            minDate: apiStartDate.toISOString().substring(0, 10),
+            maxDate: today.toISOString().substring(0, 10),
             temperatureData: {},
             humidityData: {},
             sensorData: {},
@@ -103,32 +121,7 @@ export default {
         this.initElectricalConsumptionChart();
     },
     async created() {
-        try {
-            const today = new Date();
-            const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
-            const rawData = await response.json();
-            const todaysData = rawData.filter(data => {
-                const date = new Date(data.time);
-                return date.getUTCDate() === today.getUTCDate() &&
-                    date.getUTCMonth() === today.getUTCMonth() &&
-                    date.getUTCFullYear() === today.getUTCFullYear() &&
-                    data.deviceName === this.sensorName;
-            });
-
-            if (todaysData.length > 0) {
-                this.sensorType = todaysData[0].type;
-
-                // If Temperature Sensor, split the data for Temperature and Humidity
-                if (this.sensorType === 1) {
-                    this.temperatureData = this.extractHourlyData(todaysData, 0);
-                    this.humidityData = this.extractHourlyData(todaysData, 1);
-                } else {
-                    this.sensorData = this.extractHourlyData(todaysData);
-                }
-            }
-        } catch (error) {
-            console.error("Error fetching sensor data:", error);
-        }
+        this.fetchDataForSelectedDate();
     },
     computed: {
         averageTemperature() {
@@ -142,6 +135,35 @@ export default {
         }
     },
     methods: {
+        async fetchDataForSelectedDate() {
+            try {
+                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/backup');
+                const rawData = await response.json();
+                const selectedData = rawData.filter(data => {
+                    const dataDate = new Date(data.time).toISOString().substring(0, 10);
+                    return dataDate === this.selectedDate && data.deviceName === this.sensorName;
+                });
+
+                // Reset the data
+                this.temperatureData = {};
+                this.humidityData = {};
+                this.sensorData = {};
+
+                if (selectedData.length > 0) {
+                    this.sensorType = selectedData[0].type;
+
+                    // Split the data for Temperature and Humidity if applicable
+                    if (this.sensorType === 1) {
+                        this.temperatureData = this.extractHourlyData(selectedData, 0);
+                        this.humidityData = this.extractHourlyData(selectedData, 1);
+                    } else {
+                        this.sensorData = this.extractHourlyData(selectedData);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching sensor data:", error);
+            }
+        },
         calculateAverage(data) {
             const sum = Object.values(data).reduce((acc, value) => acc + (value || 0), 0);
             const count = Object.values(data).filter(value => value !== null).length;
@@ -423,5 +445,22 @@ canvas {
     height: auto !important;
     max-height: 400px;
     /* Or any other height */
+}
+
+.date-picker-container {
+  margin-bottom: 20px;
+}
+
+.date-picker-container label {
+  margin-right: 10px;
+  font-weight: bold;
+  color: rgb(150,150,150);
+}
+
+.date-picker-container input[type="date"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
