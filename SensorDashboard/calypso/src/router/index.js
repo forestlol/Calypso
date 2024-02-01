@@ -1,55 +1,55 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Building from '../views/Home.vue';
-import FloorDetails from '../views/FloorDetail.vue';
-import RoomPage from '../views/RoomDetail.vue';
-import Login from '../views/Login.vue';
-import Sensors from '../components/Sensors.vue';
-import SensorDetails from '../components/SensorDetails.vue';
-import SensorOverview from '../components/SensorOverview.vue';
+// import Building from '../views/Home.vue';
+// import FloorDetails from '../views/FloorDetail.vue';
+// import RoomPage from '../views/RoomDetail.vue';
+// import Login from '../views/Login.vue';
+// import Sensors from '../components/Sensors.vue';
+// import SensorDetails from '../components/SensorDetails.vue';
+// import SensorOverview from '../components/SensorOverview.vue';
 import auth from '../auth';
 
 const routes = [
   {
     path: '/',
     name: 'Login',
-    component: Login,
+    component: () => import('../views/Login.vue'),
     meta: { guestOnly: true}
   },
   {
     path: '/overview',
     name: 'SensorOverview',
-    component: SensorOverview,
+    component: () => import('../components/SensorOverview.vue'),
     meta: { requiresAuth: true}
   },
   {
     path: '/building',
     name: 'Building',
-    component: Building,
+    component: () => import('../views/Home.vue'),
     meta: { requiresAuth: true}
   },
   {
     path: '/building/:buildingId/:floorName',
     name: 'FloorDetails',
-    component: FloorDetails, // Make sure to import the FloorDetails component at the top
+    component: () => import('../views/FloorDetail.vue'), // Make sure to import the FloorDetails component at the top
     props: true,
     meta: { requiresAuth: true }
   },
   {
     path: '/building/:buildingName/:floorName/:roomName',
     name: 'RoomPage',
-    component: RoomPage,
+    component: () => import('../views/RoomDetail.vue'),
     props: true,
     meta: { requiresAuth: true}
   },
   {
     path: '/sensors',
     name: 'Sensors',
-    component: Sensors,
+    component: () => import('../components/Sensors.vue'),
     meta: { requiresAuth: true}
   },
   {
     path: '/sensor/:id',
-    component: SensorDetails,
+    component: () => import('../components/SensorDetails.vue'),
     name: 'sensor-details',
     meta: { requiresAuth: true}
   },
