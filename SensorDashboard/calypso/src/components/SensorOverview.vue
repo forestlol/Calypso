@@ -16,85 +16,86 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-lg-8">
-        <dashboard-card title="Sensors Overview" :icon="['fas', 'satellite-dish']">
-          <div class="row mt-4">
-            <div class="col-md-3">
-              <div class="card-group">
-                <h5 class="mb-3 text-center">Sensors Overview</h5>
-                <div class="card mb-4 text-center bg-secondary">
-                  <h5 class="card-header">Average Temperature</h5>
-                  <div class="card-body">
-                    <font-awesome-icon :icon="['fas', 'temperature-high']" />
-                    <p class="card-text display-6">{{ averageTemperature }}°C</p>
-                  </div>
-                </div>
-
-                <div class="card mb-4 text-center bg-secondary">
-                  <h5 class="card-header">Average Humidity</h5>
-                  <div class="card-body">
-                    <font-awesome-icon :icon="['fas', 'droplet']" />
-                    <p class="card-text display-6">{{ averageHumidity }}%</p>
-                  </div>
-                </div>
-
-                <div class="card mb-4 text-center bg-secondary">
-                  <h5 class="card-header">Total People</h5>
-                  <div class="card-body">
-                    <font-awesome-icon :icon="['fas', 'users']" />
-                    <p class="card-text display-6">{{ totalPeople }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-9">
-              <div class="row">
-                <div class="col-lg-6 col-md-12">
-                  <div class="col-lg-12 col-md-12">
-                    <div class="card text-center mb-4" :class="{'bg-danger': isPanicAlert, 'bg-secondary': !isPanicAlert}">
-                      <div class="card-header">
-                        Panic Alert
-                      </div>
-                      <div class="card-body">
-                        <p class="card-text display-6">
-                          {{ panicMessage }}
-                        </p>
-                        <!-- Only show the button if there is a panic alert -->
-                        <router-link v-if="isPanicAlert" to="/sensors" class="btn btn-primary">
-                          Check Sensors
-                        </router-link>
-                      </div>
+    
+      <div class="row">
+        <div class="col-lg-8">
+          <dashboard-card title="Sensors Overview" :icon="['fas', 'satellite-dish']">
+            <div class="row mt-4">
+              <div class="col-md-3">
+                <div class="card-group">
+                  <h5 class="mb-3 text-center">Sensors Overview</h5>
+                  <div class="card mb-4 text-center bg-secondary">
+                    <h5 class="card-header">Average Temperature</h5>
+                    <div class="card-body">
+                      <font-awesome-icon :icon="['fas', 'temperature-high']" />
+                      <p class="card-text display-6">{{ averageTemperature }}°C</p>
                     </div>
                   </div>
-                  <div class="pie-chart-container">
-                    <h3 class="chart-title text-center mb-3">Recent Active Sensor Types</h3>
-                    <pie-chart :data="sensorPieChartData" :options="pieChartOptions"></pie-chart>
+
+                  <div class="card mb-4 text-center bg-secondary">
+                    <h5 class="card-header">Average Humidity</h5>
+                    <div class="card-body">
+                      <font-awesome-icon :icon="['fas', 'droplet']" />
+                      <p class="card-text display-6">{{ averageHumidity }}%</p>
+                    </div>
                   </div>
-                </div>
-                <div class="col-lg-6 col-md-6">
-                  <div class="line-charts-column">
-                    <h5 class="mb-3 text-center">Temperature Charts</h5>
-                    <div v-for="hours in [1, 3, 8, 12, 24]" :key="`line-chart-container-${hours}h`">
-                      <div class="line-chart-container">
-                        <canvas :id="`canvas${hours}h`"></canvas>
-                      </div>
+
+                  <div class="card mb-4 text-center bg-secondary">
+                    <h5 class="card-header">Total People</h5>
+                    <div class="card-body">
+                      <font-awesome-icon :icon="['fas', 'users']" />
+                      <p class="card-text display-6">{{ totalPeople }}</p>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <div class="col-md-9">
+                <div class="row">
+                  <div class="col-lg-6 col-md-12">
+                    <div class="col-lg-12 col-md-12">
+                      <div class="card text-center mb-4" :class="{'bg-danger': isPanicAlert, 'bg-secondary': !isPanicAlert}">
+                        <div class="card-header">
+                          Panic Alert
+                        </div>
+                        <div class="card-body">
+                          <p class="card-text display-6">
+                            {{ panicMessage }}
+                          </p>
+                          <!-- Only show the button if there is a panic alert -->
+                          <router-link v-if="isPanicAlert" to="/sensors" class="btn btn-primary">
+                            Check Sensors
+                          </router-link>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pie-chart-container">
+                      <h3 class="chart-title text-center mb-3">Recent Active Sensor Types</h3>
+                      <pie-chart :data="sensorPieChartData" :options="pieChartOptions"></pie-chart>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-md-6">
+                    <div class="line-charts-column">
+                      <h5 class="mb-3 text-center">Temperature Charts</h5>
+                      <div v-for="hours in [1, 3, 8, 12, 24]" :key="`line-chart-container-${hours}h`">
+                        <div class="line-chart-container">
+                          <canvas :id="`canvas${hours}h`"></canvas>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </dashboard-card>
+        </div>  
+        <div class="col-lg-4">
+          <dashboard-card title="Electrical & Water Consumption" :icon="['fas', 'house-user']">
+          <canvas :id="`waterConsumptionChart-${_uid}`"></canvas>
+          <canvas :id="`electricalConsumptionChart-${_uid}`"></canvas>
         </dashboard-card>
-      </div>  
-      <div class="col-lg-4">
-        <dashboard-card title="Electrical & Water Consumption" :icon="['fas', 'house-user']">
-        <canvas :id="`waterConsumptionChart-${_uid}`"></canvas>
-        <canvas :id="`electricalConsumptionChart-${_uid}`"></canvas>
-      </dashboard-card>
+        </div>
       </div>
-    </div>
   </div>
 </template>
   
@@ -148,6 +149,10 @@
         },
       }
     },
+    // setup() {
+    //   const sensors = ref(null);
+    //   return sensors
+    // },
     async created() {
       await this.fetchBuildings();
       try {

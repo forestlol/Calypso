@@ -1,50 +1,88 @@
 <template>
 
-  <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-      <router-link to="/overview" class="navbar-brand">Calypso</router-link>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <router-link to="/overview" class="nav-link">Home</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link to="/building" class="nav-link">Buildings</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link to="/sensors" class="nav-link">Sensors</router-link>
-          </li>
-          <!-- You can add more navigation links as required -->
-        </ul>
-        <div v-if="isLoggedIn" class="ms-auto">
-          <button @click="logout" class="btn btn-outline-danger">Logout</button>
+    <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
+        <router-link to="/overview" class="navbar-brand">Calypso</router-link>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <router-link to="/overview" class="nav-link">Home</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/building" class="nav-link">Buildings</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/sensors" class="nav-link">Sensors</router-link>
+            </li>
+            <!-- You can add more navigation links as required -->
+          </ul>
+          <div v-if="isLoggedIn" class="ms-auto">
+            <button @click="logout" class="btn btn-outline-danger">Logout</button>
+          </div>
         </div>
       </div>
-    </div>
-  </nav>
-  <div>
-    <router-view></router-view>
-  </div>
+    </nav>
+
+      <div>
+        <RouterView v-slot="{ Component }">
+          <template v-if="Component">
+            <Suspense>
+              <component :is="Component" />
+              <template #fallback>
+                <div style="font-size: 1.5rem">Loading...</div>
+              </template>
+            </Suspense>
+          </template>
+        </RouterView>
+      </div>
 </template>
 
 <script>
   import auth from '@/auth.js';
+  import { Suspense } from 'vue';
 
   export default {
+    data() {
+      return {
+        delayed:false,
+      };
+    },
     name: 'App',
     computed: {
       isLoggedIn(){
         return auth.isLoggedIn();
       }
+    }, 
+    async mounted() {
+      await this.beforeRouteEnter();
+      this.delayed = true;
     },
     methods: {
       logout() {
         auth.logout();
         this.$router.push('/');
-      }
+      },
+      delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      },
+      // async delayedLoad(ms) {
+      // await new Promise(resolve => setTimeout(resolve, ms));
+      // // Perform additional logic if needed
+      // },
+      // beforeRouteEnter(to, from, next) {
+      // // Delay the loading of the route by 2 seconds
+      //   this.delayedLoad(2000).then(() => {
+      //     next();
+      //   });
+      // },
+      async beforeRouteEnter(to, from, next) {
+        // Introduce a delay of 10 seconds before entering the route
+        await this.delay(10000);
+        next();
+      },
     }
   };
 </script>
