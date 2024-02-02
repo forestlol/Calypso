@@ -22,42 +22,6 @@
 </template>
 
 <script>
-// import { ref, onMounted } from 'vue'
-// var buildings = ref([])
-// var loading = ref(false)
-// var error = ref(null)
-
-// onMounted(async () => {
-//   await fetchBuildings()
-// })
-
-// async function fetchBuildings() {
-//   // await new Promise(resolve => setTimeout(resolve, 2000));
-//   loading.value = true
-//   try {
-//     const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/building')
-//     if (!response.ok) {
-//       throw new Error('Network response was not ok.')
-//     }
-//     const text = await response.text()
-//     // Sanitize the response text to remove ObjectId references
-//     const sanitizedText = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"')
-//     const data = JSON.parse(sanitizedText)
-//     buildings.value = data.map(item => ({
-//       building_name: item.building.building_name,
-//       floors: item.building.floors.map(floor => ({
-//         floor_name: floor.floor_name,
-//         floor_level: floor.floor_level,
-//         rooms: floor.rooms
-//       }))
-//     }))
-//   } catch (err) {
-//     console.error(err)
-//     error.value = 'Failed to load buildings data: ' + err.message
-//   } finally {
-//     loading.value = false
-//   }
-// }
 
 export default {
   data() {

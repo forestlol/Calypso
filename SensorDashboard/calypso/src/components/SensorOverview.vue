@@ -149,10 +149,6 @@
         },
       }
     },
-    // setup() {
-    //   const sensors = ref(null);
-    //   return sensors
-    // },
     async created() {
       await this.fetchBuildings();
       try {
