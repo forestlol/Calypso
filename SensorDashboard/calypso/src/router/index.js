@@ -7,6 +7,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 // import SensorDetails from '../components/SensorDetails.vue';
 // import SensorOverview from '../components/SensorOverview.vue';
 import auth from '../auth';
+import { defineAsyncComponent } from "vue";
 
 const routes = [
   {
@@ -18,38 +19,38 @@ const routes = [
   {
     path: '/overview',
     name: 'SensorOverview',
-    component: () => import('../components/SensorOverview.vue'),
+    component: defineAsyncComponent(() => import('../components/SensorOverview.vue')),
     meta: { requiresAuth: true}
   },
   {
     path: '/building',
     name: 'Building',
-    component: () => import('../views/Home.vue'),
+    component: defineAsyncComponent(() => import('../views/Home.vue')),
     meta: { requiresAuth: true}
   },
   {
     path: '/building/:buildingId/:floorName',
     name: 'FloorDetails',
-    component: () => import('../views/FloorDetail.vue'), // Make sure to import the FloorDetails component at the top
+    component: defineAsyncComponent(() => import('../views/FloorDetail.vue')), // Make sure to import the FloorDetails component at the top
     props: true,
     meta: { requiresAuth: true }
   },
   {
     path: '/building/:buildingName/:floorName/:roomName',
     name: 'RoomPage',
-    component: () => import('../views/RoomDetail.vue'),
+    component: defineAsyncComponent(() => import('../views/RoomDetail.vue')),
     props: true,
     meta: { requiresAuth: true}
   },
   {
     path: '/sensors',
     name: 'Sensors',
-    component: () => import('../components/Sensors.vue'),
+    component: defineAsyncComponent(() => import('../components/Sensors.vue')),
     meta: { requiresAuth: true}
   },
   {
     path: '/sensor/:id',
-    component: () => import('../components/SensorDetails.vue'),
+    component: defineAsyncComponent(() => import('../components/SensorDetails.vue')),
     name: 'sensor-details',
     meta: { requiresAuth: true}
   },

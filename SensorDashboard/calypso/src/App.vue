@@ -27,39 +27,31 @@
     </nav>
 
       <div>
-        <RouterView v-slot="{ Component }">
-          <template v-if="Component">
-            <Suspense>
-              <component :is="Component" />
-              <template #fallback>
-                <div style="font-size: 1.5rem">Loading...</div>
-              </template>
-            </Suspense>
-          </template>
-        </RouterView>
+        <router-view v-slot="{ Component }">
+          <suspense timeout="0" @pending="pending" @fallback="fallback" @resolve="resolved">
+
+            <component :is="Component" />
+
+
+            <!-- Loading -->
+            <template #fallback>
+              <div>Loading...</div>
+            </template>
+          </suspense>
+        </router-view>
       </div>
 </template>
 
 <script>
   import auth from '@/auth.js';
-  import { Suspense } from 'vue';
 
   export default {
-    data() {
-      return {
-        delayed:false,
-      };
-    },
     name: 'App',
     computed: {
       isLoggedIn(){
         return auth.isLoggedIn();
       }
     }, 
-    async mounted() {
-      await this.beforeRouteEnter();
-      this.delayed = true;
-    },
     methods: {
       logout() {
         auth.logout();
@@ -68,20 +60,14 @@
       delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       },
-      // async delayedLoad(ms) {
-      // await new Promise(resolve => setTimeout(resolve, ms));
-      // // Perform additional logic if needed
-      // },
-      // beforeRouteEnter(to, from, next) {
-      // // Delay the loading of the route by 2 seconds
-      //   this.delayedLoad(2000).then(() => {
-      //     next();
-      //   });
-      // },
-      async beforeRouteEnter(to, from, next) {
-        // Introduce a delay of 10 seconds before entering the route
-        await this.delay(10000);
-        next();
+      pending() {
+        console.log('pending');
+      },
+      fallback() {
+        console.log('fallback');
+      },
+      resolved() {
+        console.log('resolved');
       },
     }
   };
