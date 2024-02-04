@@ -121,7 +121,7 @@
 
           // If you want an array of unique device names
           this.uniqueDeviceNames = Object.keys(this.sensors);
-
+          this.checkSensorsAndNotify()
           this.fetchRoomData();
 
 
@@ -165,6 +165,30 @@
           console.error(err);
           this.error = 'Failed to load floor data: ' + err.message;
         }
+      },
+      checkSensorsAndNotify() {
+        this.uniqueDeviceNames.forEach((deviceName) => {
+          const lastReading = this.getLastReading(deviceName);
+          this.checkAndNotify(deviceName, lastReading);
+        });
+      },
+      checkAndNotify(deviceName, lastReading) {
+        console.log(deviceName, lastReading)
+        const data = lastReading.split(',');
+        const sensorType = this.sensors[deviceName][0].type;
+        const temperature = parseFloat(data[0]);
+        const peopleCount = parseInt(data[0], 10);
+
+        if (sensorType === 1 && temperature > 26.5) {
+          // Temperature alert
+          this.sendNotification(`Temperature alert for ${deviceName}: ${temperature}°C`);
+        } else if (sensorType === 2 && peopleCount > 4) {
+          // People count alert
+          this.sendNotification(`People count alert for ${deviceName}: ${peopleCount}`);
+        }
+      },
+      sendNotification(message) {
+        // Send the notification via an API call
       },
       getTypeName(type) {
         const types = {
