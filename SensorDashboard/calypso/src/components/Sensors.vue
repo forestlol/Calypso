@@ -173,22 +173,34 @@
         });
       },
       checkAndNotify(deviceName, lastReading) {
-        console.log(deviceName, lastReading)
         const data = lastReading.split(',');
         const sensorType = this.sensors[deviceName][0].type;
         const temperature = parseFloat(data[0]);
         const peopleCount = parseInt(data[0], 10);
 
-        if (sensorType === 1 && temperature > 26.5) {
+        if (sensorType === 1 && temperature > 30) {
           // Temperature alert
-          this.sendNotification(`Temperature alert for ${deviceName}: ${temperature}°C`);
+          this.sendNotification(deviceName, `Temperature alert for ${deviceName}: ${temperature}°C`);
         } else if (sensorType === 2 && peopleCount > 4) {
           // People count alert
-          this.sendNotification(`People count alert for ${deviceName}: ${peopleCount}`);
+          this.sendNotification(deviceName, `People count alert for ${deviceName}: ${peopleCount}`);
         }
       },
-      sendNotification(message) {
+      async sendNotification(deviceName, message) {
         // Send the notification via an API call
+        try {
+          const response = await fetch('/api/send-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ deviceName, message }),
+          });
+          const data = await response.json();
+          console.log(data);
+        } catch (error) {
+          console.error('Error sending notification:', error);
+        }
       },
       getTypeName(type) {
         const types = {
