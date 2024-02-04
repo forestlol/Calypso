@@ -17,7 +17,18 @@
             <li class="nav-item">
               <router-link to="/sensors" class="nav-link">Sensors</router-link>
             </li>
-            <!-- You can add more navigation links as required -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-bell"></i>
+                <span class="badge bg-danger">3</span> <!-- dynamic count -->
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </li>
           </ul>
           <div v-if="isLoggedIn" class="ms-auto">
             <button @click="logout" class="btn btn-outline-danger">Logout</button>

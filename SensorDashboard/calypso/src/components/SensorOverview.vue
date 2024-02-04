@@ -16,191 +16,51 @@
       </div>
     </div>
 
-    
-      <div class="row">
-        <div class="col-lg-8">
-          <dashboard-card title="Sensors Overview" :icon="['fas', 'satellite-dish']">
-            <div class="row mt-4">
-              <div class="col-md-3">
-                <div class="card-group">
-                  <h5 class="mb-3 text-center">Sensors Overview</h5>
-                  <div class="card mb-4 text-center bg-secondary">
-                    <h5 class="card-header">Average Temperature</h5>
-                    <div class="card-body">
-                      <font-awesome-icon :icon="['fas', 'temperature-high']" />
-                      <p class="card-text display-6">{{ averageTemperature }}°C</p>
-                    </div>
-                  </div>
-
-                  <div class="card mb-4 text-center bg-secondary">
-                    <h5 class="card-header">Average Humidity</h5>
-                    <div class="card-body">
-                      <font-awesome-icon :icon="['fas', 'droplet']" />
-                      <p class="card-text display-6">{{ averageHumidity }}%</p>
-                    </div>
-                  </div>
-
-                  <div class="card mb-4 text-center bg-secondary">
-                    <h5 class="card-header">Total People</h5>
-                    <div class="card-body">
-                      <font-awesome-icon :icon="['fas', 'users']" />
-                      <p class="card-text display-6">{{ totalPeople }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-9">
-                <div class="row">
-                  <div class="col-lg-6 col-md-12">
-                    <div class="col-lg-12 col-md-12">
-                      <div class="card text-center mb-4" :class="{'bg-danger': isPanicAlert, 'bg-secondary': !isPanicAlert}">
-                        <div class="card-header">
-                          Panic Alert
-                        </div>
-                        <div class="card-body">
-                          <p class="card-text display-6">
-                            {{ panicMessage }}
-                          </p>
-                          <!-- Only show the button if there is a panic alert -->
-                          <router-link v-if="isPanicAlert" to="/sensors" class="btn btn-primary">
-                            Check Sensors
-                          </router-link>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="pie-chart-container">
-                      <h3 class="chart-title text-center mb-3">Recent Active Sensor Types</h3>
-                      <pie-chart :data="sensorPieChartData" :options="pieChartOptions"></pie-chart>
-                    </div>
-                  </div>
-                  <div class="col-lg-6 col-md-6">
-                    <div class="line-charts-column">
-                      <h5 class="mb-3 text-center">Temperature Charts</h5>
-                      <div v-for="hours in [1, 3, 8, 12, 24]" :key="`line-chart-container-${hours}h`">
-                        <div class="line-chart-container">
-                          <canvas :id="`canvas${hours}h`"></canvas>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </dashboard-card>
-        </div>  
-        <div class="col-lg-4">
-          <dashboard-card title="Electrical & Water Consumption" :icon="['fas', 'house-user']">
-          <canvas :id="`waterConsumptionChart-${_uid}`"></canvas>
-          <canvas :id="`electricalConsumptionChart-${_uid}`"></canvas>
-        </dashboard-card>
-        </div>
+    <div class="row">
+      <div class="col-lg-12 mb-4">
+        <sensor-overview-card
+          :averageTemperature="averageTemperature"
+          :averageHumidity="averageHumidity"
+          :totalPeople="totalPeople"
+        ></sensor-overview-card>
       </div>
+
+      <div class="col-md-12 mb-4">
+        <electricity-water-consumption-card
+          :electricity-data="electricityData"
+          :water-data="waterData"
+        ></electricity-water-consumption-card>
+      </div>
+    </div>
   </div>
 </template>
   
 <script>
   import DashboardCard from './DashboardCard.vue';
+  import SensorOverviewCard from './SensorsOverview/SensorOverviewCard.vue';
+  import ElectricityWaterConsumptionCard from './SensorsOverview/ElectricityWaterConsumptionCard.vue';
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-  import { Chart, registerables } from 'chart.js';
-  Chart.register(...registerables);
 
   export default {
     components: {
       DashboardCard,
+      SensorOverviewCard,
+      ElectricityWaterConsumptionCard,
       FontAwesomeIcon
     },
-    props: ['data', 'options'],
     data() {
       return {
-        pieChartOptions: {
-          responsive: true,
-          maintainAspectRatio: false, // Add this to maintain aspect ratio
-          legend: {
-            labels: {
-              fontColor: '#fbffff', // this should match your light color for dark background
-            },
-            position: 'bottom',
-          },
-          // Define color of the pie sections
-          backgroundColor: ['#3590f3', '#5d91c9', '#004fa3'],
-        },
-        lineChartOptions: {
-          responsive: true,
-          maintainAspectRatio: true,
-          aspectRatio: 3,
-        },
-        barChartOptions: {
-          responsive: true,
-          maintainAspectRatio: true,
-        },
-        waterChart: null,
-        electricalChart: null,
         buildings: [],
-        panicAlertMessage: '',
         selectedBuilding: '',
         loading: false,
         error: null,
-        sensors: {},
-        sensorTypes: {
-          0: 'Panic',
-          1: 'Temperature',
-          2: 'People Counter'
-        },
+        alerts: [], // Data for notifications and alerts
+        dashboardConfigurations: {}, // Settings for custom dashboard configurations
+        advancedReports: [],
       }
     },
     async created() {
       await this.fetchBuildings();
-      try {
-        const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        let text = await response.text();
-
-        // Replace ObjectId and ISODate formats with valid JSON
-        text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
-        text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
-
-        const rawData = JSON.parse(text);
-
-        const parsedData = rawData.map(item => {
-          // Convert time string to Date object
-          if (item.time && typeof item.time === 'string') {
-            item.time = new Date(item.time); 
-          }
-          return item;
-        });
-
-        this.sensors = parsedData.reduce((acc, curr) => {
-          if (!acc[curr.deviceName]) {
-            acc[curr.deviceName] = [];
-          }
-          acc[curr.deviceName].push(curr);
-          return acc;
-        }, {});
-      } catch (error) {
-        console.error("Error fetching sensors:", error);
-      }
-    },
-    mounted() {
-      this.$nextTick(() => {
-        [1, 3, 8, 12, 24].forEach(hours => {
-          this.createLineChart(hours);
-        });
-        this.createWaterConsumptionChart();
-        this.createElectricalConsumptionChart();
-      });
-    },
-    beforeUnmount() {
-      if (this.waterChart) {
-        this.waterChart.destroy();
-      }
-      if (this.electricalChart) {
-        this.electricalChart.destroy();
-      }
     },
     methods: {
       async fetchBuildings() {
@@ -228,193 +88,6 @@
         } finally {
           this.loading = false;
         }
-      },
-      formatDate(date) {
-          const year = date.getUTCFullYear();
-          const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based in JavaScript
-          const day = String(date.getUTCDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-      },
-      createLineChart(hours) {
-        this.$nextTick(() => {
-          const canvasId = `canvas${hours}h`;
-          const canvasElement = document.getElementById(canvasId);
-
-          if (canvasElement && canvasElement.getContext) {
-            const ctx = canvasElement.getContext('2d');
-            new Chart(ctx, {
-              type: 'line',
-              data: {
-                labels: [...Array(hours).keys()].map(num => `${num}h`),
-                datasets: [{
-                  label: `${hours} Hour Temperature`,
-                  data: [...Array(hours)].map(() => Math.random() * (30 - 20) + 20),
-                  fill: false,
-                  borderColor: 'rgb(75, 192, 192)',
-                  tension: 0.1
-                }]
-              },
-              options: this.lineChartOptions
-            });
-          }
-          else {
-            console.error(`Canvas or getContext not available for '${canvasId}'`);
-          }
-        });
-      },
-      getWaterChartId() {
-        return this.waterChartId + this._uid; // _uid is a unique identifier for each Vue component instance
-      },
-      getElectricalChartId() {
-        return this.electricalChartId + this._uid;
-      },
-      createWaterConsumptionChart() {
-        const waterCanvasId = `waterConsumptionChart-${this._uid}`;
-        const waterCanvas = document.getElementById(waterCanvasId);
-        
-        if(waterCanvas){
-          const ctx = waterCanvas.getContext('2d');
-          this.waterChart = new Chart(ctx, {
-            type: 'bar',
-              data: {
-                labels: this.generateLast24HoursLabels(),
-                datasets: [{
-                  label: 'Water Consumption (Liters)',
-                  data: this.generateRandomData(24, 100, 500),
-                  backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                  borderColor: 'rgba(54, 162, 235, 1)',
-                  borderWidth: 1
-                }]
-              },
-            options: this.barChartOptions
-          });
-        }
-        else{
-          console.error('Water consumption canvas element not found');
-        }
-      },
-
-      createElectricalConsumptionChart() {
-        const electricalCanvasId = `electricalConsumptionChart-${this._uid}`;
-        const electricalCanvas = document.getElementById(electricalCanvasId);
-        if (electricalCanvas) {
-          const ctx = electricalCanvas.getContext('2d');
-          this.electricalChart = new Chart(ctx, {
-            type: 'bar',
-              data: {
-                labels: this.generateLast24HoursLabels(),
-                datasets: [{
-                  label: 'Electrical Consumption (kWh)',
-                  data: this.generateRandomData(24, 200, 1500),
-                  backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                  borderColor: 'rgba(255, 206, 86, 1)',
-                  borderWidth: 1
-                }]
-              },
-            options: this.barChartOptions
-          });
-        }
-        else{
-          console.error('Electrical consumption canvas element not found');
-        }
-      },
-
-      // Helper methods
-      generateLast24HoursLabels() {
-        let labels = [];
-          let currentHour = new Date().getHours();
-
-          for (let i = 0; i < 24; i++) {
-            // Format the hour in 12-hour format and add AM/PM
-            let hour = (currentHour - i + 24) % 24; // adjust for negative hours
-            let suffix = hour >= 12 ? 'PM' : 'AM';
-            hour = hour % 12;
-            hour = hour ? hour : 12; // the hour '0' should be '12'
-            labels.unshift(`${hour} ${suffix}`); // unshift to add to the front
-          }
-
-          return labels;
-      },
-
-      generateRandomData(count, min, max) {
-        return Array.from({ length: count }, () => Math.floor(Math.random() * (max - min + 1)) + min);
-      },
-    },
-    computed: {
-      isPanicAlert() {
-        const sensors = {};
-        Object.keys(this.sensorTypes).forEach(type => {
-          sensors[this.sensorTypes[type]] = Object.values(this.sensors).filter(sensor => sensor[0].type == type).length;
-        });
-        return sensors['Panic'] > 0;
-      },
-      panicMessage() {
-        return this.isPanicAlert ? 'Panic detected!' : 'No emergency detected.';
-      },
-      sensorBarChartData() {
-        const data = {};
-        Object.keys(this.sensorTypes).forEach(type => {
-          data[this.sensorTypes[type]] = Object.values(this.sensors).filter(sensor => sensor[0].type == type).length;
-        });
-        return data;
-      },
-      sensorPieChartData() {
-        const data = {};
-        Object.keys(this.sensorTypes).forEach(type => {
-          data[this.sensorTypes[type]] = Object.values(this.sensors).filter(sensor => sensor[0].type == type).length;
-        });
-        return data;
-      },
-      averageTemperature() {
-        const temperatures = [];
-        const today = this.formatDate(new Date());
-        
-        Object.values(this.sensors).forEach(sensor => {
-          if (sensor[0].type == 1) { // 1 is for Temperature
-            sensor.forEach(data => {
-              if (this.formatDate(new Date(data.time)) === today) {
-                temperatures.push(parseFloat(data.data.split(',')[0]));
-              }
-            });
-          }
-        });
-
-        return temperatures.length > 0
-          ? (temperatures.reduce((a, b) => a + b, 0) / temperatures.length).toFixed(2)
-          : "No data";
-      },
-      averageHumidity() {
-        const humidities = [];
-        const today = this.formatDate(new Date());
-
-        Object.values(this.sensors).forEach(sensor => {
-          if (sensor[0].type == 1) { // 1 is for Temperature
-            sensor.forEach(data => {
-              if (this.formatDate(new Date(data.time)) === today) {
-                humidities.push(parseFloat(data.data.split(',')[1]));
-              }
-            });
-          }
-        });
-
-        return humidities.length > 0
-          ? (humidities.reduce((a, b) => a + b, 0) / humidities.length).toFixed(2)
-          : "No data";
-      },
-      totalPeople() {
-        let total = 0;
-        const today = this.formatDate(new Date());
-        Object.values(this.sensors).forEach(sensor => {
-          if (sensor[0].type == 2) { // 2 is for People Counter
-            sensor.forEach(data => {
-              if (data.time === today) {
-                total += parseInt(data.data);
-              }
-            });
-          }
-        });
-
-        return total;
       },
     }
   }
@@ -516,11 +189,13 @@ h1.display-4, h3.display-4 {
   font-family: 'Roboto', sans-serif; /* Apply the font only to these classes and elements */
 }
 
-.dashboard-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1.5rem;
-  /* Additional responsive and layout styling as needed */
+.notification-alerts, .custom-dashboard-configurations, .advanced-reporting {
+  /* Styling examples */
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #404040;
+  color: #fff;
+  /* Additional styles as needed */
 }
 
 /* Charts */

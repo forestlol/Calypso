@@ -32,19 +32,56 @@
   
   <style scoped>
   .dashboard-card {
-    /* Add styles for your dashboard card here */
-    background: #333740;
-    color: #fbffff;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-    transition: box-shadow 0.3s ease-in-out;
-    /* other styles */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
   }
   
+  .dashboard-card-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .dashboard-card-icon {
+    margin-right: 10px;
+    font-size: 24px;
+  }
+
+  .dashboard-card-title {
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .dashboard-card-body {
+    padding: 16px;
+  }
+
+  .dashboard-card-chart {
+    height: 150px;
+  }
+
   .dashboard-card:hover {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
   }
   
+  .dashboard-card.water {
+    border-left: 5px solid #3498db;
+  }
+
+  .dashboard-card.electricity {
+    border-left: 5px solid #f1c40f;
+  }
+
+  .dashboard-card.efficiency {
+    border-left: 5px solid #2ecc71;
+  }
   
   .card-header {
     background-color: #3590f3;
