@@ -14,33 +14,39 @@
                 <!-- Temperature Card -->
                 <div class="col-md-4">
                     <div class="sensor-card temperature-card">
-                    <font-awesome-icon :icon="['fas', 'temperature-high']" />
-                    <div class="sensor-card-content">
-                        <p>{{ averageTemperature }}°C</p>
-                        <h5>Average Temperature</h5>
-                    </div>
+                        <div class="icon-container">
+                            <font-awesome-icon :icon="['fas', 'temperature-high']" size="3x"/>
+                        </div>
+                        <div class="sensor-card-content">
+                            <p>{{ averageTemperature }}°C</p>
+                            <h5>Average Temperature</h5>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Humidity Card -->
                 <div class="col-md-4">
                     <div class="sensor-card humidity-card">
-                    <font-awesome-icon :icon="['fas', 'droplet']" />
-                    <div class="sensor-card-content">
-                        <p>{{ averageHumidity }}%</p>
-                        <h5>Average Humidity</h5>
-                    </div>
+                        <div class="icon-container">
+                            <font-awesome-icon :icon="['fas', 'droplet']" size="3x" />
+                        </div>
+                        <div class="sensor-card-content">
+                            <p>{{ averageHumidity }}%</p>
+                            <h5>Average Humidity</h5>
+                        </div>
                     </div>
                 </div>
         
                 <!-- People Card -->
                 <div class="col-md-4">
                     <div class="sensor-card people-card">
-                    <font-awesome-icon :icon="['fas', 'users']" />
-                    <div class="sensor-card-content">
-                        <p>{{ totalPeople }}</p>
-                        <h5>Total People</h5>
-                    </div>
+                        <div class="icon-container">
+                            <font-awesome-icon :icon="['fas', 'users']" size="3x"/>
+                        </div>
+                        <div class="sensor-card-content">
+                            <p>{{ totalPeople }}</p>
+                            <h5>Total People</h5>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -48,71 +54,34 @@
     
         <!-- Sensor Details Section -->
         <div class="sensor-details-container">
-            <div class="row">
-                <div class="chart-toggle-buttons">
-                    <!-- Buttons for toggling charts -->
-                    <button v-for="hours in [1, 3, 8, 12, 24]" 
-                            :key="`btn-${hours}h`" 
-                            :class="{'active': activeChart === hours}" 
-                            :disabled="isChartLoading"
-                            @click="setActiveChart(hours)">
-                        {{ hours }}h
-                    </button>
-                </div>
-                <!-- Panic Alert and Active Sensor Types -->
-                <div class="col-lg-6 d-flex flex-column">
-                    <div class="chart-container sensor-types-card flex-grow-1">
-                        <div class="card-header">
-                            <h5>Recent Active Sensor Types</h5>
-                            <button class="minimize-button" v-if="!minimizedCards.sensorTypes" @click="minimizeCard('sensorTypes')">-</button>
-                            <button class="minimize-button" v-else @click="minimizeCard('sensorTypes')">+</button>
-                        </div>
-                        <div class="card-body" v-show="!minimizedCards.sensorTypes" >
-                            <pie-chart :data="sensorPieChartData" :options="pieChartOptions"></pie-chart>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chart Containers -->
-                <div class="col-lg-6 d-flex flex-column">
-                    <div class="chart-container temperature-chart flex-grow-1">
-                        <div class="card-header">
-                            <h5>Temperature Charts</h5>
-                            <button class="minimize-button" v-if="!minimizedCards.temperature" @click="minimizeCard('temperature')">-</button>
-                            <button class="minimize-button" v-else @click="minimizeCard('temperature')">+</button>
-                        </div>
-                        <div class="card-body" v-show="!minimizedCards.temperature">
-                            <canvas id="temperatureChartCanvas"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 d-flex flex-column">
-                    <div class="chart-container humidity-chart flex-grow-1">
-                        <div class="card-header">
-                            <h5>Humidity Charts</h5>
-                            <button class="minimize-button" v-if="!minimizedCards.humidity" @click="minimizeCard('humidity')">-</button>
-                            <button class="minimize-button" v-else @click="minimizeCard('humidity')">+</button>
-                        </div>
-                        <div class="card-body" v-show="!minimizedCards.humidity">
-                            <canvas id="humidityChartCanvas"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 d-flex flex-column">
-                    <div class="chart-container people-chart flex-grow-1">
-                        <div class="card-header">
-                            <h5>People Counter Charts</h5>
-                            <button class="minimize-button" v-if="!minimizedCards.people" @click="minimizeCard('people')">-</button>
-                            <button class="minimize-button" v-else @click="minimizeCard('people')">+</button>
-                        </div>
-                        <div class="card-body" v-show="!minimizedCards.people">
-                            <canvas id="peopleChartCanvas"></canvas>
-                        </div>
-                    </div>
-                </div>
+            <div class="chart-toggle-buttons">
+                <!-- Buttons for toggling charts -->
+                <button v-for="hours in [1, 3, 8, 12, 24]" 
+                        :key="`btn-${hours}h`" 
+                        :class="{'active': activeChart === hours}" 
+                        :disabled="isChartLoading"
+                        @click="setActiveChart(hours)">
+                    {{ hours }}h
+                </button>
             </div>
+            <draggable class="row" @end="onEnd" :list="cards" item-key="name">
+                <template #item="{ element }">
+                    <div class="col-lg-6 d-flex flex-column">
+                        <div :class="`chart-container ${element.type}-chart`">
+                            <div class="card-header">
+                                <h5>{{ formatChartName(element.name) }} Charts</h5>
+                                <button class="minimize-button" @click="minimizeCard(element.name)">
+                                    {{ minimizedCards[element.name] ? '+' : '-' }}
+                                </button>
+                            </div>
+                            <div class="card-body" v-show="!minimizedCards[element.name]">
+                                <pie-chart v-if="element.type === 'pie-chart'" :data="sensorPieChartData" :options="pieChartOptions" />
+                                <canvas v-else-if="element.type === 'line-chart'" :id="`${element.name}ChartCanvas`"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </draggable>
         </div>
     </div>
 </template>
@@ -120,14 +89,14 @@
 <script>
     import DashboardCard from '../DashboardCard.vue';
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-    import AdvancedOptionsModal from './AdvancedOptionsModal.vue';
+    import draggable from 'vuedraggable';
     import { Chart, registerables } from 'chart.js';
     Chart.register(...registerables);
 
     export default {
         components: {
+            draggable,
             DashboardCard,
-            AdvancedOptionsModal,
             FontAwesomeIcon
         },
         props: ['averageTemperature', 'averageHumidity', 'totalPeople', 'data', 'options'],
@@ -136,27 +105,62 @@
                 pieChartOptions: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                fontColor: "white",
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontColor: "white",
+                            }
+                        }]
+                    },
+                    legend: {
+                        labels: {
+                        fontColor: '#fbffff',
+                        },
+                        position: 'bottom',
+                    },
+                    backgroundColor: ['#e67e22', '#1abc9c', '#4682B4'],
+                },
+                lineChartOptions: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: [{
+                            beginAtZero: true,
+                            ticks: {
+                                fontColor: "white",
+                            }
+                        }],
+                        x: [{
+                            ticks: {
+                                fontColor: "white",
+                            }
+                        }]
+                    },
                     legend: {
                         labels: {
                         fontColor: '#fbffff', // this should match your light color for dark background
                         },
                         position: 'bottom',
                     },
-                    // Define color of the pie sections
-                    backgroundColor: ['#3590f3', '#5d91c9', '#004fa3'],
-                },
-                lineChartOptions: {
-                    responsive: true,
-                    maintainAspectRatio: true,
                     aspectRatio: 3,
                 },
+                cards: [
+                    { name: 'sensorTypes', type: 'pie-chart', minimized: false },
+                    { name: 'temperature', type: 'line-chart', minimized: false },
+                    { name: 'humidity', type: 'line-chart', minimized: false },
+                    { name: 'people', type: 'line-chart', minimized: false }
+                    ],
                 minimizedCards: {
                     sensorTypes: false,
                     temperature: false,
                     humidity: false,
                     people: false
                 },
-                intervalTemperatures: {},
                 isChartLoading: false,
                 processedData: {},
                 activeChart: 1,
@@ -168,18 +172,13 @@
                     2: 'People Counter'
                 },
                 panicAlertMessage: '',
-                showAdvancedOptions: false,
             }
         },
         async created() {
             await this.fetchSensors();
         },
         mounted() {
-            // Fetch and process data
-            this.fetchAndProcessSensorData().then(() => {
-                const allSensorReadings = Object.values(this.sensors).flat();
-                this.intervalTemperatures = this.processSensorDataForIntervals(allSensorReadings);
-            });
+            this.fetchAndProcessSensorData();
         },
         computed: {
             isPanicAlert() {
@@ -211,7 +210,7 @@
                 const today = this.formatDate(new Date());
                 
                 Object.values(this.sensors).forEach(sensor => {
-                if (sensor[0].type == 1) { // 1 is for Temperature
+                if (sensor[0].type == 1) { // 1 is for Temperature & Humidity
                     sensor.forEach(data => {
                     if (this.formatDate(new Date(data.time)) === today) {
                         temperatures.push(parseFloat(data.data.split(',')[0]));
@@ -228,7 +227,7 @@
                 const today = this.formatDate(new Date());
 
                 Object.values(this.sensors).forEach(sensor => {
-                if (sensor[0].type == 1) { // 1 is for Temperature
+                if (sensor[0].type == 1) { // 1 is for Temperature & Humidity
                     sensor.forEach(data => {
                     if (this.formatDate(new Date(data.time)) === today) {
                         humidities.push(parseFloat(data.data.split(',')[1]));
@@ -269,14 +268,12 @@
 
                     let text = await response.text();
 
-                    // Replace ObjectId and ISODate formats with valid JSON
                     text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
                     text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
 
                     const rawData = JSON.parse(text);
 
                     const parsedData = rawData.map(item => {
-                    // Convert time string to Date object
                     if (item.time && typeof item.time === 'string') {
                         item.time = new Date(item.time); 
                     }
@@ -309,7 +306,6 @@
 
                 let text = await response.text();
 
-                // Replace ObjectId and ISODate formats with valid JSON
                 text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
                 text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
 
@@ -324,7 +320,6 @@
                     const filteredData = rawData.filter(data => {
                         let sensorTime = new Date(data.time);
 
-                        // Check if the sensor time is ahead of current time by a threshold (e.g., 2 hours)
                         if (sensorTime - now > thresholdInMilliseconds) {
                             sensorTime = new Date(sensorTime.getTime() - eightHoursInMilliseconds);
                         }
@@ -342,7 +337,6 @@
                     console.error("Error fetching and processing sensor data:", error);
                 }
             },
-
             processSensorDataForCharts(sensorData, intervalHours = 1) {
                 const intervalMinutes = intervalHours === 1 ? 10 : 60;
                 const intervalsCount = (intervalHours * 60) / intervalMinutes;
@@ -397,46 +391,18 @@
                     };
                 });
             },
-            processSensorDataForIntervals(sensorData) {
-
-                if (!Array.isArray(sensorData)) {
-                    console.error('sensorData is not an array:', sensorData);
-                    return;
-                }
-
-                // Define the intervals and initialize the structure
-                const intervals = [1, 3, 8, 12, 24]; // in hours
-                const intervalTemperatures = intervals.reduce((acc, interval) => {
-                    acc[interval + 'h'] = [];
-                    return acc;
-                }, {});
-
-                // Current time
-                const now = new Date();
-
-                // Process each sensor reading
-                sensorData.forEach(data => {
-                    if (data.type === 1) { // Assuming '1' is the type for temperature sensors
-                        const readingTime = new Date(data.time);
-                        const temperature = parseFloat(data.temperature); // Assuming temperature is a direct property
-
-                        // Determine which intervals this reading belongs to
-                        intervals.forEach(interval => {
-                            if (now - readingTime <= interval * 3600000) {
-                                intervalTemperatures[interval + 'h'].push(temperature);
-                            }
-                        });
-                    }
-                });
-
-                return intervalTemperatures;
-            },
             setActiveChart(selectedInterval) {
                 this.activeChart = selectedInterval;
                 this.updateCharts();
             },
             minimizeCard(cardName) {
                 this.minimizedCards[cardName] = !this.minimizedCards[cardName];
+            },
+            formatChartName(name) {
+                return name
+                    .split(/(?=[A-Z])/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
             },
             calculateAverage(dataArray) {
                 if (dataArray.length === 0) return 0;
@@ -448,7 +414,6 @@
                 if (this.processedData && this.processedData[chartInterval]) {
                     const intervalData = this.processedData[chartInterval];
 
-                    // Initialize the arrays to store the accumulated data and labels
                     let temperatureDataPoints = [];
                     let humidityDataPoints = [];
                     let peopleCountDataPoints = [];
@@ -457,7 +422,6 @@
                     const generateLabels = (interval, count) => {
                         let labelArray = [];
                         if (interval === '1') {
-                            // For 1h interval, use 10-minute increments
                             for (let i = 0; i < count; i++) {
                                 labelArray.push(`${(i + 1) * 10}min`);
                             }
@@ -472,13 +436,11 @@
                     
                     labels = generateLabels(chartInterval, intervalData.length);
 
-                    // Accumulate data points and labels for each data point in the interval
                     intervalData.forEach((dataPoint, index) => {
                         temperatureDataPoints.push(dataPoint.temperatureAvg);
                         humidityDataPoints.push(dataPoint.humidityAvg);
                         peopleCountDataPoints.push(dataPoint.peopleCountTotal);
                     });
-                    // Now call createOrUpdateChart with the full array of data points and labels
                     this.createOrUpdateChart('Temperature', temperatureDataPoints, labels);
                     this.createOrUpdateChart('Humidity', humidityDataPoints, labels);
                     this.createOrUpdateChart('People', peopleCountDataPoints, labels);
@@ -494,79 +456,90 @@
                     await this.$nextTick();
                 }
 
-                const canvasId = `${chartType.toLowerCase()}ChartCanvas`;
-                const canvas = document.getElementById(canvasId);
-                if (canvas) {
-                    const ctx = canvas.getContext('2d');
-                    // Assuming destroy/create process is synchronous
-                    // If not, wrap in a promise or use await on async calls
-                    if (this.charts[chartType]) {
-                        await this.charts[chartType].destroy(); // Make sure this is awaited if asynchronous
+                this.$nextTick(async () => {
+                    const canvasId = `${chartType.toLowerCase()}ChartCanvas`;
+                    const canvas = document.getElementById(canvasId);
+                    console.log(canvas);
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        if (this.charts[chartType]) {
+                            await this.charts[chartType].destroy();
                         }
                         this.charts[chartType] = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                            label: chartType,
-                            data: dataPoints,
-                            fill: false,
-                            borderColor: this.getBorderColorByChartType(chartType),
-                            tension: 0.1
-                            }]
-                        },
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                label: chartType,
+                                data: dataPoints,
+                                fill: false,
+                                borderColor: this.getBorderColorByChartType(chartType),
+                                tension: 0.1
+                                }]
+                            },
                         options: this.lineChartOptions
-                    });
-                    setTimeout(() => {
-                        this.isChartLoading = false;
-                    }, 1200); // Adjust time as needed
-                } else {
-                    console.error(`Canvas element not found for chart type: '${chartType}'`);
-                }
+                        });
+                        setTimeout(() => {
+                            this.isChartLoading = false;
+                        }, 1200);
+                    } else {
+                        console.error(`Canvas element not found for chart type: '${chartType}'`);
+                    }
+                });
             },
 
             getBorderColorByChartType(chartType) {
-                // Define border colors for each chart type
                 const colors = {
-                    'Temperature': 'rgb(255, 99, 132)',
-                    'Humidity': 'rgb(54, 162, 235)',
-                    'PeopleCount': 'rgb(75, 192, 192)'
+                    'Temperature': '#e67e22',
+                    'Humidity': '#1abc9c',
+                    'People': '#4682B4'
                 };
                 return colors[chartType] || 'rgb(201, 203, 207)'; // Default color
+            },
+            onEnd(event) { // This is what we want to implement when the cards are dragged, maybe save it in database?
             },
         },
     };
 </script>
 
 <style>
-    /* Global card styles */
+    
+    :root {
+        --dark-bg: #333;
+        --light-text: #ffffff;
+        --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        --radius: 15px;
+        --color-temperature: #e67e22;
+        --color-humidity: #1abc9c;
+        --color-people: #4682B4;
+    }
+
     .sensor-cards-container .sensor-card,
     .sensor-detail-card, 
     .chart-container {
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
         margin: 10px;
-        color: white;
+        color: var(--light-text);
     }
 
-    /* Specific gradient backgrounds for sensor cards */
     .temperature-card {
-        background: linear-gradient(to right, #ff6e7f, #bfe9ff);
+        background: linear-gradient(to right, #f9d08b, var(--color-temperature));
     }
-    
+
     .humidity-card {
-        background: linear-gradient(to right, #00c6ff, #0072ff);
+        background: linear-gradient(to right, #66d1ca, var(--color-humidity));
     }
-    
+
     .people-card {
-        background: linear-gradient(to right, #f7971e, #ffd200);
+        background: linear-gradient(to right, #6e9ecf, var(--color-people));
     }
+
     
     .panic-alert-card {
-        background: #333;
+        background: var(--dark-bg);
     }
 
-    /* Layout for sensor cards */
     .sensor-card {
         padding: 20px;
         display: flex;
@@ -574,77 +547,144 @@
         justify-content: space-between;
     }
 
+    .sensor-card-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .sensor-card .sensor-card-content h5 {
+        margin: 0; 
+        padding: 0 10px;
+    }
+
+    .sensor-card .sensor-card-content p {
+        margin: 0;
+        padding: 0 10px;
+    }
+
+    .sensor-card .icon-container {
+        width: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
     .sensor-card .sensor-card-content {
-        font-size: 1.2rem; /* Adjusted font size for the header */
+        font-size: 1.2rem;
         margin-bottom: 0.5rem;
     }
 
     .sensor-card .sensor-card-content p {
-        font-size: 3rem; /* Size for the large numbers */
+        font-size: 2.5rem;
         font-weight: bold;
     }
 
-    /* Layout for detail and chart containers */
     .sensor-detail-card, .chart-container {
-        flex: 1 1 calc(50% - 20px); /* Set the width and account for margins */
+        flex: 1 1 calc(50% - 20px);
         padding: 20px;
         display: flex;
         flex-direction: column;
     }
 
-    /* Style for the card header where the minimize button will be */
     .sensor-detail-card .card-header, 
     .chart-container .card-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
-    
-    /* Add a default background for chart containers if they are not sensor-detail-cards */
+
+    .icon-container {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     .chart-container {
-        background: #333;
+        background: var(--dark-bg);
     }
 
-    /* Style for the minimize/maximize buttons */
     .minimize-button {
-        background: none;
-        border: none;
-        color: inherit;
-        font-size: 1.5rem;
+        background-color: #ffffff;
+        color: var(--dark-bg);
+        border-radius: 50%; 
+        width: 24px; 
+        height: 24px; 
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        border: none; 
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
         cursor: pointer;
-        padding: 0;
+        font-size: 16px;
+        font-weight: bold;  
+        margin-right: 8px;
+        transition: background-color 0.3s;
     }
 
-    /* Style adjustments for minimized cards */
-    .minimized-card .card-header {
-        /* No change needed here; just ensure it remains visible */
+    .minimize-button:hover {
+        background-color: #f0f0f0; /* Slightly different background on hover */
     }
 
-    .minimized-card .card-body {
-        /* Hide the card body when minimized */
-        display: none;
+    /* Additional style to increase visibility when the button is on a dark background */
+    .chart-container .minimize-button,
+    .sensor-detail-card .minimize-button {
+        color: #ffffff; /* White symbol for dark backgrounds */
+        background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
     }
 
+    .chart-container .minimize-button:hover,
+    .sensor-detail-card .minimize-button:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+    
     .chart-container.minimized-card, 
     .sensor-detail-card.minimized-card {
-        /* Adjust the minimized card itself */
-        padding-top: 20px; /* Keep padding for the header */
-        padding-bottom: 0; /* Remove bottom padding */
-        height: 50px; /* Height to accommodate the header */
-        overflow: hidden; /* Hide any overflow content */
+        padding-top: 20px;
+        padding-bottom: 0;
+        height: 50px;
+        overflow: hidden;
     }
 
-    /* Button styles for toggling charts */
+    .chart-toggle-buttons {
+        display: flex;
+        justify-content: center;
+        padding: 10px 0;
+        flex-wrap: wrap;
+    }
+
     .chart-toggle-buttons button {
-        padding: 10px;
-        margin: 5px;
+        padding: 10px 50px;
+        margin: 10px;
         border: none;
-        background-color: #444; /* Non-active color */
+        background-color: #444;
         color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .chart-toggle-buttons button:hover {
+        background-color: #555;
     }
 
     .chart-toggle-buttons button.active {
-        background-color: red; /* Active button color */
+        background-color: red;
+    }
+
+    @media (max-width: 768px) {
+        .sensor-card {
+            flex-direction: column;
+        }
+        .icon-container {
+            width: auto;
+            margin-bottom: 10px;
+        }
+        .sensor-card-content {
+            align-items: center;
+            text-align: center;
+        }
     }
 </style>
-

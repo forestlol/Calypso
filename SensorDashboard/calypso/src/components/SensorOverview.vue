@@ -10,10 +10,10 @@
           </option>
         </select>
       </div>
-      <div class="col-lg-6">
+      <!-- <div class="col-lg-6">
         <h3 v-if="selectedBuilding" class="display-4 text-center">{{selectedBuilding}} <br> Overview</h3>
         <h3 v-else class="display-4 text-center">Overview</h3>
-      </div>
+      </div> -->
     </div>
 
     <div class="row">
