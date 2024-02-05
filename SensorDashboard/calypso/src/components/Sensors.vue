@@ -78,6 +78,8 @@
   
   
 <script>
+  import * as CacheManager from './CacheManager.js';
+
   export default {
     data() {
       return {
@@ -89,7 +91,18 @@
       };
     },
     async created() {
-      try {
+      if(CacheManager.getItem('readings') != null){
+        this.sensors == CacheManager.getItem('readings');
+        await this.GetLatestReadings();
+        CacheManager.setItem('readings', this.sensors);
+      }else{
+        await this.GetLatestReadings();
+        CacheManager.setItem('readings', this.sensors);
+      }
+    },
+    methods: {
+      async GetLatestReadings(){
+        try {
           const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
           
           if (!response.ok) {
@@ -123,14 +136,10 @@
           this.uniqueDeviceNames = Object.keys(this.sensors);
           this.checkSensorsAndNotify()
           this.fetchRoomData();
-
-
-
-      } catch (error) {
-          console.error("Error fetching sensors:", error);
-      }
-  },
-    methods: {
+        } catch (error) {
+            console.error("Error fetching sensors:", error);
+        }
+      },
       async fetchRoomData() {
         try {
           const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/building');
@@ -149,18 +158,9 @@
               if (this.uniqueDeviceNames.includes(rooms[i].sensors[j])){        
                   this.roomData[rooms[i].sensors[j]] = rooms[i].room_name; // { 84AECD: Material Room }
               }
-              // if (rooms[i].sensors[j]) {
-              //   this.roomData[rooms[i].sensors[j]] = rooms[i].room_name;
-              //   //this.roomData[rooms[i].sensors[j]] = {'room_name':rooms[i].room_name, 'sensor_name':rooms[i].sensors[j]};
-              // }
-              
             }
             
           }
-          // console.log(Object.keys(this.roomData));
-          // console.log(Object.values(this.uniqueDeviceNames));
-          
-
         } catch (err) {
           console.error(err);
           this.error = 'Failed to load floor data: ' + err.message;
