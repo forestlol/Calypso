@@ -82,6 +82,9 @@
               rooms: floor.rooms
             }))
           }));
+          if (this.buildings.length > 0) {
+            this.selectedBuilding = this.buildings[0].building_name;
+          }
         } catch (err) {
           console.error(err);
           this.error = 'Failed to load buildings data: ' + err.message;
