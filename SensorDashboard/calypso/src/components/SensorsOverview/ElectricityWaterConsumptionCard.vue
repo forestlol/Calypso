@@ -1,27 +1,48 @@
 <template>
-  <div class="consumption-card">
-    <div class="card-header">Electricity Consumption</div>
-    <div class="card-body">
-      <canvas :id="electricityChartId"></canvas>
-    </div>
-    <div class="card-header">Water Consumption</div>
-    <div class="card-body">
-      <canvas :id="waterChartId"></canvas>
-    </div>
+  <div class="sensor-details-container">
+    <draggable class="row" @end="onEnd" :list="cards" item-key="name">
+      <template #item="{ element }">
+        <div class="col-lg-6 d-flex flex-column">
+          <div :class="`chart-container ${element.type}-chart`">
+            <div class="card-header">
+              <h5>{{ formatChartName(element.name) }}</h5>
+              <button class="minimize-button" @click="minimizeCard(element.name)">
+                {{ minimizedCards[element.name] ? '+' : '-' }}
+              </button>
+            </div>
+            <div class="card-body" v-show="!minimizedCards[element.name]">
+              <canvas :id="element.name === 'electricity' ? electricityChartId : waterChartId"></canvas>
+            </div>
+          </div>
+        </div>
+      </template>
+    </draggable>
   </div>
 </template>
 
 <script>
+import draggable from 'vuedraggable';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 export default {
+  components: {
+    draggable
+  },
   props: {
     electricityData: Array,
     waterData: Array
   },
   data() {
     return {
+      cards: [
+        { name: 'electricity', type: 'line-chart', minimized: false },
+        { name: 'water', type: 'line-chart', minimized: false }
+      ],
+      minimizedCards: {
+        electricity: false,
+        water: false
+      },
       electricityChart: null,
       waterChart: null,
       barChartOptions: {
@@ -48,29 +69,38 @@ export default {
     createWaterConsumptionChart() {
       const waterCanvasId = `waterConsumptionChart-${this._uid}`;
       const waterCanvas = document.getElementById(waterCanvasId);
-      
-      if(waterCanvas){
+
+      if (waterCanvas) {
         const ctx = waterCanvas.getContext('2d');
         this.waterChart = new Chart(ctx, {
           type: 'bar',
-            data: {
-              labels: this.generateLast24HoursLabels(),
-              datasets: [{
-                label: 'Water Consumption (Liters)',
-                data: this.generateRandomData(24, 100, 500),
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-              }]
-            },
+          data: {
+            labels: this.generateLast24HoursLabels(),
+            datasets: [{
+              label: 'Water Consumption (Liters)',
+              data: this.generateRandomData(24, 100, 500),
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }]
+          },
           options: this.barChartOptions
         });
       }
-      else{
+      else {
         console.error('Water consumption canvas element not found');
       }
     },
-
+    minimizeCard(cardName) {
+      this.minimizedCards[cardName] = !this.minimizedCards[cardName];
+    },
+    formatChartName(name) {
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    },
+    onEnd(event) {
+      console.log('Drag ended', event);
+      // Implement the logic you want to execute when the drag ends
+    },
     createElectricalConsumptionChart() {
       const electricalCanvasId = `electricityConsumptionChart-${this._uid}`;
       const electricalCanvas = document.getElementById(electricalCanvasId);
@@ -78,20 +108,20 @@ export default {
         const ctx = electricalCanvas.getContext('2d');
         this.electricalChart = new Chart(ctx, {
           type: 'bar',
-            data: {
-              labels: this.generateLast24HoursLabels(),
-              datasets: [{
-                label: 'Electrical Consumption (kWh)',
-                data: this.generateRandomData(24, 200, 1500),
-                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                borderColor: 'rgba(255, 206, 86, 1)',
-                borderWidth: 1
-              }]
-            },
+          data: {
+            labels: this.generateLast24HoursLabels(),
+            datasets: [{
+              label: 'Electrical Consumption (kWh)',
+              data: this.generateRandomData(24, 200, 1500),
+              backgroundColor: 'rgba(255, 206, 86, 0.2)',
+              borderColor: 'rgba(255, 206, 86, 1)',
+              borderWidth: 1
+            }]
+          },
           options: this.barChartOptions
         });
       }
-      else{
+      else {
         console.error('Electrical consumption canvas element not found');
       }
     },
@@ -99,18 +129,18 @@ export default {
     // Helper methods
     generateLast24HoursLabels() {
       let labels = [];
-        let currentHour = new Date().getHours();
+      let currentHour = new Date().getHours();
 
-        for (let i = 0; i < 24; i++) {
-          // Format the hour in 12-hour format and add AM/PM
-          let hour = (currentHour - i + 24) % 24; // adjust for negative hours
-          let suffix = hour >= 12 ? 'PM' : 'AM';
-          hour = hour % 12;
-          hour = hour ? hour : 12; // the hour '0' should be '12'
-          labels.unshift(`${hour} ${suffix}`); // unshift to add to the front
-        }
+      for (let i = 0; i < 24; i++) {
+        // Format the hour in 12-hour format and add AM/PM
+        let hour = (currentHour - i + 24) % 24; // adjust for negative hours
+        let suffix = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12;
+        hour = hour ? hour : 12; // the hour '0' should be '12'
+        labels.unshift(`${hour} ${suffix}`); // unshift to add to the front
+      }
 
-        return labels;
+      return labels;
     },
 
     generateRandomData(count, min, max) {
@@ -129,17 +159,58 @@ export default {
 </script>
 
 <style scoped>
-.consumption-card {
-  /* Styles for the card */
+.chart-container {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin: 10px;
+  color: var(--light-text);
+  background: var(--dark-bg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-header {
-  /* Styles for card headers */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .card-body {
-  /* Styles for card bodies */
+  flex-grow: 1;
 }
 
-/* Include any other styles specific to these consumption charts */
+.minimize-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--light-text);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.minimize-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Specific styles for electricity and water charts */
+.electricity-chart {
+  background: linear-gradient(to right, #ffeaa7, #fdcb6e);
+  /* Gradient for electricity */
+}
+
+.water-chart {
+  background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+  /* Gradient for water */
+}
 </style>
