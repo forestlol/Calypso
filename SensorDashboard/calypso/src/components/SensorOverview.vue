@@ -40,7 +40,7 @@
   import SensorOverviewCard from './SensorsOverview/SensorOverviewCard.vue';
   import ElectricityWaterConsumptionCard from './SensorsOverview/ElectricityWaterConsumptionCard.vue';
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-  import * as CacheManager from './CacheManager.js';
+  import * as CacheManager from 'CacheManager.js';
  
   export default {
     components: {
