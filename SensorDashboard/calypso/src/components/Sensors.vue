@@ -78,7 +78,7 @@
   
   
 <script>
-  import * as CacheManager from './CacheManager.js';
+  import * as CacheManager from '@/CacheManager.js';
 
   export default {
     data() {
