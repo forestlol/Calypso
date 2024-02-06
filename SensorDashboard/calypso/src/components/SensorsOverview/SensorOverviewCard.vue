@@ -92,7 +92,7 @@
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
     import draggable from 'vuedraggable';
     import { Chart, registerables } from 'chart.js';
-    import * as CacheManager from '../CacheManager.js';
+    import * as CacheManager from '@/CacheManager.js';
 
     Chart.register(...registerables);
 
