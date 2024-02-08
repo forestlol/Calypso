@@ -118,14 +118,10 @@
               acc[curr.deviceName].push(curr);
               return acc;
           }, {});
-
+          
           // If you want an array of unique device names
           this.uniqueDeviceNames = Object.keys(this.sensors);
-          this.checkSensorsAndNotify()
           this.fetchRoomData();
-
-
-
       } catch (error) {
           console.error("Error fetching sensors:", error);
       }
@@ -164,42 +160,6 @@
         } catch (err) {
           console.error(err);
           this.error = 'Failed to load floor data: ' + err.message;
-        }
-      },
-      checkSensorsAndNotify() {
-        this.uniqueDeviceNames.forEach((deviceName) => {
-          const lastReading = this.getLastReading(deviceName);
-          this.checkAndNotify(deviceName, lastReading);
-        });
-      },
-      checkAndNotify(deviceName, lastReading) {
-        const data = lastReading.split(',');
-        const sensorType = this.sensors[deviceName][0].type;
-        const temperature = parseFloat(data[0]);
-        const peopleCount = parseInt(data[0], 10);
-
-        if (sensorType === 1 && temperature > 30) {
-          // Temperature alert
-          this.sendNotification(deviceName, `Temperature alert for ${deviceName}: ${temperature}°C`);
-        } else if (sensorType === 2 && peopleCount > 4) {
-          // People count alert
-          this.sendNotification(deviceName, `People count alert for ${deviceName}: ${peopleCount}`);
-        }
-      },
-      async sendNotification(deviceName, message) {
-        // Send the notification via an API call
-        try {
-          const response = await fetch('/api/send-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ deviceName, message }),
-          });
-          const data = await response.json();
-          console.log(data);
-        } catch (error) {
-          console.error('Error sending notification:', error);
         }
       },
       getTypeName(type) {
