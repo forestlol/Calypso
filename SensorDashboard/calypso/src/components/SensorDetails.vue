@@ -56,13 +56,17 @@
 
         <!-- Chart Display -->
         <div class="sensor-card" v-if="sensorType === 1">
-            <h4>Temperature (°C)</h4>
-            <area-chart :data="temperatureData" :xtitle="'Hours'" :ytitle="'Temperature (°C)'"
-                :library="chartOptions"></area-chart>
+            <div class="col-12">
+                <h4>Temperature (°C)</h4>
+                <area-chart :data="temperatureData" :xtitle="'Hours'" :ytitle="'Temperature (°C)'" :library="chartOptions"></area-chart>
+            </div>
+        </div>
 
-            <h4 class="mt-4">Humidity (%)</h4>
-            <area-chart :data="humidityData" :xtitle="'Hours'" :ytitle="'Humidity (%)'"
-                :library="chartOptions"></area-chart>
+        <div class="sensor-card" v-if="sensorType === 1">
+            <div class="col-12">
+                <h4>Humidity (%)</h4>
+                <area-chart :data="humidityData" :xtitle="'Hours'" :ytitle="'Humidity (%)'" :library="chartOptions"></area-chart>
+            </div>
         </div>
 
         <div v-else class="sensor-card">
@@ -183,9 +187,11 @@ export default {
             }
         },
         calculateAverage(data) {
-            const values = Object.values(data).map(value => parseFloat(value) || 0);
+            const values = Object.values(data)
+                .map(value => parseFloat(value))
+                .filter(value => !isNaN(value) && value !== 0);
             const sum = values.reduce((acc, value) => acc + value, 0);
-            const count = values.filter(value => !isNaN(value)).length;
+            const count = values.length;
             return count > 0 ? sum / count : 0;
         },
         extractHourlyData(data, index = null) {
@@ -426,6 +432,10 @@ h2 {
 
 h4,
 h5 {
+    color: #34495e;
+}
+
+p{
     color: #34495e;
 }
 

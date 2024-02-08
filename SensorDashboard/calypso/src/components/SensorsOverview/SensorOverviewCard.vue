@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-dupe-keys -->
 <!-- SensorOverviewCard.vue -->
 <template>
     <div class="sensor-overview">
@@ -91,6 +92,8 @@
     import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
     import draggable from 'vuedraggable';
     import { Chart, registerables } from 'chart.js';
+    import * as CacheManager from '@/CacheManager.js';
+
     Chart.register(...registerables);
 
     export default {
@@ -175,7 +178,14 @@
             }
         },
         async created() {
-            await this.fetchSensors();
+            if(CacheManager.getItem('sensors') != null){
+                this.sensors == CacheManager.getItem('sensors');
+                await this.fetchSensors();
+                CacheManager.setItem('sensors', this.sensors);
+            }else{
+                await this.fetchSensors();
+                CacheManager.setItem('sensors', this.sensors);
+            }
         },
         mounted() {
             this.fetchAndProcessSensorData();
@@ -436,7 +446,7 @@
                     
                     labels = generateLabels(chartInterval, intervalData.length);
 
-                    intervalData.forEach((dataPoint, index) => {
+                    intervalData.forEach((dataPoint) => {
                         temperatureDataPoints.push(dataPoint.temperatureAvg);
                         humidityDataPoints.push(dataPoint.humidityAvg);
                         peopleCountDataPoints.push(dataPoint.peopleCountTotal);
@@ -459,7 +469,6 @@
                 this.$nextTick(async () => {
                     const canvasId = `${chartType.toLowerCase()}ChartCanvas`;
                     const canvas = document.getElementById(canvasId);
-                    console.log(canvas);
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
                         if (this.charts[chartType]) {
