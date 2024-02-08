@@ -434,6 +434,7 @@ export default {
   right:16%;
   bottom: 26%;
 }
+/* Add more classes for other rooms */
 
 
 </style>
