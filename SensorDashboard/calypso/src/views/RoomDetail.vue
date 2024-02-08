@@ -121,8 +121,9 @@
         <div class="tab-pane" id="floor-plan-tab-pane" role="tabpanel" aria-labelledby="floor-plan-tab" tabindex="0">
           <br>
           <div class="row gx-5">
-            <div class="col-12">
+            <div class="floor-plan-image col-12">
               <img src="../assets/Floorplan.jpg" class="img-fluid" alt="Floor Plan">
+              <div class="overlay overlay_box "></div>
             </div>
           </div>
           
@@ -161,7 +162,8 @@ export default {
       loading: false,
       error: null,
       waterConsumptionData: [], // Placeholder for water consumption data
-      electricalConsumptionData: [], // Placeholder for electrical consumption data
+      electricalConsumptionData: [], // Placeholder for electrical consumption data,
+      overlay: []
     };
   },
   async mounted() {
@@ -410,4 +412,18 @@ export default {
   width: 100%;
   /* Take the full width of the parent */
 }
+.floor-plan-image {
+  position: relative;
+}
+
+.overlay {
+  position: absolute; 
+  background: rgba(255, 242, 0, 0.365);
+  width: 90px;
+  height: 100px;
+  right:15%;
+  bottom: 25%;
+}
+
+
 </style>
