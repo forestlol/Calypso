@@ -53,6 +53,38 @@
                 </div>
             </div>
         </div>
+        <div class="row mb-5">
+            <div class="col">
+                <div class="average-card">
+                    <h5>Sensor Controls</h5>
+                    <div class="row" v-if="sensorType === 1">
+                        <div class="col">
+                            <div>Set Temperature </div>
+                            <input type="number" class="form-control " id="temperature" placeholder="°C" @change="setTemperature()">
+                            
+                        </div>
+                        <div class="col">
+                            <div>Humidity Toggle</div>
+                            <div class="form-check form-switch form-control-lg">
+                                <input class="form-check-input" type="checkbox" role="switch" id="humidity_toggle" @change="humidityToggle()">
+                                <label class="form-check-label" id="label_humidity_toggle" for="humidity_toggle">Off</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" v-if="sensorType !== 1">
+                        <!-- Add controls for other sensor types -->
+                        <div class="col">
+                            <div>Toggle</div>
+                            <div class="form-check form-switch form-control-lg">
+                                <input class="form-check-input" type="checkbox" role="switch" id="sensor_toggle" @change="sensorToggle()">
+                                <label class="form-check-label" id="label_sensor_toggle" for="sensor_toggle">Off</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
 
         <!-- Chart Display -->
         <div class="sensor-card" v-if="sensorType === 1">
@@ -326,6 +358,28 @@ export default {
         generateLast24HoursLabels() {
             return [...Array(24).keys()].map(hour => `${hour}:00`);
         },
+        humidityToggle(){
+            const humidityToggle = document.getElementById('humidity_toggle');
+            const labelHumidityToggle = document.getElementById('label_humidity_toggle');
+            if (humidityToggle.checked) {
+                labelHumidityToggle.textContent = 'On';
+            } else {
+                labelHumidityToggle.textContent = 'Off';
+            }
+        },
+        setTemperature(){
+            const temperature = document.getElementById('temperature');
+            // connect to sensor and set temperature
+        },
+        sensorToggle(){
+            const sensorToggle = document.getElementById('sensor_toggle');
+            const labelSensorToggle = document.getElementById('label_sensor_toggle');
+            if (sensorToggle.checked) {
+                labelSensorToggle.textContent = 'On';
+            } else {
+                labelSensorToggle.textContent = 'Off';
+            }
+        }
     },
 };
 </script>
@@ -471,4 +525,14 @@ canvas {
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* Custom styles for the checkbox toggle */
+/* .form-check-input[type="checkbox"] {
+    
+    width: 50px;
+    height: 30px;
+} */
+
+
+
 </style>

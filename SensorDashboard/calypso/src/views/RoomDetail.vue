@@ -19,6 +19,10 @@
             <button class="nav-link" id="cctv-tab" data-bs-toggle="tab" data-bs-target="#cctv-tab-pane" type="button"
               role="tab" aria-controls="cctv-tab-pane" aria-selected="false">CCTV</button>
           </li>
+          <li class="nav-item">
+            <button class="nav-link" id="floor-plan-tab" data-bs-toggle="tab" data-bs-target="#floor-plan-tab-pane" type="button"
+              role="tab" aria-controls="floor-plan-tab-pane" aria-selected="false">Floor Plan</button>
+          </li>
         </ul>
       </div>
       <!-- Tab content -->
@@ -103,11 +107,31 @@
                   id="screenshot-button-image" class="button-image" src="../assets/capture.png"><br>Screenshot</button>
             </div>
           </div>
+          
           <div class="text-center mt-4">
             <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
 
             <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allcctv' } }"
               class="btn btn-secondary">Back to All CCTV</router-link>
+          </div>
+
+
+        </div>
+        <!-- Display Floor Plan -->
+        <div class="tab-pane" id="floor-plan-tab-pane" role="tabpanel" aria-labelledby="floor-plan-tab" tabindex="0">
+          <br>
+          <div class="row gx-5">
+            <div class="col-12">
+              <img src="../assets/Floorplan.jpg" class="img-fluid" alt="Floor Plan">
+            </div>
+          </div>
+          
+          
+          <div class="text-center mt-4">
+            <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
+
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}` }"
+              class="btn btn-secondary">Back to Floor</router-link>
           </div>
 
 

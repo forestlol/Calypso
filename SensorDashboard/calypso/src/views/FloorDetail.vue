@@ -317,7 +317,7 @@ export default {
   font-size: 1.2em;
 }
 .room-card-header{
-  color: #212529 !important;
+  color: #eeebeb !important;
 }
 .card-body {
   padding: 20px;
