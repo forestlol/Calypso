@@ -123,7 +123,7 @@
           <div class="row gx-5">
             <div class="floor-plan-image col-12">
               <img src="../assets/Floorplan.jpg" class="img-fluid" alt="Floor Plan">
-              <div class="overlay overlay_box "></div>
+              <div id="overlay"></div>
             </div>
           </div>
           
@@ -174,6 +174,7 @@ export default {
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
       });
+      this.setOverlay()
     }).catch((err) => {
       console.error(err);
       this.error = err.message;
@@ -360,6 +361,13 @@ export default {
         }
       });
     },
+    setOverlay() {
+      const overlay = document.getElementById('overlay');
+      overlay.classList = [] // reset classes
+      overlay.classList.add('overlay');
+      var room = this.roomName.split(' ').join('-');  // replace spaces with hyphens
+      overlay.classList.add(room);      
+    }
   },
 };
 </script>
@@ -419,10 +427,12 @@ export default {
 .overlay {
   position: absolute; 
   background: rgba(255, 242, 0, 0.365);
-  width: 90px;
-  height: 100px;
-  right:15%;
-  bottom: 25%;
+}
+.Fire-rated-Material-Room{
+  width: 55px;
+  height: 60px;
+  right:16%;
+  bottom: 26%;
 }
 
 
