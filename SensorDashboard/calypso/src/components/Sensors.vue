@@ -78,6 +78,8 @@
   
   
 <script>
+  import * as CacheManager from '@/CacheManager.js';
+
   export default {
     data() {
       return {
@@ -89,7 +91,18 @@
       };
     },
     async created() {
-      try {
+      if(CacheManager.getItem('readings') != null){
+        this.sensors == CacheManager.getItem('readings');
+        await this.GetLatestReadings();
+        CacheManager.setItem('readings', this.sensors);
+      }else{
+        await this.GetLatestReadings();
+        CacheManager.setItem('readings', this.sensors);
+      }
+    },
+    methods: {
+      async GetLatestReadings(){
+        try {
           const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
           
           if (!response.ok) {
@@ -118,19 +131,14 @@
               acc[curr.deviceName].push(curr);
               return acc;
           }, {});
-
+          
           // If you want an array of unique device names
           this.uniqueDeviceNames = Object.keys(this.sensors);
-          this.checkSensorsAndNotify()
           this.fetchRoomData();
-
-
-
-      } catch (error) {
-          console.error("Error fetching sensors:", error);
-      }
-  },
-    methods: {
+        } catch (error) {
+            console.error("Error fetching sensors:", error);
+        }
+      },
       async fetchRoomData() {
         try {
           const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/building');
@@ -149,57 +157,12 @@
               if (this.uniqueDeviceNames.includes(rooms[i].sensors[j])){        
                   this.roomData[rooms[i].sensors[j]] = rooms[i].room_name; // { 84AECD: Material Room }
               }
-              // if (rooms[i].sensors[j]) {
-              //   this.roomData[rooms[i].sensors[j]] = rooms[i].room_name;
-              //   //this.roomData[rooms[i].sensors[j]] = {'room_name':rooms[i].room_name, 'sensor_name':rooms[i].sensors[j]};
-              // }
-              
             }
             
           }
-          // console.log(Object.keys(this.roomData));
-          // console.log(Object.values(this.uniqueDeviceNames));
-          
-
         } catch (err) {
           console.error(err);
           this.error = 'Failed to load floor data: ' + err.message;
-        }
-      },
-      checkSensorsAndNotify() {
-        this.uniqueDeviceNames.forEach((deviceName) => {
-          const lastReading = this.getLastReading(deviceName);
-          this.checkAndNotify(deviceName, lastReading);
-        });
-      },
-      checkAndNotify(deviceName, lastReading) {
-        const data = lastReading.split(',');
-        const sensorType = this.sensors[deviceName][0].type;
-        const temperature = parseFloat(data[0]);
-        const peopleCount = parseInt(data[0], 10);
-
-        if (sensorType === 1 && temperature > 30) {
-          // Temperature alert
-          this.sendNotification(deviceName, `Temperature alert for ${deviceName}: ${temperature}°C`);
-        } else if (sensorType === 2 && peopleCount > 4) {
-          // People count alert
-          this.sendNotification(deviceName, `People count alert for ${deviceName}: ${peopleCount}`);
-        }
-      },
-      async sendNotification(deviceName, message) {
-        // Send the notification via an API call
-        try {
-          const response = await fetch('/api/send-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ deviceName, message }),
-          });
-          const data = await response.json();
-          console.log(data);
-        } catch (error) {
-          console.error('Error sending notification:', error);
         }
       },
       getTypeName(type) {

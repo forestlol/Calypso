@@ -40,7 +40,8 @@
   import SensorOverviewCard from './SensorsOverview/SensorOverviewCard.vue';
   import ElectricityWaterConsumptionCard from './SensorsOverview/ElectricityWaterConsumptionCard.vue';
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
+  import * as CacheManager from '@/CacheManager.js';
+ 
   export default {
     components: {
       DashboardCard,
@@ -60,7 +61,14 @@
       }
     },
     async created() {
-      await this.fetchBuildings();
+      if(CacheManager.getItem('buildings') != null){
+        this.buildings == CacheManager.getItem('buildings')
+        await this.fetchBuildings();
+        CacheManager.setItem('buildings', this.buildings);
+      }else{
+        await this.fetchBuildings();
+        CacheManager.setItem('buildings', this.buildings);
+      }
     },
     methods: {
       async fetchBuildings() {
