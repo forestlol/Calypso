@@ -7,6 +7,23 @@
         <h1>{{ floorData.buildingName }}</h1>
         <h2>{{ floorData.floorName }} - Level: {{ floorData.floorLevel }}</h2>
       </div>
+      <div class="accordion" id="accordionFloorplan">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFloorplan" aria-expanded="false" aria-controls="collapseFloorplan">
+             Floor Plan for {{ floorData.buildingName }}
+            </button>
+          </h2>
+          <div id="collapseFloorplan" class="accordion-collapse collapse" data-bs-parent="#accordionFloorplan">
+            <div class="accordion-body">
+              <div class="text-center"><h3 style="color: black!important;;">{{floorData.buildingName }}</h3></div>
+              
+              <img class="img-fluid" src="../assets/Floorplan.jpg">
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
        <!-- Tabs -->
        <div class="tabs">
         <ul class="nav nav-tabs" role="tablist">

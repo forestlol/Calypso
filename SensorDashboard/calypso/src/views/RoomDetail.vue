@@ -428,13 +428,7 @@ export default {
   position: absolute; 
   background: rgba(255, 242, 0, 0.365);
 }
-.Fire-rated-Material-Room{
-  width: 55px;
-  height: 60px;
-  right:16%;
-  bottom: 26%;
-}
-/* Add more classes for other rooms */
+
 
 
 </style>
