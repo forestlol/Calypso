@@ -21,7 +21,7 @@
           </li>
           <li class="nav-item">
             <button class="nav-link" id="floor-plan-tab" data-bs-toggle="tab" data-bs-target="#floor-plan-tab-pane" type="button"
-              role="tab" aria-controls="floor-plan-tab-pane" aria-selected="false">Floor Plan</button>
+              role="tab" aria-controls="floor-plan-tab-pane" aria-selected="false">Sensor Location</button>
           </li>
         </ul>
       </div>
@@ -122,8 +122,7 @@
           <br>
           <div class="row gx-5">
             <div class="floor-plan-image col-12">
-              <img src="../assets/Floorplan.jpg" class="img-fluid" alt="Floor Plan">
-              <div id="overlay"></div>
+              <img src="../assets/Floorplan.jpg" id="roomImg" class="img-fluid mx-auto d-block" alt="Floor Plan">
             </div>
           </div>
           
@@ -174,7 +173,7 @@ export default {
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
       });
-      this.setOverlay()
+      this.setRoomImg()
     }).catch((err) => {
       console.error(err);
       this.error = err.message;
@@ -361,12 +360,13 @@ export default {
         }
       });
     },
-    setOverlay() {
-      const overlay = document.getElementById('overlay');
-      overlay.classList = [] // reset classes
-      overlay.classList.add('overlay');
+    setRoomImg() {
+      var img = document.getElementById("roomImg")
       var room = this.roomName.split(' ').join('-');  // replace spaces with hyphens
-      overlay.classList.add(room);      
+      // convert "/" in room to "+"
+      room = room.replace(/\//g, "+");
+      room = `/src/assets/${room}.jpg`;
+      img.src = room
     }
   },
 };
