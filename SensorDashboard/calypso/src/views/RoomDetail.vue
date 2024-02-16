@@ -365,7 +365,7 @@ export default {
       let room = this.roomName.split(' ').join('-');  // replace spaces with hyphens
       room = room.replace(/\//g, "+");
 
-      this.imagePath = `/../../src/assets/${room}.jpg`;
+      this.imagePath = `/src/assets/${room}.jpg`;
 
       var img = document.getElementById("roomImg");
       img.src = this.imagePath;
