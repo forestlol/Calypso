@@ -122,7 +122,7 @@
           <br>
           <div class="row gx-5">
             <div class="floor-plan-image col-12">
-              <img src="../assets/Floorplan.jpg" id="roomImg" class="img-fluid mx-auto d-block" alt="Floor Plan">
+              <img :src="imagePath" id="roomImg" class="img-fluid mx-auto d-block" alt="Room Image">
             </div>
           </div>
           
@@ -162,7 +162,8 @@ export default {
       error: null,
       waterConsumptionData: [], // Placeholder for water consumption data
       electricalConsumptionData: [], // Placeholder for electrical consumption data,
-      overlay: []
+      overlay: [],
+      imagePath: `../assets/Floorplan.jpg`
     };
   },
   async mounted() {
@@ -361,12 +362,15 @@ export default {
       });
     },
     setRoomImg() {
-      var img = document.getElementById("roomImg")
-      var room = this.roomName.split(' ').join('-');  // replace spaces with hyphens
-      // convert "/" in room to "+"
+      let room = this.roomName.split(' ').join('-');  // replace spaces with hyphens
       room = room.replace(/\//g, "+");
-      room = `/src/assets/${room}.jpg`;
-      img.src = room
+
+      this.imagePath = `/../../src/assets/${room}.jpg`;
+
+      var img = document.getElementById("roomImg");
+      img.src = this.imagePath;
+
+      console.log(img.src);
     }
   },
 };
