@@ -23,6 +23,10 @@
             <button class="nav-link" id="floor-plan-tab" data-bs-toggle="tab" data-bs-target="#floor-plan-tab-pane" type="button"
               role="tab" aria-controls="floor-plan-tab-pane" aria-selected="false">Sensor Location</button>
           </li>
+          <li class="nav-item">
+            <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#items-tab-pane" type="button"
+              role="tab" aria-controls="items-tab-pane" aria-selected="false">Items</button>
+          </li>
         </ul>
       </div>
       <!-- Tab content -->
@@ -121,9 +125,28 @@
         <div class="tab-pane" id="floor-plan-tab-pane" role="tabpanel" aria-labelledby="floor-plan-tab" tabindex="0">
           <br>
           <div class="row gx-5">
-            <div class="floor-plan-image col-12">
-              <img :src="imagePath" id="roomImg" class="img-fluid mx-auto d-block" alt="Room Image">
+            <div class="floor-plan-image col-12" id="sensors-drag">
+              <p>Click on the sensors to go to sensor details page</p>
+              <div><img :src="imagePath" id="roomImg" class="img-fluid mx-auto d-block" alt="Room Image"></div>
+              <!-- <div class="draggable"><img src="">ppl</div>
+              <div class="draggable"><img src="">temp&hmd</div>
+              <div class="draggable"><img src="">sensor 3</div> -->
+              
+              <div v-for="sensor in this.sensors"
+                   :key="sensor.id"
+                   :id="`icon_${sensor.id}`"
+                   class="draggable">
+                    <router-link :to="`/sensor/${sensor.id}`">
+                      <img v-if="sensor.type === 2" class="img-fluid" src="/src/assets/people-count.png">
+                      <img v-else-if="sensor.type === 1" class="img-fluid" src="/src/assets/temperature.png">                      
+                      <img v-else class="img-fluid" src="/src/assets/sensor.png">
+                    </router-link>
+                    <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span>
+
+              </div>
+              
             </div>
+
           </div>
           
           
@@ -135,6 +158,10 @@
           </div>
 
 
+        </div>
+        <div class="tab-pane" id="items-tab-pane" role="tabpanel" aria-labelledby="items-tab"
+          tabindex="0">
+          BMS data 
         </div>
       </div>
     </div>
@@ -148,6 +175,7 @@
 
 <script>
 import { Chart, registerables } from 'chart.js';
+import interact from 'interactjs';
 Chart.register(...registerables);
 
 export default {
@@ -163,7 +191,8 @@ export default {
       waterConsumptionData: [], // Placeholder for water consumption data
       electricalConsumptionData: [], // Placeholder for electrical consumption data,
       overlay: [],
-      imagePath: `../assets/Floorplan.jpg`
+      imagePath: `../assets/Floorplan.jpg`,
+      position: [],
     };
   },
   async mounted() {
@@ -173,8 +202,9 @@ export default {
         this.activateTabBasedOnQueryParam();
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
+        this.initDraggable();
       });
-      this.setRoomImg()
+      this.setRoomImg();
     }).catch((err) => {
       console.error(err);
       this.error = err.message;
@@ -238,6 +268,7 @@ export default {
           activated: 'No',
           peopleCount: 'N/A',
           lastReadingDate: null,
+          //position: { x: 0, y: 0 }
         }));
 
         // Fetching sensor data
@@ -370,7 +401,48 @@ export default {
       var img = document.getElementById("roomImg");
       img.src = this.imagePath;
 
-      console.log(img.src);
+      console.log(this.imagePath);
+    },
+    getIndexFromElement(element) {
+      // Find the index of the component in the DOM
+      const elements = document.querySelectorAll('.draggable');
+      return Array.from(elements).indexOf(element);
+    },
+    initDraggable() {
+      this.position = Array.from({ length: this.sensors.length }, () => ({ x: 0, y: 0 })); //replace with api get call
+      console.log(this.position);
+      const vm = this; // Save the reference to the Vue instance
+
+      interact('.draggable').draggable({
+        listeners: {
+          start(event) {
+            console.log(event.type, event.target);
+          },
+          move(event) {
+            const index = vm.getIndexFromElement(event.target); // Get the index of the component
+            vm.position[index].x += event.dx;
+            vm.position[index].y += event.dy;
+
+            event.target.style.transform = `translate(${vm.position[index].x}px, ${vm.position[index].y}px)`;
+            // do api post call to update position
+          }
+        }
+      });
+
+      // interact('.draggable')
+      // .on('mouseenter', function (event) {
+      //   // Show the description upon hovering
+      //   let description = event.target.querySelector('.sensor_description');
+      //   console.log(description);
+      //   description.style.display = 'block';
+    
+      // })
+      // .on('mouseleave', function (event) {
+      //   // Hide the description when mouse leaves
+      //  let description = event.target.querySelector('.sensor_description');
+      //  console.log(description);
+      //   description.style.display = 'none';
+      // });
     }
   },
 };
@@ -433,6 +505,44 @@ export default {
   background: rgba(255, 242, 0, 0.365);
 }
 
+
+.draggable {
+  width: 9%;
+
+  margin: 1rem 0 0 1rem;
+  background-color: rgba(34, 153, 238, 0.5);
+  color: white;
+  border-radius: 0.75em;
+  border-color: rgb(34,153,238);
+  color: white;
+  border-radius: 0.75em;
+  padding: 1%;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+  display: inline-block;
+}
+
+.draggable img {
+  max-width: 100%; /* Ensure the image fits inside the container */
+  max-height: 100%; /* Ensure the image fits inside the container */
+}
+
+.sensor_description{
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  color:#000000;
+  border: 1px solid #ccc;
+  padding: 5px;
+  z-index: 1000; /* Ensure the description is above other elements */
+}
+
+.sensor_description:hover{
+  display: block;
+}
 
 
 </style>
