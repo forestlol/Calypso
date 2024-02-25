@@ -49,6 +49,12 @@ const routes = [
     meta: { requiresAuth: true}
   },
   {
+    path: '/notification',
+    name: 'Notification',
+    component: defineAsyncComponent(() => import('../views/NotificationConfig.vue')),
+    meta: { requiresAuth: true}
+  },
+  {
     path: '/sensor/:id',
     component: defineAsyncComponent(() => import('../components/SensorDetails.vue')),
     name: 'sensor-details',
