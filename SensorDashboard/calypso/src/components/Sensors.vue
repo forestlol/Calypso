@@ -15,6 +15,7 @@
       <input v-model="searchTerm" type="text" placeholder="Search for a device..." class="form-control w-50">
       <p></p>
       <button @click="downloadReport" class="btn btn-primary">Download Today's Report</button>
+      <button @click="configNotification" class="btn btn-primary m-2">Configure Notification</button>
     </div>
     <p class="mb-4">{{ filteredDeviceNames.length }} device(s) found.</p>
     <div class="row mb-3" v-for="(deviceGroup, sensorType) in groupedAndOrderedDeviceNames" :key="sensorType">
@@ -264,6 +265,12 @@
         const timeDifference = currentTime.getTime() - lastUpdateTime.getTime(); // time difference in milliseconds
         return timeDifference < 15 * 60 * 1000; // 15 minutes in milliseconds
       },
+      configNotification() {
+          // Navigate to the page where you can config notification 
+          this.$router.replace({ 
+              name: 'Notification'
+          });
+      }
     },
     computed: {
       filteredDeviceNames() {
