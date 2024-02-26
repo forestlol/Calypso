@@ -471,13 +471,14 @@ export default {
             console.log(newX, newY);
             console.log(postData);
 
+
             fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/update/sensor/position', {
                 method: 'POST',
                 headers: {
                   'Accept': '*/*',
                   'Content-Type': 'application/json'
                 },
-                body: postData
+                body: JSON.stringify(postData)
               })
             .then(response => {
               if (!response.ok) {
