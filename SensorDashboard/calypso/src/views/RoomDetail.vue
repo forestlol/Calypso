@@ -137,8 +137,8 @@
                    :id="`icon_${sensor.id}`"
                    class="draggable" :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
                     <router-link :to="`/sensor/${sensor.id}`">
-                      <img v-if="sensor.type === 2" class="img-fluid" src="/src/assets/people-count.png">
-                      <img v-else-if="sensor.type === 1" class="img-fluid" src="/src/assets/temperature.png">                      
+                      <img v-if="this.position[sensor.id].type == 2" class="img-fluid" src="/src/assets/people-count.png">
+                      <img v-else-if="this.position[sensor.id].type  == 1" class="img-fluid" src="/src/assets/temperature.png">                      
                       <img v-else class="img-fluid" src="/src/assets/sensor.png">
                     </router-link>
                     <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span>
