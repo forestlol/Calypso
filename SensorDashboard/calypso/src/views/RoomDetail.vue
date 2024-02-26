@@ -135,7 +135,7 @@
               <div v-for="sensor in this.sensors"
                    :key="sensor.id"
                    :id="`icon_${sensor.id}`"
-                   class="draggable">
+                   class="draggable" :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
                     <router-link :to="`/sensor/${sensor.id}`">
                       <img v-if="sensor.type === 2" class="img-fluid" src="/src/assets/people-count.png">
                       <img v-else-if="sensor.type === 1" class="img-fluid" src="/src/assets/temperature.png">                      
@@ -197,6 +197,7 @@ export default {
   },
   async mounted() {
     this.parseUrlParams();
+    this.getPosition();
     this.fetchRoomSensors().then(() => {
       this.$nextTick(() => {
         this.activateTabBasedOnQueryParam();
@@ -288,6 +289,23 @@ export default {
         console.error(err);
         this.error = err.message;
       }
+    },
+    async getPosition(){
+      try {
+        let response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/sensor/list');
+        if (!response.ok) throw new Error('Failed to fetch sensor data');
+        let text = this.sanitizeResponse(await response.text());
+        let sensorData = JSON.parse(text);
+        let sensorPosition = {};
+        sensorData.forEach(sensor => {
+          sensorPosition[sensor.name] = {x: sensor.position.x, y: sensor.position.y, type: sensor.type, id: sensor._id};
+        });
+        this.position = sensorPosition;
+      } catch (err) {
+        console.error(err);
+        this.error = err.message;
+      }
+
     },
 
     sanitizeResponse(text) {
@@ -403,28 +421,83 @@ export default {
 
       console.log(this.imagePath);
     },
-    getIndexFromElement(element) {
-      // Find the index of the component in the DOM
-      const elements = document.querySelectorAll('.draggable');
-      return Array.from(elements).indexOf(element);
-    },
     initDraggable() {
-      this.position = Array.from({ length: this.sensors.length }, () => ({ x: 0, y: 0 })); //replace with api get call
-      console.log(this.position);
+      //console.log(this.position);
       const vm = this; // Save the reference to the Vue instance
+
+      let activeSensorId = null; // Initialize variable to track active sensor ID
+      let newX = 0;
+      let newY = 0;
 
       interact('.draggable').draggable({
         listeners: {
           start(event) {
-            console.log(event.type, event.target);
+            const sensorId = event.target.id.split('_')[1]; // Extract sensor ID
+            activeSensorId = sensorId; // Set active sensor ID
+            console.log(event.type, activeSensorId);
           },
           move(event) {
-            const index = vm.getIndexFromElement(event.target); // Get the index of the component
-            vm.position[index].x += event.dx;
-            vm.position[index].y += event.dy;
+            if (activeSensorId !== null) { // Check if there is an active sensor
+              
+              let sensorPosition = vm.position[activeSensorId];
+              if (sensorPosition) {
+                // Calculate new position for the active sensor
+                newX = vm.position[activeSensorId].x + event.dx;
+                newY = vm.position[activeSensorId].y + event.dy;
 
-            event.target.style.transform = `translate(${vm.position[index].x}px, ${vm.position[index].y}px)`;
-            // do api post call to update position
+                // Update position and apply transform only to the active sensor
+                vm.position[activeSensorId].x = newX;
+                vm.position[activeSensorId].y = newY;
+                const sensorElement = document.getElementById(`icon_${activeSensorId}`);
+                if (sensorElement) {
+                  sensorElement.style.transform = `translate(${newX}px, ${newY}px)`;
+                }
+              }
+            }
+          },
+          end(event) {
+            console.log(vm.position[activeSensorId])
+            const postData = {
+                "id":vm.position[activeSensorId].id,
+                "name": activeSensorId,
+                "type": vm.position[activeSensorId].type,
+                "position": {
+                  "x": newX,
+                  "y": newY
+                }
+              }
+            activeSensorId = null; // Reset active sensor ID when drag operation ends
+            // Perform API POST call to update positions if needed
+            console.log(newX, newY);
+            console.log(postData);
+
+            fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/update/sensor/position', {
+                method: 'POST',
+                headers: {
+                  'Accept': '*/*',
+                  'Content-Type': 'application/json'
+                },
+                body: postData
+              })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log('Response from server:', data);
+            })
+            .catch(error => {
+              console.error('There was a problem with the fetch operation:', error);
+            });
+            // {
+          //   "name": "string",
+          //   "position": {
+          //     "x": 0,
+          //     "y": 0
+          //   }
+          // }
           }
         }
       });
