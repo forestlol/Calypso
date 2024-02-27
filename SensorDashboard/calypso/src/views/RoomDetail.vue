@@ -399,7 +399,7 @@ export default {
         40, 38, 37, 36, 34, 32, 30
       ];
     },
-    gradientColor(value, data,opacity = 0.5){
+    gradientColor(value, data, opacity = 0.5){
       // Create gradient color for the chart
       const green = [0, 255, 0]; // Low consumption
       const red = [255, 0, 0]; // High consumption
@@ -497,8 +497,8 @@ export default {
           datasets: [{
             label: 'Energy Consumption (kWh)',
             data: this.weeklyEnergyConsumptionData(), // Use static fake data
-            backgroundColor: this.weeklyEnergyConsumptionData().map(value => gradientColor(value, this.weeklyEnergyConsumptionData())),
-            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1
           }]
         },
