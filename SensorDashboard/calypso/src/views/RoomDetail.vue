@@ -162,6 +162,27 @@
         <div class="tab-pane" id="items-tab-pane" role="tabpanel" aria-labelledby="items-tab"
           tabindex="0">
           BMS data 
+          <div class="row mt-4">
+            <div class="col-12 col-md-6">
+              <h2 class="text-center">Energy Consumption Data</h2>
+              <div class="chart-container">
+                <canvas id="energyConsumptionChart"></canvas>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <h2 class="text-center">Weekly Energy Usage</h2>
+              <div class="chart-container">
+                <canvas id="weeklyEnergyConsumptionChart"></canvas>
+              </div>
+            </div>
+
+            </div>                  
+              <div class="text-center mt-4">
+              <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
+              <router-link :to="{ path: `/building/${buildingName}/${floorName}` }"
+                class="btn btn-secondary">Back to Floor</router-link>
+            </div>
         </div>
       </div>
     </div>
@@ -203,6 +224,7 @@ export default {
         this.activateTabBasedOnQueryParam();
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
+        this.initEnergyConsumptionChart();
         this.initDraggable();
       });
       this.setRoomImg();
@@ -364,6 +386,39 @@ export default {
         20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35
       ];
     },
+    EnergyConsumptionData(){
+      // Static fake data for 24 hours
+      return [
+        40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21,
+        20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35
+      ];
+    },
+    weeklyEnergyConsumptionData(){
+      // Static fake data for 7 days
+      return [
+        40, 38, 37, 36, 34, 32, 30
+      ];
+    },
+    gradientColor(value, data,opacity = 0.5){
+      // Create gradient color for the chart
+      const green = [0, 255, 0]; // Low consumption
+      const red = [255, 0, 0]; // High consumption
+
+      // Interpolate between green and red based on the data value
+      const interpolate = (color1, color2, factor) => {
+        return color1.map((c, index) => Math.round(c + factor * (color2[index] - c)));
+      };
+
+      // Calculate factor based on the data value
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const factor = (value - min) / (max - min);
+
+      // Generate interpolated color
+      const color = interpolate(green, red, factor);
+      return `rgba(${color.join(',')}, ${opacity})`; // Return color with alpha (opacity)
+
+    },
     initWaterConsumptionChart() {
       const ctxWater = document.getElementById('waterConsumptionChart').getContext('2d');
       new Chart(ctxWater, {
@@ -409,6 +464,53 @@ export default {
           }
         }
       });
+    },
+    initEnergyConsumptionChart(){
+      const ctxEnergy = document.getElementById('energyConsumptionChart').getContext('2d');
+      new Chart(ctxEnergy, {
+        type: 'line',
+        data: {
+          labels: this.generateLast24HoursLabels(),
+          datasets: [{
+            label: 'Energy Consumption (kWh)',
+            data: this.EnergyConsumptionData(), // Use static fake data
+            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      const ctxWeeklyEnergy = document.getElementById('weeklyEnergyConsumptionChart').getContext('2d');
+      //create bar chart for ctxWeeklyEnergy
+      new Chart(ctxWeeklyEnergy, {
+        type: 'bar',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Energy Consumption (kWh)',
+            data: this.weeklyEnergyConsumptionData(), // Use static fake data
+            backgroundColor: this.weeklyEnergyConsumptionData().map(value => gradientColor(value, this.weeklyEnergyConsumptionData())),
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+     
     },
     setRoomImg() {
       let room = this.roomName.split(' ').join('-');  // replace spaces with hyphens
