@@ -2,81 +2,99 @@ import sgMail from '@sendgrid/mail';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+async function fetchAndSanitizeData(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  let text = await response.text();
+  text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"').replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+  return JSON.parse(text);
+}
+
 module.exports = async (req, res) => {
   if (!['GET', 'POST'].includes(req.method)) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // Fetch and sanitize the notification settings
+    const settings = await fetchAndSanitizeData('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/notification');
+    const config = settings[0];
+    const nextExecutionTime = new Date(config.nextExecutionTime);
 
-    let text = await response.text();
+    // Check if the current time has passed the next execution time
+    if (new Date() >= nextExecutionTime) {
+      // Fetch and sanitize the latest sensor readings
+      const rawData = await fetchAndSanitizeData('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
+      
+      // Process the sensor data and check for any conditions that meet the alert criteria
+      let alerts = [];
 
-    // Replace ObjectId and ISODate formats with valid JSON
-    text = text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
-    text = text.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
-
-    const rawData = JSON.parse(text);
-
-    // Process rawData to get the latest readings for each device
-    let sensors = rawData.reduce((acc, curr) => {
-      if (!acc[curr.deviceName]) {
-        acc[curr.deviceName] = [];
-      }
-
-      // Convert time string to Date object, if needed
-      if (curr.time && typeof curr.time === 'string') {
-        curr.time = new Date(curr.time);
-      }
-
-      acc[curr.deviceName].push(curr);
-      return acc;
-    }, {});
-
-    function getLastReading(deviceName) {
-      // Assuming the last reading is at the last index (latest timestamp)
-      return sensors[deviceName][sensors[deviceName].length - 1];
-    }
-
-    let alerts = [];
-
-    // Check each device for temperature and people count alerts
-    for (const [deviceName, readings] of Object.entries(sensors)) {
-      const lastReading = getLastReading(deviceName);
-      const { type, data } = lastReading;
-      if (type === 1) {
-        const temperature = parseFloat(data.split(',')[0]);
-        if (temperature > 30.5) {
-          alerts.push(`Sensor ${deviceName} recorded high temperature of ${temperature}°C.`);
+      // Process rawData to get the latest readings for each device
+      let sensors = rawData.reduce((acc, curr) => {
+        if (!acc[curr.deviceName]) {
+          acc[curr.deviceName] = [];
         }
-      } else if (type === 2) {
-        const peopleCount = parseInt(data, 10);
-        if (peopleCount > 4) {
-          alerts.push(`Sensor ${deviceName} recorded high people count of ${peopleCount}.`);
+        if (curr.time && typeof curr.time === 'string') {
+          curr.time = new Date(curr.time);
+        }
+        acc[curr.deviceName].push(curr);
+        return acc;
+      }, {});
+
+      // Get the last reading for each sensor
+      for (const deviceName in sensors) {
+        const lastReading = sensors[deviceName][sensors[deviceName].length - 1];
+        const { type, data } = lastReading;
+
+        if (type === 1) {
+          const temperature = parseFloat(data.split(',')[0]);
+          if (temperature > config.temperatureThreshold) {
+            alerts.push(`Sensor ${deviceName} recorded high temperature of ${temperature}°C.`);
+          }
+        } else if (type === 2) {
+          const peopleCount = parseInt(data, 10);
+          if (peopleCount > config.peopleCountThreshold) {
+            alerts.push(`Sensor ${deviceName} recorded high people count of ${peopleCount}.`);
+          }
         }
       }
+
+      // Send out the alerts
+      if (alerts.length > 0) {
+        const message = `${config.messageBody}\n\n${alerts.join('\n')}`;
+        const mailOptions = {
+          to: config.notifcationRecipients,
+          from: process.env.SENDGRID_EMAIL,
+          subject: `Alert from Sensor Monitoring System`,
+          text: message,
+        };
+        try {
+          await sgMail.send(mailOptions);
+          console.log('Email sent successfully');
+        } catch (emailError) {
+          console.error('Failed to send email:', emailError);
+        }
+        } else {
+          console.log('Scheduler ran, but no alerts were triggered. Thresholds not met.');
+        }
+
+      // Calculate the next execution time
+      const intervalMilliseconds = config.interval * 60000; // Convert minutes to milliseconds
+      const newNextExecutionTime = new Date(Date.now() + intervalMilliseconds).toISOString();
+
+      // Update the next execution time in the database
+      await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/post/notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...config, nextExecutionTime: newNextExecutionTime }),
+      });
     }
 
-    if (alerts.length > 0) {
-      const message = alerts.join('\n');
-      const content = {
-        to: process.env.EMAIL_TO,
-        from: process.env.SENDGRID_EMAIL,
-        subject: `Alert from Sensor Monitoring System`,
-        text: message,
-      };
-
-      await sgMail.send(content);
-      res.status(200).json({ message: 'Alert email sent successfully' });
-    } else {
-      res.status(200).json({ message: 'No alerts to send' });
-    }
+    res.status(200).json({ message: 'Scheduler ran successfully' });
   } catch (error) {
-    console.error("Error fetching sensor data or sending email", error);
-    res.status(500).json({ error: 'Error processing sensor data' });
+    console.error("Error with scheduler function", error);
+    res.status(500).json({ error: 'Error with scheduler function' });
   }
 };
