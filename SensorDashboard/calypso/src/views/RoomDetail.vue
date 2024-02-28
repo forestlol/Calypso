@@ -177,8 +177,23 @@
               </div>
             </div>
 
-            </div>                  
-              <div class="text-center mt-4">
+          </div> 
+          <div class="row mt-4">
+            <div class="col-12 col-md-6">
+              <h2 class="text-center">Air Pressure Data</h2>
+              <div class="chart-container">
+                <canvas id="airPressureChart"></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <h2 class="text-center">Water Inflow/Outflow Data</h2>
+              <div class="chart-container">
+                <canvas id="waterInflowOutflowChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
               <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
               <router-link :to="{ path: `/building/${buildingName}/${floorName}` }"
                 class="btn btn-secondary">Back to Floor</router-link>
@@ -225,6 +240,8 @@ export default {
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
         this.initEnergyConsumptionChart();
+        this.initWaterInflowOutflowChart();
+        this.initAirPressureChart();
         this.initDraggable();
       });
       this.setRoomImg();
@@ -389,36 +406,54 @@ export default {
     EnergyConsumptionData(){
       // Static fake data for 24 hours
       return [
-        40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21,
-        20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35
+        28, 34, 37, 32, 34, 30, 30, 28, 26, 28, 22, 27,
+        20, 18, 20, 16, 15, 14, 14, 12, 17, 25, 30, 35
       ];
     },
     weeklyEnergyConsumptionData(){
       // Static fake data for 7 days
       return [
-        40, 38, 37, 36, 34, 32, 30
+        250, 230, 198, 263, 253, 241, 280
       ];
     },
-    gradientColor(value, data, opacity = 0.5){
-      // Create gradient color for the chart
-      const green = [0, 255, 0]; // Low consumption
-      const red = [255, 0, 0]; // High consumption
-
-      // Interpolate between green and red based on the data value
-      const interpolate = (color1, color2, factor) => {
-        return color1.map((c, index) => Math.round(c + factor * (color2[index] - c)));
-      };
-
-      // Calculate factor based on the data value
-      const min = Math.min(...data);
-      const max = Math.max(...data);
-      const factor = (value - min) / (max - min);
-
-      // Generate interpolated color
-      const color = interpolate(green, red, factor);
-      return `rgba(${color.join(',')}, ${opacity})`; // Return color with alpha (opacity)
-
+    airPressureChart(){
+      // static fake data for 24 hours
+      return [
+        1013, 1012, 1012, 1012, 1012, 1011, 1011, 1011, 1011, 1010, 1010, 1010,
+        1010, 1010, 1009, 1009, 1009, 1009, 1009, 1008, 1008, 1008, 1008, 1008
+      ]
     },
+    waterInflowOutflowChart(){
+      // static fake data for 24 hours
+      // returns ([inflow], [outflow])
+      return [
+        [20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35,
+        40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21],
+        [15, 17, 17, 13, 12, 13, 13, 10, 17, 22, 29, 35,
+        30, 30, 34, 35, 30, 28, 30, 26, 23, 24, 20, 20]
+      ];
+    },
+    // gradientColor(value, data, opacity = 0.5){
+    // this function is not working, delete if not needed in the future
+    //   // Create gradient color for the chart
+    //   const green = [0, 255, 0]; // Low consumption
+    //   const red = [255, 0, 0]; // High consumption
+
+    //   // Interpolate between green and red based on the data value
+    //   const interpolate = (color1, color2, factor) => {
+    //     return color1.map((c, index) => Math.round(c + factor * (color2[index] - c)));
+    //   };
+
+    //   // Calculate factor based on the data value
+    //   const min = Math.min(...data);
+    //   const max = Math.max(...data);
+    //   const factor = (value - min) / (max - min);
+
+    //   // Generate interpolated color
+    //   const color = interpolate(green, red, factor);
+    //   return `rgba(${color.join(',')}, ${opacity})`; // Return color with alpha (opacity)
+
+    // },
     initWaterConsumptionChart() {
       const ctxWater = document.getElementById('waterConsumptionChart').getContext('2d');
       new Chart(ctxWater, {
@@ -511,6 +546,63 @@ export default {
         }
       });
      
+    },
+    initAirPressureChart(){
+      // create line chart for air pressure
+      const ctxAirPressure = document.getElementById('airPressureChart').getContext('2d');
+      new Chart(ctxAirPressure, {
+        type: 'line',
+        data: {
+          labels: this.generateLast24HoursLabels(),
+          datasets: [{
+            label: 'Air Pressure (hPa)',
+            data: this.airPressureChart(), // Use static fake data
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+
+    },
+    initWaterInflowOutflowChart(){
+      // create line chart for water inflow/outflow
+      const ctxWaterInflowOutflow = document.getElementById('waterInflowOutflowChart').getContext('2d');
+      new Chart(ctxWaterInflowOutflow, {
+        type: 'line',
+        data: {
+          labels: this.generateLast24HoursLabels(),
+          datasets: [{
+            label: 'Water Inflow (m³/hr)',
+            data: this.waterInflowOutflowChart()[0], // Use static fake data
+            backgroundColor:'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Water Outflow (m³/hr)',
+            data: this.waterInflowOutflowChart()[1], // Use static fake data
+            backgroundColor: 'rgba(255, 206, 86, 0.5)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
     },
     setRoomImg() {
       let room = this.roomName.split(' ').join('-');  // replace spaces with hyphens
