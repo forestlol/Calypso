@@ -3,7 +3,7 @@
     <draggable class="row" @end="onEnd" :list="cards" item-key="name">
       <template #item="{ element }">
         <div class="col-lg-6 d-flex flex-column">
-          <div :class="`chart-container ${element.type}-chart`">
+          <div :class="['chart-container', element.type + '-chart', minimizedCards[element.name] ? 'minimized-chart-container' : '']">
             <div class="card-header">
               <h5>{{ formatChartName(element.name) }}</h5>
               <button class="minimize-button" @click="minimizeCard(element.name)">
@@ -168,6 +168,7 @@ export default {
   padding: 20px;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto; /* Allow the container to grow and shrink */
 }
 
 .card-header {
@@ -179,7 +180,7 @@ export default {
 }
 
 .card-body {
-  flex-grow: 1;
+  flex-grow: 0;
 }
 
 .minimize-button {
@@ -212,5 +213,16 @@ export default {
 .water-chart {
   background: linear-gradient(to right, #a1c4fd, #c2e9fb);
   /* Gradient for water */
+}
+
+.minimized-chart-container {
+  height: auto; /* Adjust the height to fit the header */
+  overflow: hidden; /* Hide the overflow content */
+  flex: 0 0 auto; /* Do not grow, do not shrink, base size on the height given */
+}
+
+.sensor-details-container .col-lg-6 {
+  flex: 1; /* Override Bootstrap's flex properties if necessary */
+  min-width: 0; /* This ensures that the column can shrink past content size */
 }
 </style>

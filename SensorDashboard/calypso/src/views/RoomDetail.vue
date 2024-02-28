@@ -74,10 +74,10 @@
             </div>
           </div>
           <div class="text-center mt-4">
-            <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
-
+            <router-link :to="`/building/`" class="btn btn-primary btn-fixed-size">Back to Building</router-link>
             <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allsensors' } }"
-              class="btn btn-secondary">Back to Floor</router-link>
+              class="btn btn-secondary btn-fixed-size">Back to Floor</router-link>
+
           </div>
         </div>
         <!-- Display CCTV -->
@@ -111,12 +111,12 @@
                   id="screenshot-button-image" class="button-image" src="../assets/capture.png"><br>Screenshot</button>
             </div>
           </div>
-          
-          <div class="text-center mt-4">
-            <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
 
-            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allcctv' } }"
-              class="btn btn-secondary">Back to All CCTV</router-link>
+          <div class="text-center mt-4">
+            <router-link :to="`/building/`" class="btn btn-primary btn-fixed-size">Back to Building</router-link>
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allsensors' } }"
+              class="btn btn-secondary btn-fixed-size">Back to Floor</router-link>
+
           </div>
 
 
@@ -148,13 +148,13 @@
             </div>
 
           </div>
-          
-          
-          <div class="text-center mt-4">
-            <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
 
-            <router-link :to="{ path: `/building/${buildingName}/${floorName}` }"
-              class="btn btn-secondary">Back to Floor</router-link>
+
+          <div class="text-center mt-4">
+            <router-link :to="`/building/`" class="btn btn-primary btn-fixed-size">Back to Building</router-link>
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allsensors' } }"
+              class="btn btn-secondary btn-fixed-size">Back to Floor</router-link>
+
           </div>
 
 
@@ -333,7 +333,7 @@ export default {
     sanitizeResponse(text) {
       // Replace ObjectId and ISODate formats with valid JSON
       return text.replace(/ObjectId\("([^"]+)"\)/g, '"$1"')
-                .replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+        .replace(/ISODate\("([^"]+)"\)/g, '"$1"');
     },
     processSensorData(sensor, sensorIndex) {
       switch (sensor.type) {
@@ -645,6 +645,22 @@ export default {
   border-radius: 4px;
 }
 
+.btn-fixed-size {
+  width: 150px;
+  /* Set the width you want */
+  height: 50px;
+  /* Set the height you want */
+  display: inline-block;
+  /* This makes sure the width and height are applied */
+  text-align: center;
+  /* This centers the text inside the button */
+  line-height: 50px;
+  /* This centers the text vertically */
+  padding: 0;
+  /* Remove padding to maintain the size */
+}
+
+
 .btn-primary {
   background-color: #007bff;
   border-color: #007bff;
@@ -672,12 +688,13 @@ export default {
   width: 100%;
   /* Take the full width of the parent */
 }
+
 .floor-plan-image {
   position: relative;
 }
 
 .overlay {
-  position: absolute; 
+  position: absolute;
   background: rgba(255, 242, 0, 0.365);
 }
 

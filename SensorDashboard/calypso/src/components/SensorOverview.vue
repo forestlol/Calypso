@@ -138,7 +138,14 @@ h1.display-4, h3.display-4 {
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1.25rem;
+  color: #ffffff; /* Set default color for options */
 }
+
+/* Specific style for the disabled option */
+.form-select.bg-secondary option:disabled {
+  color: lightgrey; /* Lighter text color for the placeholder */
+}
+
 
 /* Cards */
 .card {

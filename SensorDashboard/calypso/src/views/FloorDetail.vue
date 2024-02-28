@@ -10,34 +10,41 @@
       <div class="accordion" id="accordionFloorplan">
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFloorplan" aria-expanded="false" aria-controls="collapseFloorplan">
-             Floor Plan for {{ floorData.buildingName }}
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#collapseFloorplan" aria-expanded="false" aria-controls="collapseFloorplan">
+              Floor Plan for {{ floorData.buildingName }}
             </button>
           </h2>
           <div id="collapseFloorplan" class="accordion-collapse collapse" data-bs-parent="#accordionFloorplan">
             <div class="accordion-body">
-              <div class="text-center"><h3 style="color: black!important;;">{{floorData.buildingName }}</h3></div>
-              
+              <div class="text-center">
+                <h3 style="color: black!important;;">{{ floorData.buildingName }}</h3>
+              </div>
+
               <img class="img-fluid" src="../assets/Floorplan.jpg">
             </div>
           </div>
         </div>
       </div>
       <br>
-       <!-- Tabs -->
-       <div class="tabs">
+      <!-- Tabs -->
+      <div class="tabs">
         <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item">
-            <button class="nav-link active" id="all-sensors-tab" data-bs-toggle="tab" data-bs-target="#all-sensors-tab-pane" type="button" role="tab" aria-controls="all-sensors-tab-pane" aria-selected="true">Sensors</button>
+            <button class="nav-link active" id="all-sensors-tab" data-bs-toggle="tab"
+              data-bs-target="#all-sensors-tab-pane" type="button" role="tab" aria-controls="all-sensors-tab-pane"
+              aria-selected="true">Sensors</button>
           </li>
           <li class="nav-item">
-            <button class="nav-link" id="all-cctv-tab" data-bs-toggle="tab" data-bs-target="#all-cctv-tab-pane" type="button" role="tab" aria-controls="all-cctv-tab-pane" aria-selected="false">CCTV</button>
+            <button class="nav-link" id="all-cctv-tab" data-bs-toggle="tab" data-bs-target="#all-cctv-tab-pane"
+              type="button" role="tab" aria-controls="all-cctv-tab-pane" aria-selected="false">CCTV</button>
           </li>
         </ul>
       </div>
       <!-- Tab content -->
       <div class="tab-content" id="floor-tab-content">
-        <div class="tab-pane show active" id="all-sensors-tab-pane" role="tabpanel" aria-labelledby="all-sensors-tab" tabindex="0">
+        <div class="tab-pane show active" id="all-sensors-tab-pane" role="tabpanel" aria-labelledby="all-sensors-tab"
+          tabindex="0">
           <br>
           <!--Sensors for All Rooms-->
           <div class="rooms-grid">
@@ -56,40 +63,40 @@
                 </div>
                 <div class="sensor-info">
                   <i class="fas fa-users"></i>
-                  <p>Last People Count: {{ room.latestPeopleCount}}</p>
+                  <p>Last People Count: {{ room.latestPeopleCount }}</p>
                 </div>
               </div>
               <div class="card-footer">
-                  <router-link
-                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'sensors' } }"
-                    class="btn btn-primary">
-                    View Room Details
-                  </router-link>
-                </div>
+                <router-link
+                  :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'sensors' } }"
+                  class="btn btn-primary">
+                  View Room Details
+                </router-link>
+              </div>
             </div>
           </div>
         </div>
         <div class="tab-pane" id="all-cctv-tab-pane" role="tabpanel" aria-labelledby="all-cctv-tab" tabindex="0">
-            <!-- Display all CCTV -->
-            <div class="rooms-grid">
-              <div v-for="room in floorData.rooms" :key="room._id" class="card">
-                <div class="card-header">
-                  <h3 class="room-card-header">{{ room.room_name }}</h3>
-                </div>
-                <div class="card-body">
-                  CCTV 
-                  <!-- v-for="room in floorData.rooms" :key="room._cctv" -->
-                  <!--<iframe src="" ></iframe>-->
-                  <iframe></iframe>
-                </div>
-                <div class="card-footer">
-                  <router-link
-                    :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'cctv' } }"
-                    class="btn btn-primary">
-                    View Room CCTV
-                  </router-link>
-                </div>
+          <!-- Display all CCTV -->
+          <div class="rooms-grid-cctv">
+            <div v-for="room in floorData.rooms" :key="room._id" class="card">
+              <div class="card-header">
+                <h3 class="room-card-header">{{ room.room_name }}</h3>
               </div>
+              <div class="card-body">
+                CCTV
+                <!-- v-for="room in floorData.rooms" :key="room._cctv" -->
+                <!--<iframe src="" ></iframe>-->
+                <iframe></iframe>
+              </div>
+              <div class="card-footer">
+                <router-link
+                  :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'cctv' } }"
+                  class="btn btn-primary">
+                  View Room CCTV
+                </router-link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -129,22 +136,49 @@ export default {
     } finally {
       this.loading = false;
     }
+
+    this.fetchFloorData().then(() => {
+      this.fetchSensorData().then(() => {
+        this.integrateSensorData();
+        setTimeout(() => {
+          this.equalizeCardHeaderHeights();
+        }, 0);
+      });
+    });
   },
   methods: {
+    equalizeCardHeaderHeights() {
+      this.$nextTick(() => {
+        const cardHeaders = document.querySelectorAll('.card-header');
+        let maxHeight = 0;
+        // Reset any previously set heights
+        cardHeaders.forEach(el => {
+          el.style.height = null;
+        });
+        // Find the max height
+        cardHeaders.forEach(el => {
+          maxHeight = Math.max(maxHeight, el.clientHeight);
+        });
+        // Apply the max height to all card headers
+        cardHeaders.forEach(el => {
+          el.style.height = `${maxHeight}px`;
+        });
+      });
+    },
     getAverage(value) {
       return typeof value === 'number' ? value.toFixed(2) : value;
     },
-    activateTabBasedOnQueryParam(){
+    activateTabBasedOnQueryParam() {
       this.query = this.$route.query.tab;
       if (this.query != null) {
-          this.resetTabs();
+        this.resetTabs();
         if (this.query === 'allsensors') {
           this.activateTab('all-sensors');
         } else if (this.query === 'allcctv') {
           this.activateTab('all-cctv');
         }
       }
-      
+
     },
     resetTabs() {
       const sensorsTab = document.getElementById('all-sensors-tab');
@@ -166,7 +200,7 @@ export default {
         tabPane.classList.add('show', 'active');
       }
     },
-    
+
     async fetchFloorData() {
       const buildingName = this.$route.params.buildingId;
       const floorName = decodeURIComponent(this.$route.params.floorName);
@@ -258,12 +292,12 @@ export default {
           const sensorData = this.sensorData[sensorId];
           if (sensorData) {
             // Update the latest temperature reading if this one is more recent
-            switch(sensorData.type){
+            switch (sensorData.type) {
               case 1:
                 if (!latestTemperatureReading || new Date(latestTemperatureReading.time) < new Date(sensorData.time)) {
                   latestTemperatureReading = sensorData;
                 }
-    
+
                 // Update the latest humidity reading if this one is more recent
                 if (!latestHumidityReading || new Date(latestHumidityReading.time) < new Date(sensorData.time)) {
                   latestHumidityReading = sensorData;
@@ -279,10 +313,10 @@ export default {
           }
         });
 
-      // Set the room's sensor data to the latest readings or a default value
-      room.latestTemperature = latestTemperatureReading ? latestTemperatureReading.temperature.toFixed(2) : 'N/A';
-      room.latestHumidity = latestHumidityReading ? latestHumidityReading.humidity.toFixed(2) : 'N/A';
-      room.latestPeopleCount = latestPeopleCount ? latestPeopleCount.peopleCount.toString() : 'N/A';
+        // Set the room's sensor data to the latest readings or a default value
+        room.latestTemperature = latestTemperatureReading ? latestTemperatureReading.temperature.toFixed(2) : 'N/A';
+        room.latestHumidity = latestHumidityReading ? latestHumidityReading.humidity.toFixed(2) : 'N/A';
+        room.latestPeopleCount = latestPeopleCount ? latestPeopleCount.peopleCount.toString() : 'N/A';
       });
     }
   }
@@ -304,7 +338,8 @@ export default {
 }
 
 .floor-header h1 {
-  color: #0056b3; /* Primary color */
+  color: #0056b3;
+  /* Primary color */
   margin-bottom: 0.5em;
 }
 
@@ -319,23 +354,40 @@ export default {
   gap: 16px;
 }
 
+.rooms-grid-cctv {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top:20px
+}
+
 .card {
   border: 1px solid #ddd;
   border-radius: 4px;
-  overflow: hidden; /* Ensures the border-radius applies to children elements */
+  overflow: hidden;
+  /* Ensures the border-radius applies to children elements */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background: white;
 }
 
 .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: #0056b3;
   color: white;
   padding: 15px;
   font-size: 1.2em;
+  min-height: 60px;
+  /* set a minimum height */
+  /* Remove a fixed height if it's set */
 }
-.room-card-header{
+
+
+.room-card-header {
   color: #eeebeb !important;
 }
+
 .card-body {
   padding: 20px;
   text-align: left;
@@ -371,24 +423,33 @@ export default {
   background-color: #004494;
 }
 
-.nav-link{
+.nav-link {
   color: rgb(150, 150, 150) !important;
 }
 
-.nav-link:focus, .nav-link:hover {
-    color: #000000 !important; /*changes the color of the text when hovered */
+.nav-link:focus,
+.nav-link:hover {
+  color: #000000 !important;
+  /*changes the color of the text when hovered */
 }
 
 @media (max-width: 768px) {
   .rooms-grid {
     grid-template-columns: 1fr;
   }
-
-  .card {
-    padding: 0; /* Removes padding for the card on smaller screens */
+  
+  .rooms-grid-cctv {
+    grid-template-columns: 1fr;
   }
 
-  .card-header, .card-body, .card-footer {
+  .card {
+    padding: 0;
+    /* Removes padding for the card on smaller screens */
+  }
+
+  .card-header,
+  .card-body,
+  .card-footer {
     padding: 10px;
   }
 }
