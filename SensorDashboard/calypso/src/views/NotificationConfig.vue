@@ -46,54 +46,96 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data() {
     return {
-        recipients: ["testing123@xyz.com", "abc@gmail.com"], // This will be fetched from the API
+        recipients: [], 
         newRecipient: '',
-        temperatureThreshold: 26, // Default threshold
-        peopleCountThreshold: 4, // Default threshold
-        messageBody: "", // Default message
+        temperatureThreshold: 26, 
+        peopleCountThreshold: 4, 
+        messageBody: "", 
         showSuccessModal: false
     };
   },
   methods: {
-    fetchRecipients() {
-      // API call to get the recipients
-      // axios.get('/api/notification-recipients').then(response => {
-      //   this.recipients = response.data;
-      // });
+    fetchSettings() {
+      // API call to get the notification settings
+      axios.get('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/notification')
+        .then(response => {
+          const sanitizedDataString = response.data.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+          try {
+            const settingsArray = JSON.parse(sanitizedDataString);
+            const settings = settingsArray[0];
+            this.recipients = settings.notifcationRecipients; // typo in 'notifcationRecipients' 
+            this.temperatureThreshold = settings.temperatureThreshold;
+            this.peopleCountThreshold = settings.peopleCountThreshold;
+            this.messageBody = settings.messageBody;
+          } catch (error) {
+            console.error('Error parsing settings:', error);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching settings:', error);
+        });
     },
     addRecipient() {
-      // Validate and add the new recipient
-      // axios.post('/api/notification-recipients', { email: this.newRecipient }).then(response => {
-        this.recipients.push(this.newRecipient);
-        this.newRecipient = ''; // Clear the input after adding
-      // });
+      if (this.newRecipient && this.isValidEmail(this.newRecipient)) {
+        // Check if the email already exists in the list
+        if (!this.recipients.includes(this.newRecipient)) {
+          this.recipients.push(this.newRecipient);
+          this.newRecipient = ''; // Reset the input
+        } else {
+          alert('This email is already in the list.');
+        }
+      } else {
+        alert('Please enter a valid email address.');
+      }
     },
+
     removeRecipient(email) {
-        // API call to remove the recipient
-        // For example:
-        // axios.delete(`/api/notification-recipients/${email}`).then(response => {
-            this.recipients = this.recipients.filter(recipient => recipient !== email);
-        // });
+      this.recipients = this.recipients.filter(recipient => recipient !== email);
     },
+
     saveConfiguration() {
-        // Perform save operation
+      const payload = {
+        temperatureThreshold: this.temperatureThreshold,
+        peopleCountThreshold: this.peopleCountThreshold,
+        notifcationRecipients: this.recipients,
+        messageBody: this.messageBody,
+        interval: 1000 
+      };
 
-        // Show the success modal
-        this.showSuccessModal = true;
+      axios.post('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/post/notification', payload)
+        .then(response => {
+          // Show the success modal
+          this.showSuccessModal = true;
 
-        // Timeout to hide the modal and redirect to sensors page
-        setTimeout(() => {
-        this.showSuccessModal = false;
-        this.$router.push({ name: 'Sensors' });
-        }, 2000); // Show the modal for 2 seconds
+          // Timeout to hide the modal and redirect to sensors page
+          setTimeout(() => {
+            this.showSuccessModal = false;
+            this.$router.push({ name: 'Sensors' });
+          }, 2000); // Show the modal for 2 seconds
+        })
+        .catch(error => {
+          // Handle error
+          alert('Failed to save configuration: ' + error.message);
+        });
+    },
+
+    isValidEmail(email) {
+      // Simple regex for email validation
+      const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+      return regex.test(email);
     },
     cancelConfiguration() {
       this.$router.push({ name: 'Sensors' });
     }
   },
+  mounted() {
+  // When the component is mounted, fetch the recipients
+    this.fetchSettings();
+  }
 };
 </script>
 
