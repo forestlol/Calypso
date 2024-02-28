@@ -2,6 +2,7 @@
   <div class="configure-container">
     <h1 class="configure-title">Configure Notifications</h1>
     <form @submit.prevent="saveConfiguration" class="configure-form">
+      <!-- Threshold Editor -->
       <div class="form-group">
         <label for="temperatureThreshold">Temperature Threshold (°C):</label>
         <input type="number" id="temperatureThreshold" v-model="temperatureThreshold" min="0" class="form-control"/>
@@ -25,6 +26,23 @@
         <button @click.prevent="addRecipient" type="button" class="btn-add-recipient">Add</button>
       </div>
 
+      <!-- Execution Schedule Editor -->
+      <div class="form-group">
+        <label for="executionSchedule">Execution Schedule:</label>
+        <select id="executionSchedule" v-model="selectedInterval" @change="updateNextExecutionTime" class="form-control">
+          <option value="5">Every 5 minutes</option>
+          <option value="15">Every 15 minutes</option>
+          <option value="30">Every 30 minutes</option>
+          <option value="60">Every 1 hour</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Next Execution Time:</label>
+        <p style="color: black;">{{ nextExecutionTime }}</p>
+      </div>
+
+      <!-- Message Body Editor -->
       <div class="form-group">
         <label for="messageBody">Message Body:</label>
         <textarea id="messageBody" v-model="messageBody" rows="4" class="form-control" placeholder="Add instructions"></textarea>
@@ -54,6 +72,8 @@ export default {
         newRecipient: '',
         temperatureThreshold: 26, 
         peopleCountThreshold: 4, 
+        selectedInterval: '', 
+        nextExecutionTime: '',
         messageBody: "", 
         showSuccessModal: false
     };
@@ -63,14 +83,18 @@ export default {
       // API call to get the notification settings
       axios.get('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/notification')
         .then(response => {
-          const sanitizedDataString = response.data.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+          const sanitizedDataString = response.data.replace(/ObjectId\("([^"]+)"\)/g, '"$1"').replace(/ISODate\("([^"]+)"\)/g, '"$1"');
           try {
             const settingsArray = JSON.parse(sanitizedDataString);
             const settings = settingsArray[0];
-            this.recipients = settings.notifcationRecipients; // typo in 'notifcationRecipients' 
+
+            this.recipients = settings.notifcationRecipients; 
             this.temperatureThreshold = settings.temperatureThreshold;
             this.peopleCountThreshold = settings.peopleCountThreshold;
             this.messageBody = settings.messageBody;
+            this.selectedInterval = settings.interval;
+            const nextExecutionDate = new Date(settings.nextExecutionTime);
+            this.nextExecutionTime = this.formatDate(nextExecutionDate);
           } catch (error) {
             console.error('Error parsing settings:', error);
           }
@@ -78,6 +102,10 @@ export default {
         .catch(error => {
           console.error('Error fetching settings:', error);
         });
+    },
+    formatDate(date) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      return date.toLocaleDateString('en-US', options);
     },
     addRecipient() {
       if (this.newRecipient && this.isValidEmail(this.newRecipient)) {
@@ -92,37 +120,46 @@ export default {
         alert('Please enter a valid email address.');
       }
     },
-
     removeRecipient(email) {
       this.recipients = this.recipients.filter(recipient => recipient !== email);
     },
-
+    updateNextExecutionTime() {
+      const currentTime = new Date();
+      const intervalMilliseconds = this.selectedInterval * 60000; 
+      const nextExecution = new Date(currentTime.getTime() + intervalMilliseconds);
+      this.nextExecutionTime = nextExecution.toLocaleString(); 
+    },
     saveConfiguration() {
+      // Calculate the next execution time based on the selected interval
+      const currentTime = new Date();
+      const intervalMilliseconds = this.selectedInterval * 60000; // Convert minutes to milliseconds
+      const nextExecution = new Date(currentTime.getTime() + intervalMilliseconds);
+      const nextExecutionISOString = nextExecution.toISOString(); // Convert to ISO string for storage
+
       const payload = {
         temperatureThreshold: this.temperatureThreshold,
         peopleCountThreshold: this.peopleCountThreshold,
         notifcationRecipients: this.recipients,
         messageBody: this.messageBody,
-        interval: 1000 
+        interval: this.selectedInterval,
+        nextExecutionTime: nextExecutionISOString 
       };
 
       axios.post('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/post/notification', payload)
         .then(response => {
-          // Show the success modal
+          // Handle the successful response here
           this.showSuccessModal = true;
-
-          // Timeout to hide the modal and redirect to sensors page
           setTimeout(() => {
             this.showSuccessModal = false;
             this.$router.push({ name: 'Sensors' });
           }, 2000); // Show the modal for 2 seconds
         })
         .catch(error => {
-          // Handle error
+          // Handle errors here
+          console.error('Failed to save configuration:', error);
           alert('Failed to save configuration: ' + error.message);
         });
     },
-
     isValidEmail(email) {
       // Simple regex for email validation
       const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -133,7 +170,6 @@ export default {
     }
   },
   mounted() {
-  // When the component is mounted, fetch the recipients
     this.fetchSettings();
   }
 };
