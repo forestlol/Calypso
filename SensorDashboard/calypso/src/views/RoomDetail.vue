@@ -126,21 +126,30 @@
           <br>
           <div class="row gx-5">
             <div class="floor-plan-image col-12" id="sensors-drag">
-              <p>Click on the sensors to go to sensor details page</p>
+              <p>Edit Mode allows dragging of icons, but do not allow clicking of sensors to visit sensor details and hovering to show details</p>
+              <!--hover over "Edit Mode" to see description, will implement for sensor icons too-->
+              <a href="#" data-bs-toggle="tooltip" data-bs-title="Default tooltip">Edit Mode</a>
+              <div class="form-check form-switch form-control-lg">
+                  <input class="form-check-input" type="checkbox" role="switch" id="edit_toggle" @change="toggleEdit()" checked>
+                  <label class="form-check-label" id="label_edit_toggle" for="edit_toggle">On</label>
+              </div>
               <div><img :src="imagePath" id="roomImg" class="img-fluid mx-auto d-block" alt="Room Image"></div>
-              <!-- <div class="draggable"><img src="">ppl</div>
-              <div class="draggable"><img src="">temp&hmd</div>
-              <div class="draggable"><img src="">sensor 3</div> -->
-              
+
               <div v-for="sensor in this.sensors"
                    :key="sensor.id"
                    :id="`icon_${sensor.id}`"
-                   class="draggable" :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
-                    <router-link :to="`/sensor/${sensor.id}`">
+                   class="draggable drag-element" :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
+                    <router-link v-if="!this.editMode" :to="`/sensor/${sensor.id}`">
                       <img v-if="this.position[sensor.id].type == 2" class="img-fluid" src="/src/assets/people-count.png">
                       <img v-else-if="this.position[sensor.id].type  == 1" class="img-fluid" src="/src/assets/temperature.png">                      
                       <img v-else class="img-fluid" src="/src/assets/sensor.png">
                     </router-link>
+                    <div v-else>
+                      <img v-if="this.position[sensor.id].type == 2" class="img-fluid" src="/src/assets/people-count.png">
+                      <img v-else-if="this.position[sensor.id].type  == 1" class="img-fluid" src="/src/assets/temperature.png">                      
+                      <img v-else class="img-fluid" src="/src/assets/sensor.png">
+                    </div>
+                    
                     <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span>
 
               </div>
@@ -229,9 +238,11 @@ export default {
       overlay: [],
       imagePath: `../assets/Floorplan.jpg`,
       position: [],
+      editMode: true
     };
   },
-  async mounted() {
+  async mounted() {    
+    this.initToolTip();
     this.parseUrlParams();
     this.getPosition();
     this.fetchRoomSensors().then(() => {
@@ -711,6 +722,33 @@ export default {
       //  console.log(description);
       //   description.style.display = 'none';
       // });
+    },
+    initToolTip(){
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    },
+    toggleEdit() {
+      this.editMode = !this.editMode;
+      console.log(this.editMode);
+      //get elements with class draggable
+      const draggableElements = document.getElementsByClassName('drag-element');
+      // for each element, remove draggable class
+      for (let i = 0; i < draggableElements.length; i++) {
+        if (this.editMode) {
+          draggableElements[i].classList.add('draggable');
+        } else {
+          draggableElements[i].classList.remove('draggable');
+        }
+      }
+
+
+      const editToggle = document.getElementById('edit_toggle');
+      const labeleditToggle = document.getElementById('label_edit_toggle');
+      if (editToggle.checked) {
+          labeleditToggle.textContent = 'On';
+      } else {
+          labeleditToggle.textContent = 'Off';
+      }
     }
   },
 };
@@ -791,7 +829,7 @@ export default {
 }
 
 
-.draggable {
+.drag-element {
   width: 9%;
 
   margin: 1rem 0 0 1rem;
@@ -808,7 +846,7 @@ export default {
   display: inline-block;
 }
 
-.draggable img {
+.drag-element img {
   max-width: 100%; /* Ensure the image fits inside the container */
   max-height: 100%; /* Ensure the image fits inside the container */
 }
