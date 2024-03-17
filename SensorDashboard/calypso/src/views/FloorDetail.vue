@@ -19,14 +19,18 @@
             <div class="accordion-body">
               <div class="text-center">
                 <h3 style="color: black!important;;">{{ floorData.buildingName }}</h3>
-              </div>
-
+              </div> 
+              <!-- generate all sensor icons as a circle and set their position of x and y on the img
+              when hover/click on the sensor icon, it shows the data
+              icon color depends on sensor status (red green orange))-->
               <img class="img-fluid" src="../assets/Floorplan.jpg">
             </div>
           </div>
         </div>
       </div>
       <br>
+      
+
       <!-- Tabs -->
       <div class="tabs">
         <ul class="nav nav-tabs" role="tablist">
