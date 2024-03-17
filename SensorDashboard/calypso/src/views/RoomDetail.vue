@@ -126,16 +126,15 @@
           <br>
           <div class="row gx-5">
             <div class="floor-plan-image col-12" id="sensors-drag">
-              <p>Edit Mode allows dragging of icons, but do not allow clicking of sensors to visit sensor details and hovering to show details</p>
-              <!--hover over "Edit Mode" to see description, will implement for sensor icons too-->
-              <a href="#" data-bs-toggle="tooltip" data-bs-title="Default tooltip">Edit Mode</a>
+
               <div class="form-check form-switch form-control-lg">
                   <input class="form-check-input" type="checkbox" role="switch" id="edit_toggle" @change="toggleEdit()" checked>
-                  <label class="form-check-label" id="label_edit_toggle" for="edit_toggle">On</label>
+                  <label class="form-check-label" id="label_edit_toggle" for="edit_toggle">Edit Mode </label>
+                  <a data-bs-toggle="tooltip" :title="this.editMsg"><img class="img-fluid info-img" src="/src/assets/info.png"></a>
               </div>
               <div><img :src="imagePath" id="roomImg" class="img-fluid mx-auto d-block" alt="Room Image"></div>
 
-              <div v-for="sensor in this.sensors"
+              <!-- <div v-for="sensor in this.sensors"
                    :key="sensor.id"
                    :id="`icon_${sensor.id}`"
                    class="draggable drag-element" :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
@@ -152,8 +151,18 @@
                     
                     <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span>
 
+              </div> -->
+              <div v-for="sensor in this.sensors"
+                   :key="sensor.id"
+                   :id="`icon_${sensor.id}`"
+                   class="draggable drag-element" :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
+                   <a  data-bs-toggle="tooltip" data-bs-html="true" :title="sensor.id"><img v-if="this.position[sensor.id].type == 2" class="img-fluid" src="/src/assets/people-count.png">
+                   <img v-else-if="this.position[sensor.id].type  == 1" class="img-fluid" src="/src/assets/temperature.png">                      
+                   <img v-else class="img-fluid" src="/src/assets/sensor.png"></a>
+                    
+                    <!-- <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span> -->
+
               </div>
-              
             </div>
 
           </div>
@@ -221,6 +230,7 @@
 <script>
 import { Chart, registerables } from 'chart.js';
 import interact from 'interactjs';
+import { Tooltip } from 'bootstrap';
 Chart.register(...registerables);
 
 export default {
@@ -238,11 +248,14 @@ export default {
       overlay: [],
       imagePath: `../assets/Floorplan.jpg`,
       position: [],
-      editMode: true
+      editMode: true,
+      editMsg: "Toggle between View and Edit Mode. Edit Mode allows dragging of icons to change their position"
     };
   },
   async mounted() {    
-    this.initToolTip();
+    new Tooltip(document.body, {
+      selector: "[data-bs-toggle='tooltip']",
+    });
     this.parseUrlParams();
     this.getPosition();
     this.fetchRoomSensors().then(() => {
@@ -723,10 +736,6 @@ export default {
       //   description.style.display = 'none';
       // });
     },
-    initToolTip(){
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-    },
     toggleEdit() {
       this.editMode = !this.editMode;
       console.log(this.editMode);
@@ -745,9 +754,9 @@ export default {
       const editToggle = document.getElementById('edit_toggle');
       const labeleditToggle = document.getElementById('label_edit_toggle');
       if (editToggle.checked) {
-          labeleditToggle.textContent = 'On';
+          labeleditToggle.textContent = 'Edit Mode';
       } else {
-          labeleditToggle.textContent = 'Off';
+          labeleditToggle.textContent = 'View Mode';
       }
     }
   },
@@ -865,6 +874,11 @@ export default {
 
 .sensor_description:hover{
   display: block;
+}
+
+.info-img {
+  width: 20px;
+  height: 20px;
 }
 
 
