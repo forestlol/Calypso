@@ -34,13 +34,17 @@
           <div class="row">
             <div class="col-md-6 mb-3" v-for="sensor in sensors" :key="sensor.id">
               <div class="card h-100">
+                <div>{{ sensor }}</div>
                 <div class="card-header">
-                  Sensor ID: {{ sensor.id }}
+                  <span v-if="sensor.type == 0 || sensor.type == -1">Panic Alert</span>
+                  <span v-if="sensor.type == 1">Temperature & Humidity Sensor</span>
+                  <span v-if="sensor.type == 2">People Counter</span>
+                  &nbsp;
+                  <h6 class="">(Sensor ID: {{ sensor.id }})</h6>
                 </div>
                 <div class="card-body">
-                  <p v-if="sensor.type == 0" class="card-text">
+                  <p v-if="sensor.type == 0 " class="card-text">
                     Activated: {{ sensor.activated ? 'Yes' : 'No' }}
-                    why nothing
                   </p>
                   <template v-if="sensor.type == 1">
                     <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
