@@ -39,10 +39,6 @@
               data-bs-target="#all-sensors-tab-pane" type="button" role="tab" aria-controls="all-sensors-tab-pane"
               aria-selected="true">Sensors</button>
           </li>
-          <li class="nav-item">
-            <button class="nav-link" id="all-cctv-tab" data-bs-toggle="tab" data-bs-target="#all-cctv-tab-pane"
-              type="button" role="tab" aria-controls="all-cctv-tab-pane" aria-selected="false">CCTV</button>
-          </li>
         </ul>
       </div>
       <!-- Tab content -->
@@ -75,29 +71,6 @@
                   :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'sensors' } }"
                   class="btn btn-primary">
                   View Room Details
-                </router-link>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="tab-pane" id="all-cctv-tab-pane" role="tabpanel" aria-labelledby="all-cctv-tab" tabindex="0">
-          <!-- Display all CCTV -->
-          <div class="rooms-grid-cctv">
-            <div v-for="room in floorData.rooms" :key="room._id" class="card">
-              <div class="card-header">
-                <h3 class="room-card-header">{{ room.room_name }}</h3>
-              </div>
-              <div class="card-body">
-                CCTV
-                <!-- v-for="room in floorData.rooms" :key="room._cctv" -->
-                <!--<iframe src="" ></iframe>-->
-                <iframe></iframe>
-              </div>
-              <div class="card-footer">
-                <router-link
-                  :to="{ path: `/building/${encodeURIComponent(floorData.buildingName)}/${encodeURIComponent(floorData.floorName)}/${encodeURIComponent(room.room_name)}`, query: { tab: 'cctv' } }"
-                  class="btn btn-primary">
-                  View Room CCTV
                 </router-link>
               </div>
             </div>
@@ -172,38 +145,7 @@ export default {
     getAverage(value) {
       return typeof value === 'number' ? value.toFixed(2) : value;
     },
-    activateTabBasedOnQueryParam() {
-      this.query = this.$route.query.tab;
-      if (this.query != null) {
-        this.resetTabs();
-        if (this.query === 'allsensors') {
-          this.activateTab('all-sensors');
-        } else if (this.query === 'allcctv') {
-          this.activateTab('all-cctv');
-        }
-      }
-
-    },
-    resetTabs() {
-      const sensorsTab = document.getElementById('all-sensors-tab');
-      const cctvTab = document.getElementById('all-cctv-tab');
-      const sensorsTabPane = document.getElementById('all-sensors-tab-pane');
-      const cctvTabPane = document.getElementById('all-cctv-tab-pane');
-
-      sensorsTab.classList.remove('active');
-      cctvTab.classList.remove('active');
-      sensorsTabPane.classList.remove('show', 'active');
-      cctvTabPane.classList.remove('show', 'active');
-    },
-    activateTab(tabName) {
-      const tab = document.getElementById(`${tabName}-tab`);
-      const tabPane = document.getElementById(`${tabName}-tab-pane`);
-
-      if (tab && tabPane) {
-        tab.classList.add('active');
-        tabPane.classList.add('show', 'active');
-      }
-    },
+   
 
     async fetchFloorData() {
       const buildingName = this.$route.params.buildingId;

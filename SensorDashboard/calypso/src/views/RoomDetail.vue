@@ -16,10 +16,6 @@
               type="button" role="tab" aria-controls="sensors-tab-pane" aria-selected="true">Sensors</button>
           </li>
           <li class="nav-item">
-            <button class="nav-link" id="cctv-tab" data-bs-toggle="tab" data-bs-target="#cctv-tab-pane" type="button"
-              role="tab" aria-controls="cctv-tab-pane" aria-selected="false">CCTV</button>
-          </li>
-          <li class="nav-item">
             <button class="nav-link" id="floor-plan-tab" data-bs-toggle="tab" data-bs-target="#floor-plan-tab-pane" type="button"
               role="tab" aria-controls="floor-plan-tab-pane" aria-selected="false">Sensor Location</button>
           </li>
@@ -44,6 +40,7 @@
                 <div class="card-body">
                   <p v-if="sensor.type == 0" class="card-text">
                     Activated: {{ sensor.activated ? 'Yes' : 'No' }}
+                    why nothing
                   </p>
                   <template v-if="sensor.type == 1">
                     <p class="card-text">Temperature: {{ sensor.temp }}°C</p>
@@ -79,47 +76,6 @@
               class="btn btn-secondary btn-fixed-size">Back to Floor</router-link>
 
           </div>
-        </div>
-        <!-- Display CCTV -->
-        <div class="tab-pane" id="cctv-tab-pane" role="tabpanel" aria-labelledby="cctv-tab" tabindex="0">
-          <br>
-          <!--http://(IP address):(Camera port number)-->
-          <!--Sample Video-->
-          <div class="row gx-5">
-            <div class="col-12">
-              <div>
-                <iframe width="100%" height="370" src="https://www.youtube.com/embed/K4TOrB7at0Y?si=dp1Ha6nVGWtAhnMz"
-                  title="YouTube video player" frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowfullscreen></iframe>
-              </div>
-            </div>
-          </div>
-          <!--CCTV Controls-->
-          Camera Controls
-          <div class="row text-center">
-            <div class="col">
-              <button id="volume-button" type="button" class="btn " @click="volumeToggle"><img id="volume-button-image"
-                  class="button-image" src="../assets/volumeon.png"><br>Sound</button>
-            </div>
-            <div class="col">
-              <button id="mic-button" type="button" class="btn" @click="micToggle"><img id="mic-button-image"
-                  class="button-image" src="../assets/micon.png"><br>Mic</button>
-            </div>
-            <div class="col">
-              <button id="screenshot-button" type="button" class="btn" @click="screenshot"><img
-                  id="screenshot-button-image" class="button-image" src="../assets/capture.png"><br>Screenshot</button>
-            </div>
-          </div>
-
-          <div class="text-center mt-4">
-            <router-link :to="`/building/`" class="btn btn-primary btn-fixed-size">Back to Building</router-link>
-            <router-link :to="{ path: `/building/${buildingName}/${floorName}`, query: { tab: 'allsensors' } }"
-              class="btn btn-secondary btn-fixed-size">Back to Floor</router-link>
-
-          </div>
-
-
         </div>
         <!-- Display Floor Plan -->
         <div class="tab-pane" id="floor-plan-tab-pane" role="tabpanel" aria-labelledby="floor-plan-tab" tabindex="0">
@@ -283,37 +239,7 @@ export default {
       this.roomName = decodeURIComponent(segments[3]);
       this.query = this.$route.query.tab;
     },
-    activateTabBasedOnQueryParam() {
-      if (!this.query != null) {
-        this.resetTabs();
-        if (this.query === 'sensors') {
-          this.activateTab('sensors');
-        } else if (this.query === 'cctv') {
-          this.activateTab('cctv');
-        }
-      }
-
-    },
-    resetTabs() {
-      const sensorsTab = document.getElementById('sensors-tab');
-      const cctvTab = document.getElementById('cctv-tab');
-      const sensorsTabPane = document.getElementById('sensors-tab-pane');
-      const cctvTabPane = document.getElementById('cctv-tab-pane');
-
-      sensorsTab.classList.remove('active');
-      cctvTab.classList.remove('active');
-      sensorsTabPane.classList.remove('show', 'active');
-      cctvTabPane.classList.remove('show', 'active');
-    },
-    activateTab(tabName) {
-      const tab = document.getElementById(`${tabName}-tab`);
-      const tabPane = document.getElementById(`${tabName}-tab-pane`);
-
-      if (tab && tabPane) {
-        tab.classList.add('active');
-        tabPane.classList.add('show', 'active');
-      }
-    },
+    
     async fetchRoomSensors() {
       try {
         // Fetching building data
