@@ -34,7 +34,6 @@
           <div class="row">
             <div class="col-md-6 mb-3" v-for="sensor in sensors" :key="sensor.id">
               <div class="card h-100">
-                <div>{{ sensor }}</div>
                 <div class="card-header">
                   <span v-if="sensor.type == 0 || sensor.type == -1">Panic Alert</span>
                   <span v-if="sensor.type == 1">Temperature & Humidity Sensor</span>
