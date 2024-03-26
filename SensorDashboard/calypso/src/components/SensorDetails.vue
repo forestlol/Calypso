@@ -106,6 +106,17 @@
             <area-chart :data="sensorData" :xtitle="'Hours'" :ytitle="'Value'" :library="chartOptions"></area-chart>
         </div>
 
+        <!-- Downtime Chart -->
+        <div class="sensor-card">
+            <div class="row">
+                <div class="col-12">
+                    <h4>Downtime Data</h4>
+                    <div class="chart-container">
+                        <canvas id="downtimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Consumption Charts -->
         <div class="sensor-card">
             <div class="row">
@@ -150,11 +161,13 @@ export default {
             //averageSensorData: 50, // Example average for non-temperature/humidity sensors
             waterConsumptionData: [], // Placeholder for water consumption data
             electricalConsumptionData: [], // Placeholder for electrical consumption data
+            
         };
     },
     mounted() {
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
+        this.initDownTimeChart(); // sensorType is initialised in fetchDataForSelectedDate() which is called after initDownTimeChart()
     },
     async created() {
         this.fetchDataForSelectedDate();
@@ -205,6 +218,7 @@ export default {
 
                 if (selectedData.length > 0) {
                     this.sensorType = selectedData[0].type;
+                    console.log("Sensor Type: ", this.sensorType)
 
                     // Split the data for Temperature and Humidity if applicable
                     if (this.sensorType === 1) {
@@ -309,6 +323,12 @@ export default {
                 20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35
             ];
         },
+        sensorDowntimeData(){
+            // static fake data for 24 hours
+            // returns ([panicAlert], [temperature], [peopleCounter]) 
+            return [0,0,5,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            
+        },
         initWaterConsumptionChart() {
             const ctxWater = document.getElementById('waterConsumptionChart').getContext('2d');
             new Chart(ctxWater, {
@@ -353,6 +373,36 @@ export default {
                         }
                     }
                 }
+            });
+        },
+        initDownTimeChart(){
+            const ctxSensorMonitor = document.getElementById('downtimeChart').getContext('2d');
+            new Chart(ctxSensorMonitor, {
+                type: 'line',
+                data: {
+                labels: this.generateLast24HoursLabels(),
+                datasets: [{
+                    label: 'Down Time',
+                    data: this.sensorDowntimeData(), // Use static fake data
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                }],
+                },
+                options: {
+                scales: {
+                    y: {
+                    beginAtZero: true,
+                    max: 60, // Set the maximum value for the y-axis
+                    title: {
+                        display: true,
+                        text: 'Minutes of Downtime' // Label for the y-axis
+                        },
+                    
+                    }
+                }
+                }
+
             });
         },
         generateLast24HoursLabels() {

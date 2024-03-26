@@ -58,7 +58,7 @@
             </div>
 
             <!-- Consumption Charts Section -->
-            <div class="row mt-4">
+            <!-- <div class="row mt-4">
               <div class="col-12 col-md-6">
                 <h2 class="text-center">Water Consumption Data</h2>
                 <div class="chart-container">
@@ -71,7 +71,7 @@
                   <canvas id="electricalConsumptionChart"></canvas>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
           <div class="text-center mt-4">
             <router-link :to="`/building/`" class="btn btn-primary btn-fixed-size">Back to Building</router-link>
@@ -141,11 +141,23 @@
           BMS data 
           <div class="row mt-4">
             <div class="col-12 col-md-6">
+              <h2 class="text-center">Water Consumption Data</h2>
+              <div class="chart-container">
+                <canvas id="waterConsumptionChart"></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <h2 class="text-center">Electrical Consumption Data</h2>
+              <div class="chart-container">
+                <canvas id="electricalConsumptionChart"></canvas>
+              </div>
+            </div>
+            <!-- <div class="col-12 col-md-6">
               <h2 class="text-center">Energy Consumption Data</h2>
               <div class="chart-container">
                 <canvas id="energyConsumptionChart"></canvas>
               </div>
-            </div>
+            </div> -->
 
             <div class="col-12 col-md-6">
               <h2 class="text-center">Weekly Energy Usage</h2>
@@ -459,27 +471,27 @@ export default {
       });
     },
     initEnergyConsumptionChart(){
-      const ctxEnergy = document.getElementById('energyConsumptionChart').getContext('2d');
-      new Chart(ctxEnergy, {
-        type: 'line',
-        data: {
-          labels: this.generateLast24HoursLabels(),
-          datasets: [{
-            label: 'Energy Consumption (kWh)',
-            data: this.EnergyConsumptionData(), // Use static fake data
-            backgroundColor: 'rgba(75, 192, 192, 0.5)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-          }],
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
+      // const ctxEnergy = document.getElementById('energyConsumptionChart').getContext('2d');
+      // new Chart(ctxEnergy, {
+      //   type: 'line',
+      //   data: {
+      //     labels: this.generateLast24HoursLabels(),
+      //     datasets: [{
+      //       label: 'Energy Consumption (kWh)',
+      //       data: this.EnergyConsumptionData(), // Use static fake data
+      //       backgroundColor: 'rgba(75, 192, 192, 0.5)',
+      //       borderColor: 'rgba(75, 192, 192, 1)',
+      //       borderWidth: 1,
+      //     }],
+      //   },
+      //   options: {
+      //     scales: {
+      //       y: {
+      //         beginAtZero: true
+      //       }
+      //     }
+      //   }
+      // });
 
       const ctxWeeklyEnergy = document.getElementById('weeklyEnergyConsumptionChart').getContext('2d');
       //create bar chart for ctxWeeklyEnergy
