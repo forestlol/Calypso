@@ -21,7 +21,7 @@
           </li>
           <li class="nav-item">
             <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#items-tab-pane" type="button"
-              role="tab" aria-controls="items-tab-pane" aria-selected="false">Items</button>
+              role="tab" aria-controls="items-tab-pane" aria-selected="false">BMS Items</button>
           </li>
         </ul>
       </div>
@@ -168,6 +168,12 @@
                 <canvas id="waterInflowOutflowChart"></canvas>
               </div>
             </div>
+            <div class="col-12 col-md-6">
+              <h2 class="text-center">Sensor Device Monitoring Chart</h2>
+              <div class="chart-container">
+                <canvas id="sensorMonitorChart"></canvas>
+              </div>
+            </div>
           </div>
 
           <div class="text-center mt-4">
@@ -219,12 +225,12 @@ export default {
     this.getPosition();
     this.fetchRoomSensors().then(() => {
       this.$nextTick(() => {
-        this.activateTabBasedOnQueryParam();
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
         this.initEnergyConsumptionChart();
         this.initWaterInflowOutflowChart();
         this.initAirPressureChart();
+        this.initSensorMonitorChart();
         this.initDraggable();
       });
       this.setRoomImg();
@@ -321,17 +327,6 @@ export default {
           break;
       }
     },
-    volumeToggle() {
-      var image = document.getElementById('volume-button-image');
-      image.src = image.src.includes("/volumeon.png") ? "/src/assets/volumeoff.png" : "/src/assets/volumeon.png";
-    },
-    micToggle() {
-      var image = document.getElementById('mic-button-image');
-      image.src = image.src.includes("/micon.png") ? "/src/assets/micoff.png" : "/src/assets/micon.png";
-    },
-    screenshot() {
-      // Functionality to be implemented
-    },
     generateLast24HoursLabels() {
       const labels = [];
       const currentHour = new Date().getHours(); // Get the current hour
@@ -386,6 +381,16 @@ export default {
         30, 30, 34, 35, 30, 28, 30, 26, 23, 24, 20, 20]
       ];
     },
+    sensorMonitorChart(){
+      // static fake data for 24 hours
+      // returns ([panicAlert], [temperature], [peopleCounter]) 
+      return [
+        [0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0,0,5,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ]
+    },
+
     // gradientColor(value, data, opacity = 0.5){
     // this function is not working, delete if not needed in the future
     //   // Create gradient color for the chart
@@ -554,6 +559,51 @@ export default {
             }
           }
         }
+      });
+
+    },
+    initSensorMonitorChart(){
+      const ctxSensorMonitor = document.getElementById('sensorMonitorChart').getContext('2d');
+      new Chart(ctxSensorMonitor, {
+        type: 'line',
+        data: {
+          labels: this.generateLast24HoursLabels(),
+          datasets: [{
+            label: 'Panic Alert',
+            data: this.sensorMonitorChart()[0], // Use static fake data
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Temperature',
+            data: this.sensorMonitorChart()[1], // Use static fake data
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'People Counter',
+            data: this.sensorMonitorChart()[2], // Use static fake data
+            backgroundColor: 'rgba(255, 206, 86, 0.5)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 60, // Set the maximum value for the y-axis
+              title: {
+                display: true,
+                text: 'Minutes of Downtime' // Label for the y-axis
+                },
+              
+            }
+          }
+        }
+
       });
 
     },

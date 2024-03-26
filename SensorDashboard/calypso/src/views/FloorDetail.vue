@@ -104,9 +104,6 @@ export default {
           this.integrateSensorData();
         }
       }
-      this.$nextTick(() => {
-        this.activateTabBasedOnQueryParam();
-      });
     } catch (err) {
       console.error(err);
       this.error = err.message;
