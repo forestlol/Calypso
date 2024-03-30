@@ -4,13 +4,13 @@
     <form @submit.prevent="saveConfiguration" class="configure-form">
       <!-- Threshold Editor -->
       <div class="form-group">
-        <label for="temperatureThreshold">Temperature Threshold (°C):</label>
-        <input type="number" id="temperatureThreshold" v-model="temperatureThreshold" min="0" class="form-control"/>
+        <label for="lowerTemperatureThreshold">Lower Temperature Threshold (°C):</label>
+        <input type="number" id="lowerTemperatureThreshold" v-model="lowerTemperatureThreshold" min="0" step="0.1" class="form-control"/>
       </div>
 
       <div class="form-group">
-        <label for="peopleCountThreshold">People Count Threshold:</label>
-        <input type="number" id="peopleCountThreshold" v-model="peopleCountThreshold" min="0" class="form-control"/>
+        <label for="upperTemperatureThreshold">Upper Temperature Threshold (°C):</label>
+        <input type="number" id="upperTemperatureThreshold" v-model="upperTemperatureThreshold" min="0" step="0.1" class="form-control"/>
       </div>
 
       <!-- Recipients Editor -->
@@ -30,10 +30,7 @@
       <div class="form-group">
         <label for="executionSchedule">Execution Schedule:</label>
         <select id="executionSchedule" v-model="selectedInterval" @change="updateNextExecutionTime" class="form-control">
-          <option value="5">Every 5 minutes</option>
-          <option value="15">Every 15 minutes</option>
-          <option value="30">Every 30 minutes</option>
-          <option value="60">Every 1 hour</option>
+          <option v-for="hour in Array.from({ length: 24 }, (_, i) => i + 1)" :key = "hour" :value="hour * 60">Every {{ hour }} hour</option>
         </select>
       </div>
 
@@ -70,7 +67,8 @@ export default {
     return {
         recipients: [], 
         newRecipient: '',
-        temperatureThreshold: 26, 
+        lowerTemperatureThreshold: 22.0, 
+        upperTemperatureThreshold: 27.0, 
         peopleCountThreshold: 4, 
         selectedInterval: '', 
         nextExecutionTime: '',
@@ -89,7 +87,8 @@ export default {
             const settings = settingsArray[0];
 
             this.recipients = settings.notifcationRecipients; 
-            this.temperatureThreshold = settings.temperatureThreshold;
+            this.lowerTemperatureThreshold = settings.lowerTemperatureThreshold;
+            this.upperTemperatureThreshold = settings.upperTemperatureThreshold;       
             this.peopleCountThreshold = settings.peopleCountThreshold;
             this.messageBody = settings.messageBody;
             this.selectedInterval = settings.interval;
@@ -137,7 +136,8 @@ export default {
       const nextExecutionISOString = nextExecution.toISOString(); // Convert to ISO string for storage
 
       const payload = {
-        temperatureThreshold: this.temperatureThreshold,
+        upperTemperatureThreshold: this.upperTemperatureThreshold,
+        lowerTemperatureThreshold: this.lowerTemperatureThreshold,
         peopleCountThreshold: this.peopleCountThreshold,
         notifcationRecipients: this.recipients,
         messageBody: this.messageBody,

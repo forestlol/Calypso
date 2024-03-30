@@ -50,8 +50,10 @@ module.exports = async (req, res) => {
 
         if (type === 1) {
           const temperature = parseFloat(data.split(',')[0]);
-          if (temperature > config.temperatureThreshold) {
-            alerts.push(`Sensor ${deviceName} recorded high temperature of ${temperature}°C.`);
+          if (temperature < config.lowerTemperatureThreshold) {
+            alerts.push(`Sensor ${deviceName} recorded a temperature of ${temperature}°C, which is lower than the threshold limit of ${config.lowerTemperatureThreshold}°C.`);
+          } else if (temperature > config.upperTemperatureThreshold) {
+              alerts.push(`Sensor ${deviceName} recorded a temperature of ${temperature}°C, which is higher than the threshold limit of ${config.upperTemperatureThreshold}°C.`);
           }
         } else if (type === 2) {
           const peopleCount = parseInt(data, 10);
