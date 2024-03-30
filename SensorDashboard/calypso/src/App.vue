@@ -1,6 +1,7 @@
 <template>
 
-    <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light">
+     <!-- <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light"> -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container">
         <router-link to="/overview" class="navbar-brand">Calypso</router-link>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,6 +17,9 @@
             </li>
             <li class="nav-item">
               <router-link to="/sensors" class="nav-link">Sensors</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/bms" class="nav-link">Bms</router-link>
             </li>
           </ul>
           <div v-if="isLoggedIn" class="ms-auto">
