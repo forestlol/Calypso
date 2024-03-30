@@ -47,7 +47,7 @@
     methods: {
         async fetchDeviceData() {
             try {
-                const response = await fetch('https://vocal-bullfrog-3.rshare.io/api/Bacnet/get/all/devices');
+                const response = await fetch('https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/all/data');
                 if (!response.ok) throw new Error('Failed to fetch');
                 const rawData = await response.text();
                 const cleanedData = this.cleanResponse(rawData);
