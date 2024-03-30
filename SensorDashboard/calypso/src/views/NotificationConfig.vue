@@ -4,13 +4,8 @@
     <form @submit.prevent="saveConfiguration" class="configure-form">
       <!-- Threshold Editor -->
       <div class="form-group">
-        <label for="lowerTemperatureThreshold">Lower Temperature Threshold (°C):</label>
-        <input type="number" id="lowerTemperatureThreshold" v-model="lowerTemperatureThreshold" min="0" step="0.1" class="form-control"/>
-      </div>
-
-      <div class="form-group">
-        <label for="upperTemperatureThreshold">Upper Temperature Threshold (°C):</label>
-        <input type="number" id="upperTemperatureThreshold" v-model="upperTemperatureThreshold" min="0" step="0.1" class="form-control"/>
+        <label for="temperatureThreshold">Temperature Threshold (°C):</label>
+        <input type="number" id="temperatureThreshold" v-model="temperatureThreshold" min="0" class="form-control"/>
       </div>
 
       <!-- Recipients Editor -->
@@ -30,10 +25,8 @@
       <div class="form-group">
         <label for="executionSchedule">Execution Schedule:</label>
         <select id="executionSchedule" v-model="selectedInterval" @change="updateNextExecutionTime" class="form-control">
-          <option value="5">Every 5 minutes</option>
-          <option value="15">Every 15 minutes</option>
-          <option value="30">Every 30 minutes</option>
-          <option value="60">Every 1 hour</option>
+          <!-- Generate options from 1 hour to 24 hours -->
+          <option v-for="n in 24" :value="n * 60" :key="n">{{ `Every ${n} hour${n > 1 ? 's' : ''}` }}</option>
         </select>
       </div>
 
@@ -70,10 +63,9 @@ export default {
     return {
         recipients: [], 
         newRecipient: '',
-        lowerTemperatureThreshold: 22.0, 
-        upperTemperatureThreshold: 27.0, 
+        temperatureThreshold: 35,
         peopleCountThreshold: 4, 
-        selectedInterval: '', 
+        selectedInterval: 60, 
         nextExecutionTime: '',
         messageBody: "", 
         showSuccessModal: false
@@ -90,8 +82,7 @@ export default {
             const settings = settingsArray[0];
 
             this.recipients = settings.notifcationRecipients; 
-            this.lowerTemperatureThreshold = settings.lowerTemperatureThreshold;
-            this.upperTemperatureThreshold = settings.upperTemperatureThreshold;       
+            this.temperatureThreshold = settings.temperatureThreshold;
             this.peopleCountThreshold = settings.peopleCountThreshold;
             this.messageBody = settings.messageBody;
             this.selectedInterval = settings.interval;
@@ -139,8 +130,7 @@ export default {
       const nextExecutionISOString = nextExecution.toISOString(); // Convert to ISO string for storage
 
       const payload = {
-        upperTemperatureThreshold: this.upperTemperatureThreshold,
-        lowerTemperatureThreshold: this.lowerTemperatureThreshold,
+        temperatureThreshold: this.temperatureThreshold,
         peopleCountThreshold: this.peopleCountThreshold,
         notifcationRecipients: this.recipients,
         messageBody: this.messageBody,
