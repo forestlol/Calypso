@@ -20,7 +20,7 @@
                         <h6 class="text-uppercase mb-2">{{ formatName(objectId) }}</h6>
                         <p>Status: <span :class="`badge ${objGroup.lastReading.Status === 'OK' ? 'bg-success' : 'bg-danger'}`">{{ objGroup.lastReading.Status }}</span></p>
                         <p class="mb-1">Average Value: {{ objGroup.average.toFixed(2) }}</p>
-                        <p class="mb-1">Last Reading: {{ objGroup.lastReading.dateTime }}</p>
+                        <p class="mb-1">Last Reading: {{ objGroup.lastReading.Time }}</p>
                       </div>
                     </div>
                   </div>
@@ -39,10 +39,19 @@
       return {
         isDarkMode: false,
         groupedDevices: {}, // Structured data for display
+        refreshTimer: null
       };
     },
     mounted() {
       this.fetchDeviceData();
+      this.refreshTimer = setInterval(() =>{
+        this.fetchDeviceData();
+      }, 120000);
+    },
+    beforeUnmount() {
+      if (this.refreshTimer) {
+        clearInterval(this.refreshTimer);
+      }
     },
     methods: {
         async fetchDeviceData() {
@@ -60,7 +69,6 @@
         cleanResponse(rawData) {
             return rawData
                 .replace(/ObjectId\("([^"]+)"\)/g, '"$1"') // Convert ObjectId to string
-                .replace(/ISODate\("([^"]+)"\)/g, '"$1"');  // Convert ISODate to string
         },
       processData(devices) {
         const grouped = {};
@@ -68,7 +76,7 @@
           if (!grouped[Device]) grouped[Device] = {};
           if (!grouped[Device][Name]) grouped[Device][Name] = { chartData: {}, entries: [], average: 0, lastReading: {} };
           const value = parseFloat(Value);
-          const formattedDateTime = dateTime.toLocaleString();
+          const formattedDateTime = dateTime;
   
           const group = grouped[Device][Name];
           group.chartData[formattedDateTime] = value;
