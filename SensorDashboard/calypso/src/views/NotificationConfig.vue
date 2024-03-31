@@ -134,10 +134,12 @@ export default {
       const intervalMilliseconds = this.selectedInterval * 60000; // Convert minutes to milliseconds
       const nextExecution = new Date(currentTime.getTime() + intervalMilliseconds);
       const nextExecutionISOString = nextExecution.toISOString(); // Convert to ISO string for storage
+      const lowerThreshold = parseFloat(this.lowerTemperatureThreshold.toFixed(1));
+      const upperThreshold = parseFloat(this.upperTemperatureThreshold.toFixed(1));
 
       const payload = {
-        upperTemperatureThreshold: this.upperTemperatureThreshold,
-        lowerTemperatureThreshold: this.lowerTemperatureThreshold,
+        upperTemperatureThreshold: upperThreshold,
+        lowerTemperatureThreshold: lowerThreshold,
         peopleCountThreshold: this.peopleCountThreshold,
         notifcationRecipients: this.recipients,
         messageBody: this.messageBody,
