@@ -83,7 +83,7 @@ module.exports = async (req, res) => {
         }
 
       // Calculate the next execution time
-      const intervalMilliseconds = config.interval * 60 * 60 * 1000; // Convert hours to milliseconds
+      const intervalMilliseconds = config.interval * 60000; // Convert mins to milliseconds
       const newNextExecutionTime = new Date(Date.now() + intervalMilliseconds).toISOString();
 
       // Update the next execution time in the database

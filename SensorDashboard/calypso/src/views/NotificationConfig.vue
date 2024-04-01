@@ -131,7 +131,7 @@ export default {
     saveConfiguration() {
       // Calculate the next execution time based on the selected interval
       const currentTime = new Date();
-      const intervalMilliseconds = this.selectedInterval * 60 * 60 * 1000; // Convert hours to milliseconds
+      const intervalMilliseconds = this.selectedInterval * 60000; // Convert mins to milliseconds
       const nextExecution = new Date(currentTime.getTime() + intervalMilliseconds);
       const nextExecutionISOString = nextExecution.toISOString(); // Convert to ISO string for storage
       const payload = {
