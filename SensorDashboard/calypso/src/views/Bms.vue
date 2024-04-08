@@ -1,122 +1,166 @@
 <template>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-8 mx-auto">
-          <div class="card shadow mb-4">
-            <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">Device Data Overview</h6>
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <!-- Device Cards -->
-                <div class="col-md-6 mb-4" v-for="(deviceGroup, deviceId) in groupedDevices" :key="deviceId">
-                  <div class="card h-100">
-                    <div class="card-header bg-primary text-white">
-                      <h6 class="m-0">Device: {{ deviceId }}</h6>
-                    </div>
-                    <div class="card-body">
-                      <!-- Object Data -->
-                      <div v-for="(objGroup, objectId) in deviceGroup" :key="objectId">
-                        <h6 class="text-uppercase mb-2">{{ formatName(objectId) }}</h6>
-                        <p>Status: <span :class="`badge ${objGroup.lastReading.Status === 'OK' ? 'bg-success' : 'bg-danger'}`">{{ objGroup.lastReading.Status }}</span></p>
-                        <p class="mb-1">Average Value: {{ objGroup.average.toFixed(2) }}</p>
-                        <p class="mb-1">Last Reading: {{ objGroup.lastReading.Time }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+  <div class="container mt-5">
+    <h2 class="mb-3">BMS Groups Dashboard</h2>
+    <div v-if="loading" class="alert alert-info">Loading...</div>
+    <div v-if="error" class="alert alert-danger">Error: {{ error }}</div>
+    <transition-group name="fade" tag="div" class="row">
+      <div v-for="(group, index) in groups" :key="group._id" class="mb-4">
+        <h3>{{ group.name }}</h3>
+        <div class="d-flex flex-wrap">
+          <div v-for="id in group.group" :key="id" class="m-2" style="width: 18rem;">
+            <div v-if="findLatestDataById(id)" class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ findLatestDataById(id).Name || 'Data Unavailable' }}</h5>
+                <p class="card-text">
+                  <span :class="{'status-label': true, 'ok': findLatestDataById(id).Status === 'OK', 'not-ok': findLatestDataById(id).Status !== 'OK'}">
+                    Status: {{ findLatestDataById(id).Status || 'N/A' }}
+                  </span><br><br>
+                  Value: {{ findLatestDataById(id).Value || 'N/A' }}<br>
+                  Date: {{ findLatestDataById(id).dateTime || 'N/A' }}
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        isDarkMode: false,
-        groupedDevices: {}, // Structured data for display
-        refreshTimer: null
-      };
+    </transition-group>
+  </div>
+</template>
+
+
+
+<script>
+
+import * as CacheManager from '@/CacheManager.js';
+
+export default {
+  data() {
+    return {
+      groups: [],
+      loading: true, // Add a loading state
+      error: null, // Track any errors
+      latestData: [],
+      refreshInternal: null,
+    }
+  },
+  mounted() {
+    this.setRefreshInterval();
+  },
+  async created(){
+    if(CacheManager.getItem('bms') != null){
+        this.latestData == CacheManager.getItem('bms')
+        await this.fetchLatestData();
+        await this.fetchData();
+        CacheManager.setItem('bms', this.latestData);
+      }else{
+        await this.fetchLatestData();
+        await this.fetchData();
+        CacheManager.setItem('bms', this.latestData);
+      }
+  },
+  beforeUnmount() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+  },
+  methods: {
+    setRefreshInterval() {
+      // Set up an interval to fetch data every 2 minutes
+      this.refreshInterval = setInterval(() => {
+        this.fetchLatestData();
+      }, 120000); // 120000 milliseconds = 2 minutes
     },
-    mounted() {
-      this.fetchDeviceData();
-      this.refreshTimer = setInterval(() =>{
-        this.fetchDeviceData();
-      }, 120000);
-    },
-    beforeUnmount() {
-      if (this.refreshTimer) {
-        clearInterval(this.refreshTimer);
+    async fetchData() {
+      this.loading = true;
+      try {
+        const response = await fetch('https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/bms/groups');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        let textData = await response.text();
+        textData = textData.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+        const data = JSON.parse(textData);
+        this.groups = data;
+      } catch (error) {
+        this.error = error.message;
+      } finally {
+        this.loading = false;
       }
     },
-    methods: {
-        async fetchDeviceData() {
-            try {
-                const response = await fetch('https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/all/data');
-                if (!response.ok) throw new Error('Failed to fetch');
-                const rawData = await response.text();
-                const cleanedData = this.cleanResponse(rawData);
-                const parsedData = JSON.parse(cleanedData);
-                this.processData(parsedData);
-            } catch (error) {
-                console.error('Error fetching device data:', error);
-            }
-        },
-        cleanResponse(rawData) {
-            return rawData
-                .replace(/ObjectId\("([^"]+)"\)/g, '"$1"') // Convert ObjectId to string
-        },
-      processData(devices) {
-        const grouped = {};
-        devices.forEach(({ Device, Name, Value, Status, dateTime }) => {
-          if (!grouped[Device]) grouped[Device] = {};
-          if (!grouped[Device][Name]) grouped[Device][Name] = { chartData: {}, entries: [], average: 0, lastReading: {} };
-          const value = parseFloat(Value);
-          const formattedDateTime = dateTime;
-  
-          const group = grouped[Device][Name];
-          group.chartData[formattedDateTime] = value;
-          group.entries.push({ dateTime: formattedDateTime, value });
-          group.lastReading = { Value, Time: formattedDateTime, Status };
-  
-          // Recalculate the average
-          const total = group.entries.reduce((acc, curr) => acc + curr.value, 0);
-          group.average = total / group.entries.length;
-        });
-        this.groupedDevices = grouped;
-      },
-      formatName(name) {
-        // Format name as required
-        // For example, replacing underscores with spaces
-        return name.replace(/_/g, ' ');
+    async fetchLatestData() {
+      this.loading = true;
+      try {
+        const response = await fetch('https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/all/latest/data');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        let textData = await response.text();
+        // Replace MongoDB ObjectId and ISODate to be JSON-compatible
+        textData = textData.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
+        textData = textData.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+        const data = JSON.parse(textData);
+        this.latestData = data;
+
+        console.log(this.latestData);
+
+      } catch (error) {
+        this.error = error.message;
+      } finally {
+        this.loading = false;
+      }
     },
-      toggleDarkMode() {
-        this.isDarkMode = !this.isDarkMode;
-      },
+    findLatestDataById(objectId) {
+      const filteredData = this.latestData.filter(data => data.ObjectId === objectId);
+      return filteredData.length > 0 ? filteredData[filteredData.length - 1] : {};
     },
-  };
-  </script>
+  }
+}
+</script>
+
 
 <style>
-/* Additional CSS styles */
-.card-header h6 {
-  margin-bottom: 0;
+/* Additional CSS styles for hover effect and transitions */
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
-.card-body {
-  padding: 1.5rem;
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
-.card-body h6 {
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
+
+/* Transition styles for fade effect */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
 }
-.card-body p {
-  font-size: 0.85rem;
-  margin-bottom: 0.25rem;
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+.status-label {
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.375rem; /* Rounded corners */
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+              border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ok {
+  color: #fff;
+  background-color: #28a745; /* Green background for 'OK' status */
+}
+
+.not-ok {
+  color: #fff;
+  background-color: #dc3545; /* Red background for non-'OK' statuses */
 }
 </style>
+
   
   
