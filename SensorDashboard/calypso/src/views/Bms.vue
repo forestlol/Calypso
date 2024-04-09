@@ -4,19 +4,21 @@
     <div v-if="loading" class="alert alert-info">Loading...</div>
     <div v-if="error" class="alert alert-danger">Error: {{ error }}</div>
     <transition-group name="fade" tag="div" class="row">
-      <div v-for="(group, index) in groups" :key="group._id" class="mb-4">
+      <div v-for="(group) in groups" :key="group._id" class="mb-4">
         <h3>{{ group.name }}</h3>
         <div class="d-flex flex-wrap">
-          <div v-for="id in group.group" :key="id" class="m-2" style="width: 18rem;">
+          <div v-for="(id, index) in group.group" :key="id" class="m-2" style="width: 18rem;">
             <div v-if="findLatestDataById(id)" class="card">
               <div class="card-body">
                 <h5 class="card-title">{{ findLatestDataById(id).Name || 'Data Unavailable' }}</h5>
                 <p class="card-text">
                   <span :class="{'status-label': true, 'ok': findLatestDataById(id).Status === 'OK', 'not-ok': findLatestDataById(id).Status !== 'OK'}">
                     Status: {{ findLatestDataById(id).Status || 'N/A' }}
-                  </span><br><br>
-                  Value: {{ findLatestDataById(id).Value || 'N/A' }}<br>
-                  Date: {{ findLatestDataById(id).dateTime || 'N/A' }}
+                  </span>
+                    <br>
+                    Value: {{ getStatusValue(id) }} {{ group.units[index] || '' }}
+                    <br>
+                    Date: {{ findLatestDataById(id).dateTime || 'N/A' }}
                 </p>
               </div>
             </div>
@@ -51,11 +53,9 @@ export default {
         this.latestData == CacheManager.getItem('bms')
         await this.fetchLatestData();
         await this.fetchData();
-        CacheManager.setItem('bms', this.latestData);
       }else{
         await this.fetchLatestData();
         await this.fetchData();
-        CacheManager.setItem('bms', this.latestData);
       }
   },
   beforeUnmount() {
@@ -100,8 +100,8 @@ export default {
         textData = textData.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
         const data = JSON.parse(textData);
         this.latestData = data;
-
-        console.log(this.latestData);
+        
+        CacheManager.setItem('bms', this.latestData);
 
       } catch (error) {
         this.error = error.message;
@@ -112,6 +112,13 @@ export default {
     findLatestDataById(objectId) {
       const filteredData = this.latestData.filter(data => data.ObjectId === objectId);
       return filteredData.length > 0 ? filteredData[filteredData.length - 1] : {};
+    },
+    getStatusValue(id) {
+      const latestData = this.findLatestDataById(id);
+      if (latestData.Name && latestData.Name.includes('_RunningStatus') && latestData.Value === "0") {
+        return 'No Fault Detected';
+      }
+      return latestData.Value;
     },
   }
 }
