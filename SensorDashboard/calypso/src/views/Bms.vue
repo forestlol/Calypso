@@ -115,7 +115,7 @@ export default {
     },
     getStatusValue(id) {
       const latestData = this.findLatestDataById(id);
-      if (latestData.Name && latestData.Name.includes('_RunningStatus') && latestData.Value === "0") {
+      if (latestData.Name && latestData.Name.includes('Status') && latestData.Value === "0") {
         return 'No Fault Detected';
       }
       return latestData.Value;
