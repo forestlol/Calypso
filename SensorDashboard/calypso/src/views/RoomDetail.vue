@@ -449,7 +449,7 @@ export default {
     async ElectricalConsumptionData() {
       // Static fake data for 24 hours
       //hard coded object id
-      let data = await this.bmsDeviceData("BV:38");
+      let data = await this.bmsDeviceData("AV:43");
       let byHour = {};
       for (let i = 0; i < 24; i++) {
         byHour[i] = 0;
