@@ -208,6 +208,7 @@
 import { Chart, registerables } from 'chart.js';
 import interact from 'interactjs';
 import { Tooltip } from 'bootstrap';
+import { useTransitionState } from 'vue';
 Chart.register(...registerables);
 
 export default {
@@ -226,7 +227,10 @@ export default {
       imagePath: `../assets/Floorplan.jpg`,
       position: [],
       editMode: true,
-      editMsg: "Toggle between View and Edit Mode. Edit Mode allows dragging of icons to change their position"
+      editMsg: "Toggle between View and Edit Mode. Edit Mode allows dragging of icons to change their position",
+      bmsDeviceGroup: [],
+      bms24hrData: [],
+      
     };
   },
   async mounted() {    
@@ -237,6 +241,7 @@ export default {
     this.getPosition();
     this.fetchRoomSensors().then(() => {
       this.$nextTick(() => {
+        this.getbmsDeviceGroups();
         this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
         this.initEnergyConsumptionChart();
@@ -349,6 +354,91 @@ export default {
 
       return labels.reverse(); // Reverse to get the labels in chronological order
     },
+    async getbmsDeviceGroups(){
+      try {
+        let response = await fetch('https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/bms/groups');
+        if (!response.ok) throw new Error('Failed to fetch sensor data');
+        let text = this.sanitizeResponse(await response.text());
+        let deviceData = JSON.parse(text);
+        let deviceGroups = {}
+        deviceData.forEach(group => {
+          // later arrange in for each group, pair with corresponding unit
+          // _id: {name: {group: , units:}, {group: , units:}}
+          let group_unit = []
+          for (let i = 0; i < group.units.length; i++) {
+            group_unit.push({group: group.group[i], units: group.units[i]}); 
+          }
+          deviceGroups[group.name] = {group: group_unit};
+        });
+        this.bmsDeviceGroup = deviceGroups;
+      } catch (err) {
+        console.error(err);
+        this.error = err.message;
+      }
+    },
+    // functionally same as https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/object/ObjectId
+    // async getbms24hrData(){
+    //   try{
+    //     let response = await fetch('https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/all/latest/data');
+    //     if (!response.ok) throw new Error('Failed to fetch sensor data');
+    //     let text = this.sanitizeResponse(await response.text());
+    //     let bmsData = JSON.parse(text);
+    //     let dayData = {}
+    //     // ObjectID: {{id, device, name, value, time, status, description, dateTime}, {id, device, name, value, time, status, description, dateTime}...}
+    //     // AI:9: {id: '6614189a070d5adfe1ada658', device: '32', name: 'RoomTemp_000', value: '27.7', time: '00:15:59', …}
+    //     bmsData.forEach(data => {
+    //       if (!dayData[data.ObjectId]) {
+    //         // If not, initialize it as an empty array
+    //         dayData[data.ObjectId] = [];
+    //       }
+          
+    //       // Push a new object containing data properties to the array
+    //       dayData[data.ObjectId].push({
+    //         id: data._id,
+    //         device: data.Device,
+    //         name: data.Name,
+    //         value: data.Value,
+    //         time: data.Time,
+    //         status: data.Status,
+    //         description: data.Description,
+    //         dateTime: data.dateTime
+    //       });
+    //     });
+    //     this.bms24hrData = dayData;
+
+    //   } catch (err) {
+    //     console.error(err);
+    //     this.error = err.message;
+    //   }
+    // },
+    async bmsDeviceData(objectId){
+      // get data for a specific object id 
+      try{
+        let response = await fetch(`https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/object/${objectId}`);
+        if (!response.ok) throw new Error('Failed to fetch sensor data');
+        let text = this.sanitizeResponse(await response.text());
+        let bmsData = JSON.parse(text);
+        let toclean = []
+        let success = []
+        bmsData.forEach(data => {
+          toclean.push({
+            value: data.Value,
+            dateTime: data.dateTime
+          });
+          success.push({
+            status: data.Status,
+            dateTime: data.dateTime
+          });
+        });
+        
+
+        return {objectId: objectId, data: toclean, status: success};
+        
+      } catch (err) {
+        console.error(err);
+        this.error = err.message;
+      }
+    },
     WaterConsumptionData() {
       // Static fake data for 24 hours
       return [
@@ -356,12 +446,20 @@ export default {
         40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21
       ];
     },
-    ElectricalConsumptionData() {
+    async ElectricalConsumptionData() {
       // Static fake data for 24 hours
-      return [
-        40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21,
-        20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35
-      ];
+      //hard coded object id
+      let data = await this.bmsDeviceData("BV:38");
+      let byHour = {};
+      for (let i = 0; i < 24; i++) {
+        byHour[i] = 0;
+      }
+      data.data.forEach(data => {
+          let hour = new Date(data.dateTime).getHours();
+          byHour[hour] += Math.abs(parseInt(data.value));
+        });
+        return byHour;
+
     },
     EnergyConsumptionData(){
       // Static fake data for 24 hours
@@ -424,6 +522,15 @@ export default {
     //   return `rgba(${color.join(',')}, ${opacity})`; // Return color with alpha (opacity)
 
     // },
+    datato24hrformat(data){
+      // convert  to 24 hour format
+      let toReturn = [];
+      let currHr = new Date().getHours();
+      let toSplice = data.splice(currHr, data.length-1);
+      toReturn = toSplice.concat(data);
+      
+      return toReturn;
+    },
     initWaterConsumptionChart() {
       const ctxWater = document.getElementById('waterConsumptionChart').getContext('2d');
       new Chart(ctxWater, {
@@ -447,15 +554,25 @@ export default {
         }
       });
     },
-    initElectricalConsumptionChart() {
+    async initElectricalConsumptionChart() {
       const ctxElectric = document.getElementById('electricalConsumptionChart').getContext('2d');
+      let values = [];
+      try {
+        let data = await this.ElectricalConsumptionData();
+        values = Object.values(data);
+        values = this.datato24hrformat(values);
+        
+      } catch (err) {
+        console.error(err);
+        this.error = err.message;
+      }
       new Chart(ctxElectric, {
         type: 'line',
         data: {
           labels: this.generateLast24HoursLabels(),
           datasets: [{
             label: 'Electrical Consumption (kWh)',
-            data: this.ElectricalConsumptionData(), // Use static fake data
+            data: values, // Use static fake data
             backgroundColor: 'rgba(255, 206, 86, 0.5)',
             borderColor: 'rgba(255, 206, 86, 1)',
             borderWidth: 1,
