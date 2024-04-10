@@ -140,12 +140,12 @@
           tabindex="0">
           BMS data 
           <div class="row mt-4">
-            <div class="col-12 col-md-6">
+            <!-- <div class="col-12 col-md-6">
               <h2 class="text-center">Water Consumption Data</h2>
               <div class="chart-container">
                 <canvas id="waterConsumptionChart"></canvas>
               </div>
-            </div>
+            </div> -->
             <div class="col-12 col-md-6">
               <h2 class="text-center">Electrical Consumption Data</h2>
               <div class="chart-container">
@@ -158,7 +158,7 @@
                 <canvas id="energyConsumptionChart"></canvas>
               </div>
             </div> -->
-
+<!-- 
             <div class="col-12 col-md-6">
               <h2 class="text-center">Weekly Energy Usage</h2>
               <div class="chart-container">
@@ -173,7 +173,7 @@
               <div class="chart-container">
                 <canvas id="airPressureChart"></canvas>
               </div>
-            </div>
+            </div> -->
             <div class="col-12 col-md-6">
               <h2 class="text-center">Water Inflow/Outflow Data</h2>
               <div class="chart-container">
@@ -242,11 +242,11 @@ export default {
     this.fetchRoomSensors().then(() => {
       this.$nextTick(() => {
         this.getbmsDeviceGroups();
-        this.initWaterConsumptionChart();
+        // this.initWaterConsumptionChart();
         this.initElectricalConsumptionChart();
-        this.initEnergyConsumptionChart();
+        // this.initEnergyConsumptionChart();
         this.initWaterInflowOutflowChart();
-        this.initAirPressureChart();
+        // this.initAirPressureChart();
         this.initSensorMonitorChart();
         this.initDraggable();
       });
@@ -431,7 +431,6 @@ export default {
           });
         });
         
-
         return {objectId: objectId, data: toclean, status: success};
         
       } catch (err) {
@@ -456,8 +455,9 @@ export default {
       }
       data.data.forEach(data => {
           let hour = new Date(data.dateTime).getHours();
-          byHour[hour] += Math.abs(parseInt(data.value));
+          byHour[hour] += Math.abs(parseFloat(data.value));
         });
+
         return byHour;
 
     },
@@ -526,7 +526,7 @@ export default {
       // convert  to 24 hour format
       let toReturn = [];
       let currHr = new Date().getHours();
-      let toSplice = data.splice(currHr, data.length-1);
+      let toSplice = data.splice(currHr+1, data.length-1);
       toReturn = toSplice.concat(data);
       
       return toReturn;
@@ -744,8 +744,6 @@ export default {
 
       var img = document.getElementById("roomImg");
       img.src = this.imagePath;
-
-      console.log(this.imagePath);
     },
     initDraggable() {
       //console.log(this.position);
