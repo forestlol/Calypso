@@ -42,7 +42,7 @@
                   <h6 class="">(Sensor ID: {{ sensor.id }})</h6>
                 </div>
                 <div class="card-body">
-                  <p v-if="sensor.type == 0 " class="card-text">
+                  <p v-if="sensor.type == 0 || sensor.type == -1 " class="card-text">
                     Activated: {{ sensor.activated ? 'Yes' : 'No' }}
                   </p>
                   <template v-if="sensor.type == 1">
