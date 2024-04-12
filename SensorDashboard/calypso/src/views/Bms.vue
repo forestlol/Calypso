@@ -1,10 +1,15 @@
 <template>
   <div class="container mt-5">
     <h2 class="mb-3">BMS Groups Dashboard</h2>
+    <!-- Search box -->
+    <div class="mb-4">
+      <input type="text" v-model="search" class="form-control" placeholder="Search for a group name...">
+    </div>
+
     <div v-if="loading" class="alert alert-info">Loading...</div>
     <div v-if="error" class="alert alert-danger">Error: {{ error }}</div>
     <transition-group name="fade" tag="div" class="row">
-      <div v-for="(group) in groups" :key="group._id" class="mb-4">
+      <div v-for="(group, index) in filteredGroups" :key="group._id" class="mb-4">
         <h3>{{ group.name }}</h3>
         <div class="d-flex flex-wrap">
           <div v-for="(id, index) in group.group" :key="id" class="m-2" style="width: 18rem;">
@@ -35,6 +40,7 @@
 
 import * as CacheManager from '@/CacheManager.js';
 
+
 export default {
   data() {
     return {
@@ -43,10 +49,8 @@ export default {
       error: null, // Track any errors
       latestData: [],
       refreshInternal: null,
+      search: '',
     }
-  },
-  mounted() {
-    this.setRefreshInterval();
   },
   async created(){
     if(CacheManager.getItem('bms') != null){
@@ -57,11 +61,18 @@ export default {
         await this.fetchLatestData();
         await this.fetchData();
       }
+      this.setRefreshInterval();
   },
   beforeUnmount() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
+  },
+  computed:{
+    filteredGroups() {
+      const searchTerm = this.search.toLowerCase();
+      return this.groups.filter(group => group.name.toLowerCase().includes(searchTerm));
+    },
   },
   methods: {
     setRefreshInterval() {
