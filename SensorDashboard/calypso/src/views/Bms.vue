@@ -21,7 +21,7 @@
                     Connecton: {{ findLatestDataById(id).Status || 'N/A' }}
                   </span> 
                       <br>
-                  <span :class="{'status-label': true, 'ok': getActiveValue(id) === 'Active', 'not-ok': getActiveValue(id) !== 'Active'}">
+                  <span v-if="shouldShowStatus(findLatestDataById(id).Name)" :class="{'status-label': true, 'ok': getActiveValue(id) === 'On', 'not-ok': getActiveValue(id) !== 'On'}">
                     Status: {{ getActiveValue(id) || 'N/A' }}
                   </span>
                     <br>
@@ -132,11 +132,11 @@ export default {
     getActiveValue(id) {
       const latestData = this.findLatestDataById(id);
       if (latestData.Name && latestData.Name.includes('Status')) {
-        return latestData.Value >= 1 ? 'Active' : 'Inactive';
+        return latestData.Value >= 1 ? 'On' : 'Off';
       } else if (latestData.Name && latestData.Name.includes('_GD')) {
-        return latestData.Value >= 1 ? 'Active' : 'Inactive';
+        return latestData.Value >= 1 ? 'On' : 'Off';
       } else if (latestData.Name && latestData.Name.includes('_SD')) {
-        return latestData.Value >= 1 ? 'Active' : 'Inactive';
+        return latestData.Value >= 1 ? 'On' : 'Off';
       }
       // Fall back to raw value if not a status field
       return 'Active';
@@ -146,6 +146,10 @@ export default {
       const latestData = this.findLatestDataById(id);
       // Fall back to raw value if not a status field
       return latestData.Value;
+    },
+
+    shouldShowStatus(name) {
+      return name.includes('Status') || name.includes('_GD') || name.includes('_SD');
     },
   }
 }
