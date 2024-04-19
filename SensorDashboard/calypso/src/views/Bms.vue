@@ -18,10 +18,15 @@
                 <h5 class="card-title">{{ findLatestDataById(id).Name || 'Data Unavailable' }}</h5>
                 <p class="card-text">
                   <span :class="{'status-label': true, 'ok': findLatestDataById(id).Status === 'OK', 'not-ok': findLatestDataById(id).Status !== 'OK'}">
-                    Status: {{ findLatestDataById(id).Status || 'N/A' }}
+                    Connecton: {{ findLatestDataById(id).Status || 'N/A' }}
+                  </span> 
+                      
+                  <span style="margin-left: 30px;" :class="{'status-label': true, 'ok': getActiveValue(id) === 'Active', 'not-ok': getActiveValue(id) !== 'Active'}">
+                    Status: {{ getActiveValue(id) || 'N/A' }}
                   </span>
                     <br>
-                    Value: {{ getStatusValue(id) }} {{ group.units[index] || '' }}
+                    <br>
+                    Value: {{ getPresentValue(id) }} {{ group.units[index] || '' }}
                     <br>
                     Date: {{ findLatestDataById(id).dateTime || 'N/A' }}
                 </p>
@@ -124,25 +129,23 @@ export default {
       const filteredData = this.latestData.filter(data => data.ObjectId === objectId);
       return filteredData.length > 0 ? filteredData[filteredData.length - 1] : {};
     },
-    getStatusValue(id) {
+    
+    getActiveValue(id) {
       const latestData = this.findLatestDataById(id);
-      if (latestData.Name && latestData.Name.includes('Status') && latestData.Value === "0") {
-        return 'Inactive';
-      }else if(latestData.Name && latestData.Name.includes('Status') && latestData.Value === "1"){
-        return 'Active';
+      if (latestData.Name && latestData.Name.includes('Status')) {
+        return latestData.Value >= 1 ? 'Active' : 'Inactive';
+      } else if (latestData.Name && latestData.Name.includes('_GD')) {
+        return latestData.Value >= 1 ? 'Active' : 'Inactive';
+      } else if (latestData.Name && latestData.Name.includes('_SD')) {
+        return latestData.Value >= 1 ? 'Active' : 'Inactive';
       }
-      else if(latestData.Name && latestData.Name.includes('_GD') && latestData.Value === "0"){
-        return 'Inactive';
-      }
-      else if(latestData.Name && latestData.Name.includes('_GD') && latestData.Value === "1"){
-        return 'Active';
-      }
-      else if(latestData.Name && latestData.Name.includes('_SD') && latestData.Value === "0"){
-        return 'Inactive';
-      }
-      else if(latestData.Name && latestData.Name.includes('_SD') && latestData.Value === "1"){
-        return 'Active';
-      }
+      // Fall back to raw value if not a status field
+      return 'Active';
+    },
+
+    getPresentValue(id) {
+      const latestData = this.findLatestDataById(id);
+      // Fall back to raw value if not a status field
       return latestData.Value;
     },
   }
