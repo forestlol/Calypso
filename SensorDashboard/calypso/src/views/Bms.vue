@@ -127,7 +127,21 @@ export default {
     getStatusValue(id) {
       const latestData = this.findLatestDataById(id);
       if (latestData.Name && latestData.Name.includes('Status') && latestData.Value === "0") {
-        return 'No Fault Detected';
+        return 'Inactive';
+      }else if(latestData.Name && latestData.Name.includes('Status') && latestData.Value === "1"){
+        return 'Active';
+      }
+      else if(latestData.Name && latestData.Name.includes('_GD') && latestData.Value === "0"){
+        return 'Inactive';
+      }
+      else if(latestData.Name && latestData.Name.includes('_GD') && latestData.Value === "1"){
+        return 'Active';
+      }
+      else if(latestData.Name && latestData.Name.includes('_SD') && latestData.Value === "0"){
+        return 'Inactive';
+      }
+      else if(latestData.Name && latestData.Name.includes('_SD') && latestData.Value === "1"){
+        return 'Active';
       }
       return latestData.Value;
     },
