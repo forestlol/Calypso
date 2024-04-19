@@ -20,11 +20,10 @@
                   <span :class="{'status-label': true, 'ok': findLatestDataById(id).Status === 'OK', 'not-ok': findLatestDataById(id).Status !== 'OK'}">
                     Connecton: {{ findLatestDataById(id).Status || 'N/A' }}
                   </span> 
-                      
-                  <span style="margin-left: 30px;" :class="{'status-label': true, 'ok': getActiveValue(id) === 'Active', 'not-ok': getActiveValue(id) !== 'Active'}">
+                      <br>
+                  <span :class="{'status-label': true, 'ok': getActiveValue(id) === 'Active', 'not-ok': getActiveValue(id) !== 'Active'}">
                     Status: {{ getActiveValue(id) || 'N/A' }}
                   </span>
-                    <br>
                     <br>
                     Value: {{ getPresentValue(id) }} {{ group.units[index] || '' }}
                     <br>
