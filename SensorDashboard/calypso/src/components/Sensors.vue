@@ -96,7 +96,8 @@ export default {
       sensors: {},
       uniqueDeviceNames: [],
       searchTerm: '',
-      roomData: {}, // { devicename : {room_name:"", device_name : "" } } 
+      roomData: {}, // { devicename : {room_name:"", device_name : "" } }
+      refreshInternal: null, 
     };
   },
   mounted() {
@@ -106,13 +107,23 @@ export default {
     if (CacheManager.getItem('readings') != null) {
       this.sensors == CacheManager.getItem('readings');
       await this.GetLatestReadings();
-      CacheManager.setItem('readings', this.sensors);
     } else {
       await this.GetLatestReadings();
-      CacheManager.setItem('readings', this.sensors);
+    }
+    this.setRefreshInterval();
+  },
+  beforeUnmount() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
     }
   },
   methods: {
+    setRefreshInterval() {
+      // Set up an interval to fetch data every 2 minutes
+      this.refreshInterval = setInterval(() => {
+        this.GetLatestReadings();
+      }, 120000); // 120000 milliseconds = 2 minutes
+    },
     equalizeCardHeaderHeights() {
       this.$nextTick(() => {
         const cardHeaders = [...document.querySelectorAll('.card-header')];
@@ -166,9 +177,11 @@ export default {
         // If you want an array of unique device names
         this.uniqueDeviceNames = Object.keys(this.sensors);
         this.fetchRoomData();
+        CacheManager.setItem('readings', this.sensors);
       } catch (error) {
         console.error("Error fetching sensors:", error);
       }
+
     },
     async fetchRoomData() {
       try {
@@ -219,6 +232,9 @@ export default {
     },
     formatDate(dateTime) {
       const date = new Date(dateTime);
+
+      date.setUTCHours(date.getUTCHours() + 8);
+
       const day = date.getUTCDate().toString().padStart(2, '0');
       const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // +1 because months are 0-indexed
       const year = date.getUTCFullYear();
@@ -232,6 +248,7 @@ export default {
       // Update local state to reflect that the panic has been acknowledged
       // Assuming the data is a string and you want to set it to '0'
       const device = this.sensors[deviceName];
+      console.log(deviceName);
       device[device.length - 1].data = '0';
     },
     isAcknowledged(deviceName) {

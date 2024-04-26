@@ -243,7 +243,7 @@ export default {
         extractHourlyData(data, index = null) {
             let hourlyData = {};
             for (let hour = 0; hour < 24; hour++) {
-                const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
+                const hourData = data.filter(d => new Date(d.time).getUTCHours()+8 === hour);
                 let hour12Format = (hour % 12) || 12; // Convert 24-hour format to 12-hour format
                 hour12Format += hour < 12 ? ' AM' : ' PM';
 
@@ -283,6 +283,7 @@ export default {
 
                 const todaysData = rawData.filter(data => {
                     const date = new Date(data.time);
+
                     return date.toDateString() === new Date().toDateString() && data.deviceName === this.sensorName;
                 });
 

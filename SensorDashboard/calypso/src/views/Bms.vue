@@ -134,9 +134,9 @@ export default {
       if (latestData.Name && latestData.Name.includes('Status')) {
         return latestData.Value >= 1 ? 'On' : 'Off';
       } else if (latestData.Name && latestData.Name.includes('_GD')) {
-        return latestData.Value >= 1 ? 'On' : 'Off';
+        return latestData.Value >= 1 ? 'Open' : 'Close';
       } else if (latestData.Name && latestData.Name.includes('_SD')) {
-        return latestData.Value >= 1 ? 'On' : 'Off';
+        return latestData.Value >= 1 ? 'Open' : 'Close';
       }
       // Fall back to raw value if not a status field
       return 'Active';
