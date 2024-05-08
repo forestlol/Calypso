@@ -33,7 +33,7 @@ const routes = [
     name: 'FloorDetails',
     component: defineAsyncComponent(() => import('../views/FloorDetail.vue')), // Make sure to import the FloorDetails component at the top
     props: true,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false}
   },
   {
     path: '/building/:buildingName/:floorName/:roomName',
@@ -73,14 +73,14 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !auth.isLoggedIn()) {
-    next('/');
-  } else if (to.meta.guestOnly && auth.isLoggedIn()) {
-    next(`/overview`);
-  } else {
-    next();
-  }
-});
+// router.beforeEach((to, from, next) => {
+//   if (to.meta.requiresAuth) {
+//     next('/');
+//   } else if (to.meta.guestOnly) {
+//     next(`/overview`);
+//   } else {
+//     next();
+//   }
+// });
 
 export default router;

@@ -186,7 +186,7 @@ export default {
     methods: {
         async fetchDataForSelectedDate() {
             try {
-                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
+                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/readings/byDevice/' + this.sensorName);
                 if (!response.ok) throw new Error('Network response was not ok.');
 
                 let text = await response.text();
@@ -208,7 +208,7 @@ export default {
 
                 const selectedData = rawData.filter(data => {
                     const dataDate = new Date(data.time).toISOString().substring(0, 10);
-                    return dataDate === this.selectedDate && data.deviceName === this.sensorName;
+                    return dataDate === this.selectedDate;
                 });
 
                 // Reset the data
@@ -218,7 +218,6 @@ export default {
 
                 if (selectedData.length > 0) {
                     this.sensorType = selectedData[0].type;
-                    console.log("Sensor Type: ", this.sensorType)
 
                     // Split the data for Temperature and Humidity if applicable
                     if (this.sensorType === 1) {
@@ -243,7 +242,7 @@ export default {
         extractHourlyData(data, index = null) {
             let hourlyData = {};
             for (let hour = 0; hour < 24; hour++) {
-                const hourData = data.filter(d => new Date(d.time).getUTCHours()+8 === hour);
+                const hourData = data.filter(d => new Date(d.time).getUTCHours() === hour);
                 let hour12Format = (hour % 12) || 12; // Convert 24-hour format to 12-hour format
                 hour12Format += hour < 12 ? ' AM' : ' PM';
 
@@ -256,6 +255,7 @@ export default {
                     } else if (this.sensorType === 2) {
                         // People Counter
                         value = Math.max(...hourData.map(d => parseInt(d.data, 10)));
+                        console.log(value);
                     } else {
                         // Other sensor data
                         value = parseFloat(value);
@@ -270,7 +270,7 @@ export default {
         },
         async downloadSensorData() {
             try {
-                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/all/latest/readings');
+                const response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/readings/byDevice/' + this.sensorName);
                 if (!response.ok) throw new Error('Network response was not ok.');
 
                 let text = await response.text();
@@ -284,7 +284,7 @@ export default {
                 const todaysData = rawData.filter(data => {
                     const date = new Date(data.time);
 
-                    return date.toDateString() === new Date().toDateString() && data.deviceName === this.sensorName;
+                    return date.toDateString() === new Date().toDateString();
                 });
 
                 if (todaysData.length === 0) {

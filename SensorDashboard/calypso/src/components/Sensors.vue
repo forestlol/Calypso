@@ -104,12 +104,13 @@ export default {
     this.equalizeCardHeaderHeights();
   },
   async created() {
-    if (CacheManager.getItem('readings') != null) {
-      this.sensors == CacheManager.getItem('readings');
-      await this.GetLatestReadings();
-    } else {
-      await this.GetLatestReadings();
-    }
+    // if (CacheManager.getItem('readings') != null) {
+    //   this.sensors == CacheManager.getItem('readings');
+    //   await this.GetLatestReadings();
+    // } else {
+    //   await this.GetLatestReadings();
+    // }
+    await this.GetLatestReadings();
     this.setRefreshInterval();
   },
   beforeUnmount() {
@@ -177,7 +178,7 @@ export default {
         // If you want an array of unique device names
         this.uniqueDeviceNames = Object.keys(this.sensors);
         this.fetchRoomData();
-        CacheManager.setItem('readings', this.sensors);
+        //CacheManager.setItem('readings', this.sensors);
       } catch (error) {
         console.error("Error fetching sensors:", error);
       }

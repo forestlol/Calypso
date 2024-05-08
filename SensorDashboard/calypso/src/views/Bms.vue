@@ -21,9 +21,12 @@
                     Connecton: {{ findLatestDataById(id).Status || 'N/A' }}
                   </span> 
                       <br>
-                  <span v-if="shouldShowStatus(findLatestDataById(id).Name)" :class="{'status-label': true, 'ok': getActiveValue(id) === 'On', 'not-ok': getActiveValue(id) !== 'On'}">
-                    Status: {{ getActiveValue(id) || 'N/A' }}
-                  </span>
+                    <span v-if="shouldShowStatus(findLatestDataById(id).Name)" 
+                          :class="{'status-label': true, 
+                                  'ok': getActiveValue(id) === 'On' || getActiveValue(id) === 'Open', 
+                                  'not-ok': getActiveValue(id) === 'Off' || getActiveValue(id) === 'Close'}">
+                        Status: {{ getActiveValue(id) || 'N/A' }}
+                    </span>
                     <br>
                     Value: {{ getPresentValue(id) }} {{ group.units[index] || '' }}
                     <br>
@@ -134,9 +137,9 @@ export default {
       if (latestData.Name && latestData.Name.includes('Status')) {
         return latestData.Value >= 1 ? 'On' : 'Off';
       } else if (latestData.Name && latestData.Name.includes('_GD')) {
-        return latestData.Value >= 1 ? 'Open' : 'Close';
+        return latestData.Value >= 1 ? 'Close' : 'Open';
       } else if (latestData.Name && latestData.Name.includes('_SD')) {
-        return latestData.Value >= 1 ? 'Open' : 'Close';
+        return latestData.Value >= 1 ? 'Close' : 'Open';
       }
       // Fall back to raw value if not a status field
       return 'Active';
