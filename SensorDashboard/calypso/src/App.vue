@@ -22,9 +22,9 @@
               <router-link to="/bms" class="nav-link">Bms</router-link>
             </li>
           </ul>
-          <div v-if="isLoggedIn" class="ms-auto">
+          <!-- <div v-if="isLoggedIn" class="ms-auto">
             <button @click="logout" class="btn btn-outline-danger">Logout</button>
-          </div>
+          </div> -->
         </div>
       </div>
     </nav>

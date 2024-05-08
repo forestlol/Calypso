@@ -6,6 +6,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 // import Sensors from '../components/Sensors.vue';
 // import SensorDetails from '../components/SensorDetails.vue';
 // import SensorOverview from '../components/SensorOverview.vue';
+
 import { defineAsyncComponent } from "vue";
 
 const routes = [
@@ -39,7 +40,7 @@ const routes = [
   {
     path: '/sensors',
     name: 'Sensors',
-    component: import('../components/Sensors.vue'),
+    component: defineAsyncComponent(() => import('../components/Sensors.vue')),
   },
   {
     path: '/notification',
