@@ -39,7 +39,7 @@ const routes = [
   {
     path: '/sensors',
     name: 'Sensors',
-    component: defineAsyncComponent(() => import('../components/Sensors.vue')),
+    component: import('../components/Sensors.vue'),
   },
   {
     path: '/notification',
