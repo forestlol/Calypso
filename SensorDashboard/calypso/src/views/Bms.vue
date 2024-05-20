@@ -18,19 +18,19 @@
                 <h5 class="card-title">{{ findLatestDataById(id).Name || 'Data Unavailable' }}</h5>
                 <p class="card-text">
                   <span :class="{'status-label': true, 'ok': findLatestDataById(id).Status === 'OK', 'not-ok': findLatestDataById(id).Status !== 'OK'}">
-                    Connecton: {{ findLatestDataById(id).Status || 'N/A' }}
-                  </span> 
-                      <br>
-                    <span v-if="shouldShowStatus(findLatestDataById(id).Name)" 
-                          :class="{'status-label': true, 
-                                  'ok': getActiveValue(id) === 'On' || getActiveValue(id) === 'Open', 
-                                  'not-ok': getActiveValue(id) === 'Off' || getActiveValue(id) === 'Close'}">
-                        Status: {{ getActiveValue(id) || 'N/A' }}
-                    </span>
-                    <br>
-                    Value: {{ getPresentValue(id) }} {{ group.units[index] || '' }}
-                    <br>
-                    Date: {{ findLatestDataById(id).dateTime || 'N/A' }}
+                    Connection: {{ findLatestDataById(id).Status || 'N/A' }}
+                  </span>
+                  <br>
+                  <span v-if="shouldShowStatus(findLatestDataById(id).Name || '')"
+                        :class="{'status-label': true,
+                                'ok': getActiveValue(id) === 'On' || getActiveValue(id) === 'Open',
+                                'not-ok': getActiveValue(id) === 'Off' || getActiveValue(id) === 'Close'}">
+                    Status: {{ getActiveValue(id) || 'N/A' }}
+                  </span>
+                  <br>
+                  Value: {{ getPresentValue(id) }} {{ group.units[index] || '' }}
+                  <br>
+                  Date: {{ findLatestDataById(id).dateTime || 'N/A' }}
                 </p>
               </div>
             </div>
