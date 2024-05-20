@@ -98,6 +98,7 @@ export default {
         let textData = await response.text();
         textData = textData.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
         const data = JSON.parse(textData);
+        console.log(data);
         this.groups = data;
       } catch (error) {
         this.error = error.message;
@@ -117,6 +118,7 @@ export default {
         textData = textData.replace(/ObjectId\("([^"]+)"\)/g, '"$1"');
         textData = textData.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
         const data = JSON.parse(textData);
+        console.log(data);
         this.latestData = data;
         
         CacheManager.setItem('bms', this.latestData);
@@ -152,8 +154,8 @@ export default {
     },
 
     shouldShowStatus(name) {
-      return name.includes('Status') || name.includes('_GD') || name.includes('_SD');
-    },
+      return name && (name.includes('Status') || name.includes('_GD') || name.includes('_SD'));
+    }
   }
 }
 </script>
