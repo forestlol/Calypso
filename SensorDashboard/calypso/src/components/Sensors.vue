@@ -234,7 +234,7 @@ export default {
     formatDate(dateTime) {
       const date = new Date(dateTime);
 
-      date.setUTCHours(date.getUTCHours() + 8);
+      date.setUTCHours(date.getUTCHours());
 
       const day = date.getUTCDate().toString().padStart(2, '0');
       const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // +1 because months are 0-indexed
