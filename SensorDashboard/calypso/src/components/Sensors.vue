@@ -1,7 +1,17 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="container mt-5">
-    <h1 class="text-center mb-5 display-4">Sensor Devices</h1>
+    <div class="header-row">
+      <h2 class="dashboard-title">Sensors</h2>
+      <nav class="breadcrumb">
+        <span class="breadcrumb-item">Cavill</span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item">Menu</span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item active">Sensors</span>
+      </nav>
+    </div>
+    <h1 class="mb-5 display-4">Sensor Devices</h1>
 
     <div class="mb-4">
       <label for="typeFilter" class="mr-2">Filter by Type: &nbsp;</label>
@@ -26,8 +36,8 @@
       </div>
       <!-- Devices in the Group -->
       <div class="col-md-4" v-for="deviceName in deviceGroup" :key="deviceName">
-        <router-link v-if="sensors[deviceName][0].type !== 0" :to="{ name: 'sensor-details', params: { id: deviceName } }"
-          custom v-slot="{ navigate }">
+        <router-link v-if="sensors[deviceName][0].type !== 0"
+          :to="{ name: 'sensor-details', params: { id: deviceName } }" custom v-slot="{ navigate }">
           <div class="card mb-4 shadow" @click="navigate" style="cursor: pointer;">
             <div class="card-header" :class="getCardHeaderClass(deviceName)">
               <div class="status-indicator"
@@ -39,7 +49,8 @@
               <!-- <h5 class="card-title">{{ getTypeName(sensors[deviceName][0].type) }}</h5>-->
               <!-- Check if type is Temperature -->
               <div v-if="sensors[deviceName][0].type == 1">
-                <p class="card-text">Temperature: {{ parseFloat(getLastReading(deviceName).split(',')[0]).toFixed(2) }}°C
+                <p class="card-text">Temperature: {{ parseFloat(getLastReading(deviceName).split(',')[0]).toFixed(2)
+                }}°C
                 </p>
                 <p class="card-text">Humidity: {{ getLastReading(deviceName).split(',')[1] }}%</p>
               </div>
@@ -49,8 +60,9 @@
               </div>
               <p></p>
               <p class="card-text">
-                <small>Last updated: <span class="text-muted">{{ formatDate(sensors[deviceName][sensors[deviceName].length
-                  - 1].time) }}</span></small>
+                <small>Last updated: <span class="text-muted">{{
+                  formatDate(sensors[deviceName][sensors[deviceName].length
+                    - 1].time) }}</span></small>
               </p>
             </div>
           </div>
@@ -75,7 +87,8 @@
               </div>
             </div>
             <p class="card-text">
-              <small>Last updated: <span class="text-muted">{{ formatDate(sensors[deviceName][sensors[deviceName].length -
+              <small>Last updated: <span class="text-muted">{{ formatDate(sensors[deviceName][sensors[deviceName].length
+                -
                 1].time) }}</span></small>
             </p>
           </div>
@@ -84,8 +97,8 @@
     </div>
   </div>
 </template>
-  
-  
+
+
 <script>
 //import * as CacheManager from '@/CacheManager.js';
 
@@ -97,7 +110,7 @@ export default {
       uniqueDeviceNames: [],
       searchTerm: '',
       roomData: {}, // { devicename : {room_name:"", device_name : "" } }
-      refreshInternal: null, 
+      refreshInternal: null,
     };
   },
   mounted() {
@@ -362,7 +375,7 @@ export default {
   },
 };
 </script>
-  
+
 <style scoped>
 /* Base styles */
 .container {
@@ -397,7 +410,8 @@ a:hover {
   flex: 1 0 calc(33.333% - 16px);
   /* Adjust percentage for 3 in a row minus gap */
   display: grid;
-  grid-template-rows: auto 1fr auto; /* Header, content, footer */
+  grid-template-rows: auto 1fr auto;
+  /* Header, content, footer */
 }
 
 .card:hover {
@@ -535,8 +549,10 @@ a:hover {
 
 .card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Replace 300px with your card width */
-  gap: 16px; /* Adjust the space between cards */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* Replace 300px with your card width */
+  gap: 16px;
+  /* Adjust the space between cards */
   /* Adjust the space between cards */
   justify-content: center;
   /* Center cards in the container */
@@ -558,4 +574,52 @@ a:hover {
   .card-header {
     min-height: auto;
   }
-}</style>
+}
+
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 2%;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.breadcrumb-item {
+  color: #4b5563;
+}
+
+.breadcrumb-item.active {
+  color: #111827;
+  font-weight: 600;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+}
+
+@media (min-width: 1400px) {
+
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 100%;
+  }
+}
+</style>

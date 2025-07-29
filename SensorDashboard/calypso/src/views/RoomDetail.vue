@@ -4,7 +4,8 @@
     <div v-if="error">
       <p>Error: {{ error }}</p>
     </div>
-    <h1 class="text-center mb-4">{{ roomName }}</h1>
+    <h1 class="text-center mb-4" style="
+  margin-top: 5%;">{{ roomName }}</h1>
     <!-- Check if sensor data is available -->
     <div v-if="sensors.length > 0" class="room-sensors">
       <!-- <h1 class="text-center mb-4">{{ roomName }}</h1> -->
@@ -16,8 +17,9 @@
               type="button" role="tab" aria-controls="sensors-tab-pane" aria-selected="true">Sensors</button>
           </li>
           <li class="nav-item">
-            <button class="nav-link" id="floor-plan-tab" data-bs-toggle="tab" data-bs-target="#floor-plan-tab-pane" type="button"
-              role="tab" aria-controls="floor-plan-tab-pane" aria-selected="false">Sensor Location</button>
+            <button class="nav-link" id="floor-plan-tab" data-bs-toggle="tab" data-bs-target="#floor-plan-tab-pane"
+              type="button" role="tab" aria-controls="floor-plan-tab-pane" aria-selected="false">Sensor
+              Location</button>
           </li>
           <li class="nav-item">
             <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#items-tab-pane" type="button"
@@ -42,7 +44,7 @@
                   <h6 class="">(Sensor ID: {{ sensor.id }})</h6>
                 </div>
                 <div class="card-body">
-                  <p v-if="sensor.type == 0 || sensor.type == -1 " class="card-text">
+                  <p v-if="sensor.type == 0 || sensor.type == -1" class="card-text">
                     Activated: {{ sensor.activated ? 'Yes' : 'No' }}
                   </p>
                   <template v-if="sensor.type == 1">
@@ -87,9 +89,11 @@
             <div class="floor-plan-image col-12" id="sensors-drag">
 
               <div class="form-check form-switch form-control-lg">
-                  <input class="form-check-input" type="checkbox" role="switch" id="edit_toggle" @change="toggleEdit()" checked>
-                  <label class="form-check-label" id="label_edit_toggle" for="edit_toggle">Edit Mode </label>
-                  <a data-bs-toggle="tooltip" :title="this.editMsg"><img class="img-fluid info-img" src="/src/assets/info.png"></a>
+                <input class="form-check-input" type="checkbox" role="switch" id="edit_toggle" @change="toggleEdit()"
+                  checked>
+                <label class="form-check-label" id="label_edit_toggle" for="edit_toggle">Edit Mode </label>
+                <a data-bs-toggle="tooltip" :title="this.editMsg"><img class="img-fluid info-img"
+                    src="/src/assets/info.png"></a>
               </div>
               <div><img :src="imagePath" id="roomImg" class="img-fluid mx-auto d-block" alt="Room Image"></div>
 
@@ -111,15 +115,16 @@
                     <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span>
 
               </div> -->
-              <div v-for="sensor in this.sensors"
-                   :key="sensor.id"
-                   :id="`icon_${sensor.id}`"
-                   class="draggable drag-element" :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
-                   <a  data-bs-toggle="tooltip" data-bs-html="true" :title="sensor.id"><img v-if="this.position[sensor.id].type == 2" class="img-fluid" src="/src/assets/people-count.png">
-                   <img v-else-if="this.position[sensor.id].type  == 1" class="img-fluid" src="/src/assets/temperature.png">                      
-                   <img v-else class="img-fluid" src="/src/assets/sensor.png"></a>
-                    
-                    <!-- <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span> -->
+              <div v-for="sensor in this.sensors" :key="sensor.id" :id="`icon_${sensor.id}`"
+                class="draggable drag-element"
+                :style="{ transform: `translate(${this.position[sensor.id].x}px, ${this.position[sensor.id].y}px)` }">
+                <a data-bs-toggle="tooltip" data-bs-html="true" :title="sensor.id"><img
+                    v-if="this.position[sensor.id].type == 2" class="img-fluid" src="/src/assets/people-count.png">
+                  <img v-else-if="this.position[sensor.id].type == 1" class="img-fluid"
+                    src="/src/assets/temperature.png">
+                  <img v-else class="img-fluid" src="/src/assets/sensor.png"></a>
+
+                <!-- <span :id="`description_${sensor.id}`" class="sensor_description">ID:{{ sensor.id }}</span> -->
 
               </div>
             </div>
@@ -136,9 +141,8 @@
 
 
         </div>
-        <div class="tab-pane" id="items-tab-pane" role="tabpanel" aria-labelledby="items-tab"
-          tabindex="0">
-          BMS data 
+        <div class="tab-pane" id="items-tab-pane" role="tabpanel" aria-labelledby="items-tab" tabindex="0">
+          BMS data
           <div class="row mt-4">
             <!-- <div class="col-12 col-md-6">
               <h2 class="text-center">Water Consumption Data</h2>
@@ -158,7 +162,7 @@
                 <canvas id="energyConsumptionChart"></canvas>
               </div>
             </div> -->
-<!-- 
+            <!-- 
             <div class="col-12 col-md-6">
               <h2 class="text-center">Weekly Energy Usage</h2>
               <div class="chart-container">
@@ -189,10 +193,10 @@
           </div>
 
           <div class="text-center mt-4">
-              <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
-              <router-link :to="{ path: `/building/${buildingName}/${floorName}` }"
-                class="btn btn-secondary">Back to Floor</router-link>
-            </div>
+            <router-link :to="`/building/`" class="btn btn-primary">Back to Building</router-link>
+            <router-link :to="{ path: `/building/${buildingName}/${floorName}` }" class="btn btn-secondary">Back to
+              Floor</router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -230,10 +234,10 @@ export default {
       editMsg: "Toggle between View and Edit Mode. Edit Mode allows dragging of icons to change their position",
       bmsDeviceGroup: [],
       bms24hrData: [],
-      
+
     };
   },
-  async mounted() {    
+  async mounted() {
     new Tooltip(document.body, {
       selector: "[data-bs-toggle='tooltip']",
     });
@@ -265,7 +269,7 @@ export default {
       this.roomName = decodeURIComponent(segments[3]);
       this.query = this.$route.query.tab;
     },
-    
+
     async fetchRoomSensors() {
       try {
         // Fetching building data
@@ -305,7 +309,7 @@ export default {
         this.error = err.message;
       }
     },
-    async getPosition(){
+    async getPosition() {
       try {
         let response = await fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/get/sensor/list');
         if (!response.ok) throw new Error('Failed to fetch sensor data');
@@ -313,7 +317,7 @@ export default {
         let sensorData = JSON.parse(text);
         let sensorPosition = {};
         sensorData.forEach(sensor => {
-          sensorPosition[sensor.name] = {x: sensor.position.x, y: sensor.position.y, type: sensor.type, id: sensor._id};
+          sensorPosition[sensor.name] = { x: sensor.position.x, y: sensor.position.y, type: sensor.type, id: sensor._id };
         });
         this.position = sensorPosition;
       } catch (err) {
@@ -354,7 +358,7 @@ export default {
 
       return labels.reverse(); // Reverse to get the labels in chronological order
     },
-    async getbmsDeviceGroups(){
+    async getbmsDeviceGroups() {
       try {
         let response = await fetch('https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/bms/groups');
         if (!response.ok) throw new Error('Failed to fetch sensor data');
@@ -366,9 +370,9 @@ export default {
           // _id: {name: {group: , units:}, {group: , units:}}
           let group_unit = []
           for (let i = 0; i < group.units.length; i++) {
-            group_unit.push({group: group.group[i], units: group.units[i]}); 
+            group_unit.push({ group: group.group[i], units: group.units[i] });
           }
-          deviceGroups[group.name] = {group: group_unit};
+          deviceGroups[group.name] = { group: group_unit };
         });
         this.bmsDeviceGroup = deviceGroups;
       } catch (err) {
@@ -391,7 +395,7 @@ export default {
     //         // If not, initialize it as an empty array
     //         dayData[data.ObjectId] = [];
     //       }
-          
+
     //       // Push a new object containing data properties to the array
     //       dayData[data.ObjectId].push({
     //         id: data._id,
@@ -411,9 +415,9 @@ export default {
     //     this.error = err.message;
     //   }
     // },
-    async bmsDeviceData(objectId){
+    async bmsDeviceData(objectId) {
       // get data for a specific object id 
-      try{
+      try {
         let response = await fetch(`https://hammerhead-app-kva7n.ondigitalocean.app/Bacnet/api/get/object/${objectId}`);
         if (!response.ok) throw new Error('Failed to fetch sensor data');
         let text = this.sanitizeResponse(await response.text());
@@ -430,9 +434,9 @@ export default {
             dateTime: data.dateTime
           });
         });
-        
-        return {objectId: objectId, data: toclean, status: success};
-        
+
+        return { objectId: objectId, data: toclean, status: success };
+
       } catch (err) {
         console.error(err);
         this.error = err.message;
@@ -454,49 +458,49 @@ export default {
         byHour[i] = 0;
       }
       data.data.forEach(data => {
-          let hour = new Date(data.dateTime).getHours();
-          byHour[hour] += Math.abs(parseFloat(data.value));
-        });
+        let hour = new Date(data.dateTime).getHours();
+        byHour[hour] += Math.abs(parseFloat(data.value));
+      });
 
-        return byHour;
+      return byHour;
 
     },
-    EnergyConsumptionData(){
+    EnergyConsumptionData() {
       // Static fake data for 24 hours
       return [
         28, 34, 37, 32, 34, 30, 30, 28, 26, 28, 22, 27,
         20, 18, 20, 16, 15, 14, 14, 12, 17, 25, 30, 35
       ];
     },
-    weeklyEnergyConsumptionData(){
+    weeklyEnergyConsumptionData() {
       // Static fake data for 7 days
       return [
         250, 230, 198, 263, 253, 241, 280
       ];
     },
-    airPressureChart(){
+    airPressureChart() {
       // static fake data for 24 hours
       return [
         1013, 1012, 1012, 1012, 1012, 1011, 1011, 1011, 1011, 1010, 1010, 1010,
         1010, 1010, 1009, 1009, 1009, 1009, 1009, 1008, 1008, 1008, 1008, 1008
       ]
     },
-    waterInflowOutflowChart(){
+    waterInflowOutflowChart() {
       // static fake data for 24 hours
       // returns ([inflow], [outflow])
       return [
         [20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35,
-        40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21],
+          40, 38, 37, 36, 34, 32, 30, 28, 26, 24, 22, 21],
         [15, 17, 17, 13, 12, 13, 13, 10, 17, 22, 29, 35,
-        30, 30, 34, 35, 30, 28, 30, 26, 23, 24, 20, 20]
+          30, 30, 34, 35, 30, 28, 30, 26, 23, 24, 20, 20]
       ];
     },
-    sensorMonitorChart(){
+    sensorMonitorChart() {
       // static fake data for 24 hours
       // returns ([panicAlert], [temperature], [peopleCounter]) 
       return [
         [0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0,0,5,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0, 0, 5, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
       ]
     },
@@ -522,13 +526,13 @@ export default {
     //   return `rgba(${color.join(',')}, ${opacity})`; // Return color with alpha (opacity)
 
     // },
-    datato24hrformat(data){
+    datato24hrformat(data) {
       // convert  to 24 hour format
       let toReturn = [];
       let currHr = new Date().getHours();
-      let toSplice = data.splice(currHr+1, data.length-1);
+      let toSplice = data.splice(currHr + 1, data.length - 1);
       toReturn = toSplice.concat(data);
-      
+
       return toReturn;
     },
     initWaterConsumptionChart() {
@@ -561,7 +565,7 @@ export default {
         let data = await this.ElectricalConsumptionData();
         values = Object.values(data);
         values = this.datato24hrformat(values);
-        
+
       } catch (err) {
         console.error(err);
         this.error = err.message;
@@ -587,7 +591,7 @@ export default {
         }
       });
     },
-    initEnergyConsumptionChart(){
+    initEnergyConsumptionChart() {
       // const ctxEnergy = document.getElementById('energyConsumptionChart').getContext('2d');
       // new Chart(ctxEnergy, {
       //   type: 'line',
@@ -632,9 +636,9 @@ export default {
           }
         }
       });
-     
+
     },
-    initAirPressureChart(){
+    initAirPressureChart() {
       // create line chart for air pressure
       const ctxAirPressure = document.getElementById('airPressureChart').getContext('2d');
       new Chart(ctxAirPressure, {
@@ -659,7 +663,7 @@ export default {
       });
 
     },
-    initWaterInflowOutflowChart(){
+    initWaterInflowOutflowChart() {
       // create line chart for water inflow/outflow
       const ctxWaterInflowOutflow = document.getElementById('waterInflowOutflowChart').getContext('2d');
       new Chart(ctxWaterInflowOutflow, {
@@ -669,7 +673,7 @@ export default {
           datasets: [{
             label: 'Water Inflow (m³/hr)',
             data: this.waterInflowOutflowChart()[0], // Use static fake data
-            backgroundColor:'rgba(54, 162, 235, 0.5)',
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
             borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1,
           },
@@ -691,7 +695,7 @@ export default {
       });
 
     },
-    initSensorMonitorChart(){
+    initSensorMonitorChart() {
       const ctxSensorMonitor = document.getElementById('sensorMonitorChart').getContext('2d');
       new Chart(ctxSensorMonitor, {
         type: 'line',
@@ -727,8 +731,8 @@ export default {
               title: {
                 display: true,
                 text: 'Minutes of Downtime' // Label for the y-axis
-                },
-              
+              },
+
             }
           }
         }
@@ -762,7 +766,7 @@ export default {
           },
           move(event) {
             if (activeSensorId !== null) { // Check if there is an active sensor
-              
+
               let sensorPosition = vm.position[activeSensorId];
               if (sensorPosition) {
                 // Calculate new position for the active sensor
@@ -782,14 +786,14 @@ export default {
           end(event) {
             console.log(vm.position[activeSensorId])
             const postData = {
-                "id":vm.position[activeSensorId].id,
-                "name": activeSensorId,
-                "type": vm.position[activeSensorId].type,
-                "position": {
-                  "x": newX,
-                  "y": newY
-                }
+              "id": vm.position[activeSensorId].id,
+              "name": activeSensorId,
+              "type": vm.position[activeSensorId].type,
+              "position": {
+                "x": newX,
+                "y": newY
               }
+            }
             activeSensorId = null; // Reset active sensor ID when drag operation ends
             // Perform API POST call to update positions if needed
             console.log(newX, newY);
@@ -797,32 +801,32 @@ export default {
 
 
             fetch('https://octopus-app-afr3m.ondigitalocean.app/Decoder/api/update/sensor/position', {
-                method: 'POST',
-                headers: {
-                  'Accept': '*/*',
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(postData)
+              method: 'POST',
+              headers: {
+                'Accept': '*/*',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(postData)
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json();
               })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              return response.json();
-            })
-            .then(data => {
-              console.log('Response from server:', data);
-            })
-            .catch(error => {
-              console.error('There was a problem with the fetch operation:', error);
-            });
+              .then(data => {
+                console.log('Response from server:', data);
+              })
+              .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+              });
             // {
-          //   "name": "string",
-          //   "position": {
-          //     "x": 0,
-          //     "y": 0
-          //   }
-          // }
+            //   "name": "string",
+            //   "position": {
+            //     "x": 0,
+            //     "y": 0
+            //   }
+            // }
           }
         }
       });
@@ -833,7 +837,7 @@ export default {
       //   let description = event.target.querySelector('.sensor_description');
       //   console.log(description);
       //   description.style.display = 'block';
-    
+
       // })
       // .on('mouseleave', function (event) {
       //   // Hide the description when mouse leaves
@@ -860,9 +864,9 @@ export default {
       const editToggle = document.getElementById('edit_toggle');
       const labeleditToggle = document.getElementById('label_edit_toggle');
       if (editToggle.checked) {
-          labeleditToggle.textContent = 'Edit Mode';
+        labeleditToggle.textContent = 'Edit Mode';
       } else {
-          labeleditToggle.textContent = 'View Mode';
+        labeleditToggle.textContent = 'View Mode';
       }
     }
   },
@@ -872,7 +876,7 @@ export default {
 
 
 
-<style>
+<style scoped>
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -951,7 +955,7 @@ export default {
   background-color: rgba(34, 153, 238, 0.5);
   color: white;
   border-radius: 0.75em;
-  border-color: rgb(34,153,238);
+  border-color: rgb(34, 153, 238);
   color: white;
   border-radius: 0.75em;
   padding: 1%;
@@ -962,23 +966,26 @@ export default {
 }
 
 .drag-element img {
-  max-width: 100%; /* Ensure the image fits inside the container */
-  max-height: 100%; /* Ensure the image fits inside the container */
+  max-width: 100%;
+  /* Ensure the image fits inside the container */
+  max-height: 100%;
+  /* Ensure the image fits inside the container */
 }
 
-.sensor_description{
+.sensor_description {
   display: none;
   position: absolute;
   top: 100%;
   left: 0;
   background-color: #fff;
-  color:#000000;
+  color: #000000;
   border: 1px solid #ccc;
   padding: 5px;
-  z-index: 1000; /* Ensure the description is above other elements */
+  z-index: 1000;
+  /* Ensure the description is above other elements */
 }
 
-.sensor_description:hover{
+.sensor_description:hover {
   display: block;
 }
 
@@ -986,6 +993,4 @@ export default {
   width: 20px;
   height: 20px;
 }
-
-
 </style>

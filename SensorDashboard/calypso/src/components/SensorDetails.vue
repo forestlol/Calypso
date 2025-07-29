@@ -1,20 +1,20 @@
 <template>
     <div class="container mt-5">
+        <button class="back-button mb-3" @click="$router.go(-1)">
+            <!-- Left arrow emoji, or you can use an icon instead -->
+            ← Back
+        </button>
+
+
         <div class="header-row">
-            <h2 class="mb-4">{{ sensorName }}</h2>
+            <h2 class="mb-4">Selected Sensor: {{ sensorName }}</h2>
             <button @click="downloadSensorData" class="btn btn-primary">Download Sensor Data</button>
         </div>
 
         <div class="date-picker-container">
             <label for="datePicker">Select Date: </label>
-            <input 
-            type="date" 
-            id="datePicker" 
-            v-model="selectedDate" 
-            @change="fetchDataForSelectedDate" 
-            :min="minDate"
-            :max="maxDate"
-            />
+            <input type="date" id="datePicker" v-model="selectedDate" @change="fetchDataForSelectedDate" :min="minDate"
+                :max="maxDate" />
         </div>
 
         <!-- Loading State -->
@@ -60,14 +60,17 @@
                     <div class="row" v-if="sensorType === 1">
                         <div class="col">
                             <div>Set Temperature </div>
-                            <input type="number" class="form-control " id="temperature" placeholder="°C" @change="setTemperature()">
-                            
+                            <input type="number" class="form-control " id="temperature" placeholder="°C"
+                                @change="setTemperature()">
+
                         </div>
                         <div class="col">
                             <div>Humidity Toggle</div>
                             <div class="form-check form-switch form-control-lg">
-                                <input class="form-check-input" type="checkbox" role="switch" id="humidity_toggle" @change="humidityToggle()">
-                                <label class="form-check-label" id="label_humidity_toggle" for="humidity_toggle">Off</label>
+                                <input class="form-check-input" type="checkbox" role="switch" id="humidity_toggle"
+                                    @change="humidityToggle()">
+                                <label class="form-check-label" id="label_humidity_toggle"
+                                    for="humidity_toggle">Off</label>
                             </div>
                         </div>
                     </div>
@@ -76,7 +79,8 @@
                         <div class="col">
                             <div>Toggle</div>
                             <div class="form-check form-switch form-control-lg">
-                                <input class="form-check-input" type="checkbox" role="switch" id="sensor_toggle" @change="sensorToggle()">
+                                <input class="form-check-input" type="checkbox" role="switch" id="sensor_toggle"
+                                    @change="sensorToggle()">
                                 <label class="form-check-label" id="label_sensor_toggle" for="sensor_toggle">Off</label>
                             </div>
                         </div>
@@ -90,14 +94,16 @@
         <div class="sensor-card" v-if="sensorType === 1">
             <div class="col-12">
                 <h4>Temperature (°C)</h4>
-                <area-chart :data="temperatureData" :xtitle="'Hours'" :ytitle="'Temperature (°C)'" :library="chartOptions"></area-chart>
+                <area-chart :data="temperatureData" :xtitle="'Hours'" :ytitle="'Temperature (°C)'"
+                    :library="chartOptions"></area-chart>
             </div>
         </div>
 
         <div class="sensor-card" v-if="sensorType === 1">
             <div class="col-12">
                 <h4>Humidity (%)</h4>
-                <area-chart :data="humidityData" :xtitle="'Hours'" :ytitle="'Humidity (%)'" :library="chartOptions"></area-chart>
+                <area-chart :data="humidityData" :xtitle="'Hours'" :ytitle="'Humidity (%)'"
+                    :library="chartOptions"></area-chart>
             </div>
         </div>
 
@@ -137,7 +143,7 @@
 
     </div>
 </template>
-  
+
 
 <script>
 import { Chart, registerables } from 'chart.js';
@@ -161,7 +167,7 @@ export default {
             //averageSensorData: 50, // Example average for non-temperature/humidity sensors
             waterConsumptionData: [], // Placeholder for water consumption data
             electricalConsumptionData: [], // Placeholder for electrical consumption data
-            
+
         };
     },
     mounted() {
@@ -324,11 +330,11 @@ export default {
                 20, 18, 17, 16, 15, 14, 13, 12, 20, 25, 30, 35
             ];
         },
-        sensorDowntimeData(){
+        sensorDowntimeData() {
             // static fake data for 24 hours
             // returns ([panicAlert], [temperature], [peopleCounter]) 
-            return [0,0,5,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            
+            return [0, 0, 5, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
         },
         initWaterConsumptionChart() {
             const ctxWater = document.getElementById('waterConsumptionChart').getContext('2d');
@@ -376,32 +382,32 @@ export default {
                 }
             });
         },
-        initDownTimeChart(){
+        initDownTimeChart() {
             const ctxSensorMonitor = document.getElementById('downtimeChart').getContext('2d');
             new Chart(ctxSensorMonitor, {
                 type: 'line',
                 data: {
-                labels: this.generateLast24HoursLabels(),
-                datasets: [{
-                    label: 'Down Time',
-                    data: this.sensorDowntimeData(), // Use static fake data
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1,
-                }],
+                    labels: this.generateLast24HoursLabels(),
+                    datasets: [{
+                        label: 'Down Time',
+                        data: this.sensorDowntimeData(), // Use static fake data
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                    }],
                 },
                 options: {
-                scales: {
-                    y: {
-                    beginAtZero: true,
-                    max: 60, // Set the maximum value for the y-axis
-                    title: {
-                        display: true,
-                        text: 'Minutes of Downtime' // Label for the y-axis
-                        },
-                    
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 60, // Set the maximum value for the y-axis
+                            title: {
+                                display: true,
+                                text: 'Minutes of Downtime' // Label for the y-axis
+                            },
+
+                        }
                     }
-                }
                 }
 
             });
@@ -409,7 +415,7 @@ export default {
         generateLast24HoursLabels() {
             return [...Array(24).keys()].map(hour => `${hour}:00`);
         },
-        humidityToggle(){
+        humidityToggle() {
             const humidityToggle = document.getElementById('humidity_toggle');
             const labelHumidityToggle = document.getElementById('label_humidity_toggle');
             if (humidityToggle.checked) {
@@ -418,11 +424,11 @@ export default {
                 labelHumidityToggle.textContent = 'Off';
             }
         },
-        setTemperature(){
+        setTemperature() {
             const temperature = document.getElementById('temperature');
             // connect to sensor and set temperature
         },
-        sensorToggle(){
+        sensorToggle() {
             const sensorToggle = document.getElementById('sensor_toggle');
             const labelSensorToggle = document.getElementById('label_sensor_toggle');
             if (sensorToggle.checked) {
@@ -434,7 +440,7 @@ export default {
     },
 };
 </script>
-  
+
 <style scoped>
 /* Typography */
 body {
@@ -467,7 +473,7 @@ h2.mb-4 {
 
 /* Containers and Spacing */
 .container {
-    max-width: 1100px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 30px 15px;
 }
@@ -540,7 +546,7 @@ h5 {
     color: #34495e;
 }
 
-p{
+p {
     color: #34495e;
 }
 
@@ -561,20 +567,20 @@ canvas {
 }
 
 .date-picker-container {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .date-picker-container label {
-  margin-right: 10px;
-  font-weight: bold;
-  color: rgb(150,150,150);
+    margin-right: 10px;
+    font-weight: bold;
+    color: rgb(150, 150, 150);
 }
 
 .date-picker-container input[type="date"] {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 /* Custom styles for the checkbox toggle */
@@ -584,6 +590,25 @@ canvas {
     height: 30px;
 } */
 
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #f2f4f8;
+    color: #3466ad;
+    border: none;
+    padding: 8px 22px;
+    border-radius: 7px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(52, 102, 173, 0.07);
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
 
-
+.back-button:hover {
+    background-color: #3466ad;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(52, 102, 173, 0.14);
+}
 </style>

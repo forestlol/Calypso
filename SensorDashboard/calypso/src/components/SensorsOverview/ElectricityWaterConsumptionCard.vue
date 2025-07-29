@@ -1,10 +1,12 @@
 <template>
-  <div>
-      <h3>Electrical Data</h3>
-      <div style="position: relative; height: 400px; width: 50%;"><canvas id="electricityChart"></canvas>
-      </div>
+  <div class="electricity-data-card">
+    <h3>Electrical Data</h3>
+    <div style="position: relative; height: 400px; width: 100%;">
+      <canvas id="electricityChart"></canvas>
+    </div>
   </div>
 </template>
+
 
 <script>
 import { Chart } from 'chart.js';
@@ -127,5 +129,36 @@ export default {
   color: var(--light-text);
   box-shadow: var(--shadow);
   border-radius: var(--radius);
+}
+
+.electricity-data-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 3px 16px 0 rgba(60, 60, 80, 0.10);
+  padding: 32px 30px 24px 30px;
+  border: 1px solid #e5e8ef;
+  margin-bottom: 22px;
+  width: 96%;
+  max-width: 100%;
+  /* Make the card expand to available width */
+  margin-left: 1%;
+}
+
+.electricity-data-card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+#electricityChart {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  background-color: #fff;
+  /* remove dark background so chart fits card style */
+  color: #222;
+  border-radius: 14px;
+  box-shadow: none;
 }
 </style>

@@ -1,5 +1,15 @@
 <template>
   <div class="container mt-5">
+    <div class="header-row">
+      <h2 class="dashboard-title">Building Management System</h2>
+      <nav class="breadcrumb">
+        <span class="breadcrumb-item">Cavill</span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item">Menu</span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item active">BMS</span>
+      </nav>
+    </div>
     <h2 class="mb-3">BMS Groups Dashboard</h2>
     <!-- Search box -->
     <div class="mb-4">
@@ -17,14 +27,16 @@
               <div class="card-body">
                 <h5 class="card-title">{{ findLatestDataById(id).Name || 'Data Unavailable' }}</h5>
                 <p class="card-text">
-                  <span :class="{'status-label': true, 'ok': findLatestDataById(id).Status === 'OK', 'not-ok': findLatestDataById(id).Status !== 'OK'}">
+                  <span
+                    :class="{ 'status-label': true, 'ok': findLatestDataById(id).Status === 'OK', 'not-ok': findLatestDataById(id).Status !== 'OK' }">
                     Connection: {{ findLatestDataById(id).Status || 'N/A' }}
                   </span>
                   <br>
-                  <span v-if="shouldShowStatus(findLatestDataById(id).Name || '')"
-                        :class="{'status-label': true,
-                                'ok': getActiveValue(id) === 'On' || getActiveValue(id) === 'Open',
-                                'not-ok': getActiveValue(id) === 'Off' || getActiveValue(id) === 'Close'}">
+                  <span v-if="shouldShowStatus(findLatestDataById(id).Name || '')" :class="{
+                    'status-label': true,
+                    'ok': getActiveValue(id) === 'On' || getActiveValue(id) === 'Open',
+                    'not-ok': getActiveValue(id) === 'Off' || getActiveValue(id) === 'Close'
+                  }">
                     Status: {{ getActiveValue(id) || 'N/A' }}
                   </span>
                   <br>
@@ -59,23 +71,23 @@ export default {
       search: '',
     }
   },
-  async created(){
-    if(CacheManager.getItem('bms') != null){
-        this.latestData == CacheManager.getItem('bms')
-        await this.fetchLatestData();
-        await this.fetchData();
-      }else{
-        await this.fetchLatestData();
-        await this.fetchData();
-      }
-      this.setRefreshInterval();
+  async created() {
+    if (CacheManager.getItem('bms') != null) {
+      this.latestData == CacheManager.getItem('bms')
+      await this.fetchLatestData();
+      await this.fetchData();
+    } else {
+      await this.fetchLatestData();
+      await this.fetchData();
+    }
+    this.setRefreshInterval();
   },
   beforeUnmount() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
   },
-  computed:{
+  computed: {
     filteredGroups() {
       const searchTerm = this.search.toLowerCase();
       return this.groups.filter(group => group.name.toLowerCase().includes(searchTerm));
@@ -120,7 +132,7 @@ export default {
         const data = JSON.parse(textData);
         console.log(data);
         this.latestData = data;
-        
+
         CacheManager.setItem('bms', this.latestData);
 
       } catch (error) {
@@ -133,7 +145,7 @@ export default {
       const filteredData = this.latestData.filter(data => data.ObjectId === objectId);
       return filteredData.length > 0 ? filteredData[filteredData.length - 1] : {};
     },
-    
+
     getActiveValue(id) {
       const latestData = this.findLatestDataById(id);
       if (latestData.Name && latestData.Name.includes('Status')) {
@@ -161,22 +173,26 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 /* Additional CSS styles for hover effect and transitions */
 .card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
+
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Transition styles for fade effect */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s;
 }
-.fade-enter, .fade-leave-to {
+
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -189,21 +205,91 @@ export default {
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
-  border-radius: 0.375rem; /* Rounded corners */
+  border-radius: 0.375rem;
+  /* Rounded corners */
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-              border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .ok {
   color: #fff;
-  background-color: #28a745; /* Green background for 'OK' status */
+  background-color: #28a745;
+  /* Green background for 'OK' status */
 }
 
 .not-ok {
   color: #fff;
-  background-color: #dc3545; /* Red background for non-'OK' statuses */
+  background-color: #dc3545;
+  /* Red background for non-'OK' statuses */
+}
+
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 2%;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.breadcrumb-item {
+  color: #4b5563;
+}
+
+.breadcrumb-item.active {
+  color: #111827;
+  font-weight: 600;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+}
+
+@media (min-width: 1400px) {
+
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 100%;
+  }
+}
+
+/* Breadcrumb responsiveness */
+@media (max-width: 767.98px) {
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .breadcrumb-item,
+  .breadcrumb-separator {
+    white-space: nowrap;
+    margin-right: 0.25rem;
+  }
 }
 </style>
-
-  
-  

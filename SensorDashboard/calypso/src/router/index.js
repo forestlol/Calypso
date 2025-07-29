@@ -14,6 +14,7 @@ const routes = [
     path: '/',
     name: 'Login',
     component: () => import('../views/Login.vue'),
+    meta: { hideLayout: true }    // ← this must be here
   },
   {
     path: '/overview',

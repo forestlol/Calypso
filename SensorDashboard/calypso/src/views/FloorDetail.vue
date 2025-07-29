@@ -19,7 +19,7 @@
             <div class="accordion-body">
               <div class="text-center">
                 <h3 style="color: black!important;;">{{ floorData.buildingName }}</h3>
-              </div> 
+              </div>
               <!-- generate all sensor icons as a circle and set their position of x and y on the img
               when hover/click on the sensor icon, it shows the data
               icon color depends on sensor status (red green orange))-->
@@ -29,7 +29,7 @@
         </div>
       </div>
       <br>
-      
+
 
       <!-- Tabs -->
       <div class="tabs">
@@ -142,7 +142,7 @@ export default {
     getAverage(value) {
       return typeof value === 'number' ? value.toFixed(2) : value;
     },
-   
+
 
     async fetchFloorData() {
       const buildingName = this.$route.params.buildingId;
@@ -266,7 +266,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .container {
   max-width: 100%;
   margin: 0 auto;
@@ -278,6 +278,7 @@ export default {
 .floor-header {
   text-align: center;
   margin-bottom: 20px;
+  margin-top: 5%;
 }
 
 .floor-header h1 {
@@ -301,7 +302,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
-  margin-top:20px
+  margin-top: 20px
 }
 
 .card {
@@ -380,7 +381,7 @@ export default {
   .rooms-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .rooms-grid-cctv {
     grid-template-columns: 1fr;
   }
@@ -397,6 +398,3 @@ export default {
   }
 }
 </style>
-
-
-

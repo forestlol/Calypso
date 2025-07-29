@@ -1,92 +1,87 @@
-<!-- eslint-disable vue/no-dupe-keys -->
-<!-- SensorOverviewCard.vue -->
 <template>
     <div class="sensor-overview">
-        <div class="sensor-cards-container">
-            <!-- Sensor Cards -->
-            <div class="sensor-detail-card panic-alert-card" :class="{ 'bg-danger': isPanicAlert }">
-                <h5 class="card-header">Panic Alert</h5>
-                <div class="card-body">
-                    <p class="card-text">{{ panicMessage }}</p>
-                    <router-link v-if="isPanicAlert" to="/sensors" class="btn btn-primary">Check Sensors</router-link>
+        <!-- Top Row: Environment Summary + Panic Alert -->
+        <div class="card-row">
+            <!-- Environment Summary Card -->
+            <div class="stats-summary-card">
+                <div class="summary-header">
+                    <font-awesome-icon :icon="['fas', 'chart-line']" class="summary-icon" />
+                    <div>
+                        <h3>Environment Summary</h3>
+                        <span class="subtitle">Live Averages &amp; Current People Count</span>
+                    </div>
+                </div>
+                <div class="summary-content">
+                    <div class="summary-row">
+                        <font-awesome-icon :icon="['fas', 'temperature-high']" class="item-icon temperature" />
+                        <span>
+                            Temperature:
+                            <b>{{ averageTemperature }}</b><span class="unit">°C</span>
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <font-awesome-icon :icon="['fas', 'droplet']" class="item-icon humidity" />
+                        <span>
+                            Humidity:
+                            <b>{{ averageHumidity }}</b><span class="unit">%</span>
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <font-awesome-icon :icon="['fas', 'users']" class="item-icon people" />
+                        <span>
+                            People Detected:
+                            <b>{{ totalPeople }}</b>
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <!-- Temperature Card -->
-                <div class="col-md-4">
-                    <div class="sensor-card temperature-card">
-                        <div class="icon-container">
-                            <font-awesome-icon :icon="['fas', 'temperature-high']" size="3x" />
-                        </div>
-                        <div class="sensor-card-content">
-                            <p>{{ averageTemperature }}°C</p>
-                            <h5>Average Temperature</h5>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Humidity Card -->
-                <div class="col-md-4">
-                    <div class="sensor-card humidity-card">
-                        <div class="icon-container">
-                            <font-awesome-icon :icon="['fas', 'droplet']" size="3x" />
-                        </div>
-                        <div class="sensor-card-content">
-                            <p>{{ averageHumidity }}%</p>
-                            <h5>Average Humidity</h5>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- People Card -->
-                <div class="col-md-4">
-                    <div class="sensor-card people-card">
-                        <div class="icon-container">
-                            <font-awesome-icon :icon="['fas', 'users']" size="3x" />
-                        </div>
-                        <div class="sensor-card-content">
-                            <p>{{ totalPeople }}</p>
-                            <h5>Total People</h5>
-                        </div>
-                    </div>
+            <!-- Panic Alert Card -->
+            <div class="panic-alert-card" :class="{ 'bg-danger': isPanicAlert }">
+                <div class="panic-content">
+                    <span class="panic-title">
+                        <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="panic-icon" />
+                        Panic Alert
+                    </span>
+                    <span class="panic-message">{{ panicMessage }}</span>
+                    <router-link v-if="isPanicAlert" to="/sensors" class="btn btn-sm btn-outline-light ms-auto">Check
+                        Sensors</router-link>
                 </div>
             </div>
         </div>
-
-        <!-- Sensor Details Section -->
+        <!-- Charts Section -->
         <div class="sensor-details-container">
             <div class="chart-toggle-buttons">
-                <!-- Buttons for toggling charts -->
                 <button v-for="hours in [1, 3, 8, 12, 24]" :key="`btn-${hours}h`"
-                    :class="{ 'active': activeChart === hours }" :disabled="isChartLoading" @click="setActiveChart(hours)">
+                    :class="{ active: activeChart === hours }" :disabled="isChartLoading"
+                    @click="setActiveChart(hours)">
                     {{ hours }}h
                 </button>
             </div>
-            <draggable class="row" @end="onEnd" :list="cards" item-key="name">
-                <template #item="{ element }">
-                    <div class="col-12 col-lg-6 d-flex flex-column">
-                        <div
-                            :class="['chart-container', element.type + '-chart', minimizedCards[element.name] ? 'minimized-card' : '']">
-                            <div class="card-header">
-                                <h5>{{ formatChartName(element.name) }} Charts</h5>
+            <div class="charts-grid">
+                <draggable v-model="cards" group="charts" @end="onEnd" item-key="name" tag="div">
+                    <template #item="{ element }">
+                        <div class="chart-card" :class="{ minimized: minimizedCards[element.name] }">
+                            <div class="chart-header">
+                                <span>{{ formatChartName(element.name) }} Charts</span>
                                 <button class="minimize-button" @click="minimizeCard(element.name)">
-                                    {{ minimizedCards[element.name] ? '+' : '-' }}
+                                    <font-awesome-icon
+                                        :icon="['fas', minimizedCards[element.name] ? 'plus' : 'minus']" />
                                 </button>
                             </div>
-                            <div class="card-body" v-show="!minimizedCards[element.name]">
-                                <pie-chart v-if="element.type === 'pie-chart'" :data="sensorPieChartData"
+                            <div class="chart-body" v-show="!minimizedCards[element.name]">
+                                <pie-chart v-if="element.name === 'sensorTypes'" :data="sensorPieChartData"
                                     :options="pieChartOptions" />
-                                <canvas v-else-if="element.type === 'line-chart'"
-                                    :id="`${element.name}ChartCanvas`"></canvas>
+                                <canvas v-else :id="element.name + 'ChartCanvas'"></canvas>
                             </div>
                         </div>
-                    </div>
-                </template>
-            </draggable>
+                    </template>
+                </draggable>
+            </div>
+
         </div>
     </div>
 </template>
-  
+
 <script>
 import DashboardCard from '../DashboardCard.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -508,211 +503,359 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 :root {
-    --dark-bg: #333;
-    --light-text: #ffffff;
-    --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    --radius: 15px;
-    --color-temperature: #e67e22;
-    --color-humidity: #1abc9c;
-    --color-people: #4682B4;
+    --color-temperature: #f7b267;
+    --color-humidity: #70b8ff;
+    --color-people: #6fcf97;
+    --color-panic: #ff5151;
+    --card-radius: 15px;
+    --shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.10);
+    --card-bg: #fff;
+    --card-border: #f0f1f5;
+    --header-bg: #fafbfc;
 }
 
-.sensor-cards-container .sensor-card,
-.sensor-detail-card,
-.chart-container {
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin: 10px;
-    color: var(--light-text);
+.sensor-overview {
+    padding: 30px 15px 0 15px;
 }
 
-.temperature-card {
-    background: linear-gradient(to right, #f9d08b, var(--color-temperature));
+
+.card-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 32px;
+    align-items: stretch;
 }
 
-.humidity-card {
-    background: linear-gradient(to right, #66d1ca, var(--color-humidity));
+.stats-summary-card,
+.panic-alert-card {
+    width: 100%;
+    max-width: none;
+    /* Remove previous max-width */
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
 }
 
-.people-card {
-    background: linear-gradient(to right, #6e9ecf, var(--color-people));
+.stats-summary-card,
+.panic-alert-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
 }
 
+.stats-summary-card {
+    background: linear-gradient(135deg, #1e293b, #304a75);
+    color: white;
+    border-radius: 14px;
+    box-shadow: 0 3px 16px 0 rgba(60, 60, 80, 0.10);
+    padding: 32px 30px 24px 30px;
+    min-width: 100%;
+    max-width: 420px;
+    margin: 0 auto 22px auto;
+    border: 1px solid #e5e8ef;
+}
+
+.stats-summary-card .summary-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.stats-summary-card .summary-icon {
+    font-size: 2rem;
+    opacity: 0.7;
+    margin-top: 3px;
+}
+
+.stats-summary-card h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 2px 0;
+}
+
+.stats-summary-card .subtitle {
+    font-size: 1rem;
+    color: #818ca9;
+}
+
+.stats-summary-card .summary-content {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stats-summary-card .summary-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.08rem;
+    margin-bottom: 3px;
+}
+
+.stats-summary-card .item-icon {
+    font-size: 1.15rem;
+    opacity: 0.7;
+}
+
+.stats-summary-card .item-icon.temperature {
+    color: #e58e26;
+}
+
+.stats-summary-card .item-icon.humidity {
+    color: #368b8b;
+}
+
+.stats-summary-card .item-icon.people {
+    color: #3a436e;
+}
+
+.stats-summary-card .summary-row b {
+    font-size: 1.12rem;
+    margin-left: 2px;
+}
+
+.stats-summary-card .unit {
+    font-size: 1.04rem;
+    font-weight: 400;
+    margin-left: 2px;
+    color: #6076a9;
+}
 
 .panic-alert-card {
-    background: var(--dark-bg);
-}
-
-.sensor-card {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.sensor-card-content {
-    flex-grow: 1;
+    background: linear-gradient(135deg, #1e293b, #304a75);
+    color: white;
+    border-radius: 14px;
+    box-shadow: 0 3px 16px 0 rgba(60, 60, 80, 0.10);
+    padding: 32px 30px 24px 30px;
+    min-width: 100%;
+    max-width: 420px;
+    margin: 0 0 22px 0;
+    border: 1px solid #e5e8ef;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
-    text-align: left;
 }
 
-.sensor-card .sensor-card-content h5 {
-    margin: 0;
-    padding: 0 10px;
-}
-
-.sensor-card .sensor-card-content p {
-    margin: 0;
-    padding: 0 10px;
-}
-
-.sensor-card .icon-container {
-    width: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.sensor-card .sensor-card-content {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-}
-
-.sensor-card .sensor-card-content p {
-    font-size: 2.5rem;
-    font-weight: bold;
-}
-
-.sensor-detail-card,
-.chart-container {
-    flex: 1 1 calc(50% - 20px);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-header {
-    margin: 0;
-}
-
-.sensor-detail-card .card-header,
-.chart-container .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.icon-container {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.chart-container {
-    background: var(--dark-bg);
-}
-
-.minimize-button {
-    background-color: #ffffff;
-    color: var(--dark-bg);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.panic-alert-card.bg-danger {
+    background: linear-gradient(90deg, #e74c3c 60%, #ffb1b1 100%);
+    color: #fff;
     border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    margin-right: 8px;
-    transition: background-color 0.3s;
 }
 
-.minimize-button:hover {
-    background-color: #f0f0f0;
-    /* Slightly different background on hover */
+.panic-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-/* Additional style to increase visibility when the button is on a dark background */
-.chart-container .minimize-button,
-.sensor-detail-card .minimize-button {
-    color: #ffffff;
-    /* White symbol for dark backgrounds */
-    background-color: rgba(255, 255, 255, 0.2);
-    /* Semi-transparent background */
+.panic-title {
+    font-weight: 700;
+    font-size: 1.08rem;
+    display: flex;
+    align-items: center;
+    gap: 7px;
 }
 
-.chart-container .minimize-button:hover,
-.sensor-detail-card .minimize-button:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+.panic-icon {
+    color: #e74c3c;
+    font-size: 1.25rem;
+    margin-right: 7px;
 }
 
-.minimized-card {
-    flex: 0 0 auto;
-    /* Do not grow, do not shrink, based on the content size */
+.bg-danger .panic-icon {
+    color: #fff;
 }
 
+.panic-message {
+    font-size: 1rem;
+    margin-left: 8px;
+}
 
-.chart-container.minimized-card,
-.sensor-detail-card.minimized-card {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    height: auto;
-    overflow: hidden;
+.panic-alert-card .btn-outline-light {
+    margin-left: auto;
+    border-radius: 6px;
+    padding: 5px 18px;
+    border: 1px solid #fff;
+    color: #fff;
+    background: transparent;
+    font-weight: 600;
+    font-size: 0.99rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.panic-alert-card .btn-outline-light:hover {
+    background: #fff;
+    color: #e74c3c;
+}
+
+/* Charts Section Grid */
+.sensor-details-container {
+    background: var(--header-bg);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+    margin-top: 28px;
+    padding: 18px 18px 20px 18px;
+    border: 1.5px solid #ebecf0;
 }
 
 .chart-toggle-buttons {
     display: flex;
-    justify-content: center;
-    padding: 10px 0;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
 .chart-toggle-buttons button {
-    padding: 10px 50px;
-    margin: 10px;
+    padding: 7px 27px;
+    border-radius: 7px;
     border: none;
-    background-color: #444;
-    color: white;
+    background: #f3f6fa;
+    color: #3466ad;
+    font-size: 1.03rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.18s, color 0.18s;
 }
 
-.chart-toggle-buttons button:hover {
-    background-color: #555;
-}
-
+.chart-toggle-buttons button:hover,
 .chart-toggle-buttons button.active {
-    background-color: red;
+    background: #3466ad;
+    color: #fff;
 }
 
-@media (max-width: 768px) {
-    .sensor-card {
-        flex-direction: column;
+/* 2x2 Responsive Grid for Charts */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 18px;
+    /* Fix: make sure the grid fills height */
+    min-height: 650px;
+    /* Adjust as needed */
+}
+
+.charts-grid>div {
+    display: contents;
+    /* THIS is the magic! */
+}
+
+.chart-card {
+    background: #fff;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid #e2e4ed;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+    min-width: 0;
+    min-height: 0;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7f9fb;
+    padding: 10px 16px 8px 16px;
+    border-bottom: 1px solid #e9eaf2;
+}
+
+.chart-header span {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #444b66;
+}
+
+.minimize-button {
+    background: transparent;
+    border: none;
+    color: #9da6b8;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 8px;
+    opacity: 0.9;
+    transition: color 0.18s;
+}
+
+.minimize-button:hover {
+    color: #3466ad;
+}
+
+.chart-body {
+    padding: 10px 6px 6px 6px;
+    height: 100%;
+    min-height: 260px;
+    max-height: 320px;
+    background: #fcfdff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-body>canvas,
+.chart-body>.your-chart-component {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 400px !important;
+}
+
+.chart-card.minimized .chart-body {
+    display: none;
+}
+
+.chart-card.minimized {
+    min-height: 36px;
+    max-height: 48px;
+}
+
+@media (max-width: 1100px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, 1fr);
     }
 
-    .icon-container {
-        width: auto;
-        margin-bottom: 10px;
-    }
-
-    .sensor-card-content {
-        align-items: center;
-        text-align: center;
-    }
-
-    .col-lg-6 {
-        /* This will make the element take 100% of the container's width */
-        flex: 0 0 100%;
+    .chart-card {
+        min-width: 0;
         max-width: 100%;
+    }
+}
+
+@media (max-width: 700px) {
+    .sensor-overview {
+        padding: 7px 2px 0 2px;
+    }
+
+    .sensor-details-container {
+        padding: 7px 4px 8px 4px;
+    }
+
+    .chart-toggle-buttons button {
+        padding: 6px 13px;
+        font-size: 0.98rem;
+    }
+}
+
+/* Stack the two cards into one column on small screens */
+@media (max-width: 767.98px) {
+    .card-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        /* a little vertical spacing between cards */
+    }
+
+    /* ensure each card fills the row */
+    .stats-summary-card,
+    .panic-alert-card {
+        max-width: 100%;
+        margin: 0 auto;
     }
 }
 </style>

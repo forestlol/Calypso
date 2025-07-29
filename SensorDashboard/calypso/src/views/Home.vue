@@ -1,16 +1,28 @@
 <template>
   <div class="container mt-5">
-    <h1 class="text-center mb-5">Buildings</h1>
+    <div class="header-row">
+      <h2 class="dashboard-title">Buildings</h2>
+      <nav class="breadcrumb">
+        <span class="breadcrumb-item">Cavill</span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item">Menu</span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item active">Buildings</span>
+      </nav>
+    </div>
+
     <div class="row gy-4">
       <div class="col-lg-4 col-md-6" v-for="building in buildings" :key="building.building_name">
         <div class="card shadow">
           <div class="card-body">
             <h5 class="card-title">{{ building.building_name }}</h5>
-            <div v-if="building.floors && building.floors.length" v-for="floor in building.floors" :key="floor.floor_name">
+            <div v-if="building.floors && building.floors.length" v-for="floor in building.floors"
+              :key="floor.floor_name">
               <p class="card-text">{{ floor.floor_name }} - Level: {{ floor.floor_level }}</p>
               <p class="card-text">Rooms: {{ floor.rooms.length }}</p>
               <!-- Link to view rooms for the floor -->
-              <router-link :to="`/building/${building.building_name}/${floor.floor_name}`" class="btn btn-primary">View Rooms</router-link>
+              <router-link :to="`/building/${building.building_name}/${floor.floor_name}`" class="btn btn-primary">View
+                Rooms</router-link>
             </div>
             <!-- You could add an else case if there are no floors -->
             <div v-else>No floors available</div>
@@ -65,6 +77,54 @@ export default {
 };
 </script>
 
-<style>
-/* Your existing styles */
+<style scoped>
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 5%;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.breadcrumb-item {
+  color: #4b5563;
+}
+
+.breadcrumb-item.active {
+  color: #111827;
+  font-weight: 600;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+}
+
+@media (min-width: 1400px) {
+
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 100%;
+  }
+}
+
+.mt-5 {
+  margin-top: 0rem !important;
+}
 </style>
