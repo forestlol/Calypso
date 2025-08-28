@@ -39,6 +39,12 @@
                             <span v-if="!collapsed">BMS</span>
                         </router-link>
                     </li>
+                    <li class="menu-item">
+                        <router-link to="/smart-toilet" class="menu-link" exact-active-class="router-link-exact-active">
+                            <i class="fas fa-droplet"></i>
+                            <span v-if="!collapsed">Smart Toilet</span>
+                        </router-link>
+                    </li>
                 </ul>
             </div>
         </nav>

@@ -58,6 +58,11 @@ const routes = [
     name: 'BMS',
     component: defineAsyncComponent(() => import('../views/Bms.vue')),
   },
+  {
+    path: '/smart-toilet',
+    name: 'smartToilet',
+    component: defineAsyncComponent(() => import('../views/SmartToilet.vue')),
+  },
 ];
 
 const router = createRouter({
